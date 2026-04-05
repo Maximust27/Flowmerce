@@ -16,6 +16,10 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- AOS Animation Library -->
+        <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     </head>
     <body class="font-body antialiased">
         <div class="flex min-h-screen" x-data="{ sidebarOpen: false }">
@@ -66,5 +70,14 @@
             @include('partials.mobile-bottom-nav')
 
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                AOS.init({
+                    once: true,
+                    easing: 'ease-out-cubic'
+                });
+            });
+        </script>
     </body>
 </html>

@@ -16,6 +16,10 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- AOS Animation Library -->
+        <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
         <style>
             .orb-glow { filter: blur(80px); opacity: 0.4; }
@@ -27,10 +31,10 @@
             {{-- Left Panel: Branding & Decorative --}}
             <section class="hidden lg:flex flex-1 relative items-center justify-center bg-gradient-to-br from-surface-container-lowest to-[#1e1b4b] overflow-hidden">
                 {{-- Decorative Orbs --}}
-                <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-primary rounded-full orb-glow"></div>
-                <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-container rounded-full orb-glow"></div>
+                <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-primary rounded-full orb-glow animate-float" style="animation-duration: 8s;"></div>
+                <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-container rounded-full orb-glow animate-float"></div>
 
-                <div class="relative z-10 text-center px-12">
+                <div class="relative z-10 text-center px-12" data-aos="fade-up" data-aos-duration="800">
                     <div class="flex items-center justify-center gap-3 mb-6">
                         <span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings: 'FILL' 1;">hub</span>
                         <h1 class="text-6xl font-extrabold tracking-tighter text-on-surface">Flowmerce</h1>
@@ -59,18 +63,33 @@
             </section>
 
             {{-- Right Panel: Auth Form --}}
-            <section class="flex-1 flex items-center justify-center p-6 md:p-12 bg-surface-container-lowest relative">
+            <section class="flex-1 flex flex-col items-center justify-center p-6 md:p-12 bg-surface-container-lowest relative overflow-y-auto">
+                {{-- Back Button --}}
+                <div class="absolute top-6 left-6 md:top-10 md:left-10 z-20">
+                    <a href="{{ url('/') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all text-sm font-semibold border border-white/5 backdrop-blur-md">
+                        <span class="material-symbols-outlined text-sm">arrow_back</span>
+                        Kembali
+                    </a>
+                </div>
+
                 <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]"></div>
 
-                <div class="w-full max-w-md glass-card p-8 md:p-10 rounded-2xl shadow-2xl relative z-10">
+                <div class="w-full max-w-md glass-card p-8 md:p-10 rounded-2xl shadow-2xl relative z-10" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
                     {{ $slot }}
                 </div>
 
                 {{-- Footer Mobile --}}
-                <div class="absolute bottom-6 text-center w-full lg:hidden">
+                <div class="mt-8 text-center w-full lg:hidden pb-6">
                     <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Powered by Flowmerce AI Intelligence</p>
                 </div>
             </section>
         </main>
+        
+        <script>
+            AOS.init({
+                once: true,
+                easing: 'ease-out-cubic'
+            });
+        </script>
     </body>
 </html>
