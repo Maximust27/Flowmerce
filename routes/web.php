@@ -2,21 +2,25 @@
 
 use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\DashboardPage;
+use App\Livewire\InventoryManager;
+use App\Livewire\GudangManager;
+use App\Livewire\TransactionManager;
 
 Route::view('/', 'welcome');
 
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardPage::class)->name('dashboard');
 
     // Inventaris
-    Route::view('inventaris', 'inventaris.index')->name('inventaris.index');
+    Route::get('inventaris', InventoryManager::class)->name('inventaris.index');
 
     // Gudang
-    Route::view('gudang', 'gudang.index')->name('gudang.index');
+    Route::get('gudang', GudangManager::class)->name('gudang.index');
 
     // Keuangan
-    Route::view('keuangan', 'keuangan.index')->name('keuangan.index');
+    Route::get('keuangan', TransactionManager::class)->name('keuangan.index');
 
     // Chat AI
     Route::view('chat', 'chat.index')->name('chat.index');

@@ -1,74 +1,67 @@
-<x-layouts.app :title="'Inventaris'">
-
+<div>
     {{-- Header --}}
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4" x-data="{ modalOpen: false }">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
         <div>
             <h2 class="text-4xl font-extrabold tracking-tight text-white mb-2">Inventaris</h2>
             <p class="text-slate-400 font-medium">Kelola stok produk warung Anda dengan presisi AI.</p>
         </div>
-        <button class="btn btn-primary" id="btn-tambah-produk" @click="modalOpen = true">
+        <button class="btn btn-primary" wire:click="openModal">
             <span class="material-symbols-outlined">add</span>
             Tambah Produk
         </button>
 
-        {{-- Dummy Modal --}}
-        <template x-teleport="body">
-            <div x-show="modalOpen" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto" x-cloak>
-                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="modalOpen = false" x-transition.opacity></div>
+        {{-- Livewire Modal --}}
+        @if($isModalOpen)
+            <div class="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeModal"></div>
                 
-                <div class="glass-card-strong w-full max-w-lg rounded-2xl p-6 relative z-10 shadow-2xl border border-white/10 m-4"
-                     x-show="modalOpen" 
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-8 scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                     x-transition:leave="transition ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-8 scale-95">
+                <div class="glass-card-strong w-full max-w-lg rounded-2xl p-6 relative z-10 shadow-2xl border border-white/10 m-4">
                     
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-white">Tambah Produk Baru</h3>
-                        <button @click="modalOpen = false" class="text-slate-400 hover:text-white transition-colors">
+                        <button wire:click="closeModal" class="text-slate-400 hover:text-white transition-colors">
                             <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
 
-                    <form class="space-y-4">
+                    <form wire:submit="save" class="space-y-4">
                         <div>
                             <label class="block font-bold text-sm text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Nama Produk</label>
-                            <input type="text" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30" placeholder="Cth: Indomie Goreng">
+                            <input type="text" wire:model="name" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30" placeholder="Cth: Indomie Goreng">
+                            @error('name') <span class="text-error text-xs">{{ $message }}</span> @enderror
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block font-bold text-sm text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Harga Beli</label>
-                                <input type="number" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                                <input type="number" wire:model="buy_price" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                                @error('buy_price') <span class="text-error text-xs">{{ $message }}</span> @enderror
                             </div>
                             <div>
                                 <label class="block font-bold text-sm text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Harga Jual</label>
-                                <input type="number" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                                <input type="number" wire:model="sell_price" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                                @error('sell_price') <span class="text-error text-xs">{{ $message }}</span> @enderror
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block font-bold text-sm text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Stok Awal</label>
-                                <input type="number" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                                <input type="number" wire:model="current_stock" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                                @error('current_stock') <span class="text-error text-xs">{{ $message }}</span> @enderror
                             </div>
                             <div>
-                                <label class="block font-bold text-sm text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Kategori</label>
-                                <select class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30">
-                                    <option>Sembako</option>
-                                    <option>Minuman</option>
-                                    <option>Lainnya</option>
-                                </select>
+                                <label class="block font-bold text-sm text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Batas Stok Minimum</label>
+                                <input type="number" wire:model="min_stock_alert" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30" placeholder="5">
+                                @error('min_stock_alert') <span class="text-error text-xs">{{ $message }}</span> @enderror
                             </div>
                         </div>
                         <div class="pt-4 flex gap-3 justify-end">
-                            <button type="button" @click="modalOpen = false" class="btn btn-ghost border border-white/10">Batal</button>
-                            <button type="button" @click="modalOpen = false" class="btn btn-primary">Simpan Produk</button>
+                            <button type="button" wire:click="closeModal" class="btn btn-ghost border border-white/10">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan Produk</button>
                         </div>
                     </form>
                 </div>
             </div>
-        </template>
+        @endif
     </div>
 
     {{-- Overview Stats --}}
@@ -83,7 +76,7 @@
         </div>
         <div class="glass-card p-6 rounded-2xl border-l-4 border-error/50">
             <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">Stok Habis</p>
-            <p class="text-4xl font-bold text-error font-jb tracking-tighter">3</p>
+            <p class="text-4xl font-bold text-error font-jb tracking-tighter">{{ \App\Models\Product::where('user_id', Auth::id())->where('current_stock', 0)->count() }}</p>
             <p class="mt-4 text-xs text-slate-500 font-medium">Perlu segera restock</p>
         </div>
         <div class="glass-card p-6 rounded-2xl border-l-4 border-amber-400/50">
@@ -132,125 +125,53 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/5">
-                {{-- Row 1: Aman --}}
+                @forelse($products as $product)
                 <tr class="hover:bg-white/[0.02] transition-colors">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
-                                <span class="material-symbols-outlined">cookie</span>
+                                <span class="material-symbols-outlined">inventory_2</span>
                             </div>
                             <div>
-                                <p class="font-bold text-white">Gula Pasir 1kg</p>
-                                <p class="text-xs text-slate-500">Sembako • SKU-9231</p>
+                                <p class="font-bold text-white">{{ $product->name }}</p>
+                                <p class="text-xs text-slate-500">ID: {{ $product->id }}</p>
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium">Rp14.500</td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium text-primary">Rp16.000</td>
+                    <td class="px-6 py-4 font-jb text-sm font-medium text-slate-300">Rp{{ number_format($product->buy_price, 0, ',', '.') }}</td>
+                    <td class="px-6 py-4 font-jb text-sm font-medium text-primary">Rp{{ number_format($product->sell_price, 0, ',', '.') }}</td>
                     <td class="px-6 py-4">
-                        <span class="badge-stock-aman">24 unit</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">edit</span></button>
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
-                    </td>
-                </tr>
-
-                {{-- Row 2: Menipis --}}
-                <tr class="hover:bg-white/[0.02] transition-colors">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
-                                <span class="material-symbols-outlined">water_drop</span>
-                            </div>
-                            <div>
-                                <p class="font-bold text-white">Minyak Goreng 2L</p>
-                                <p class="text-xs text-slate-500">Sembako • SKU-1044</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium">Rp32.000</td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium text-primary">Rp35.500</td>
-                    <td class="px-6 py-4">
-                        <span class="badge-stock-menipis">2 unit</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">edit</span></button>
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
-                    </td>
-                </tr>
-
-                {{-- Row 3: Habis --}}
-                <tr class="hover:bg-white/[0.02] transition-colors">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-600 opacity-50 shrink-0">
-                                <span class="material-symbols-outlined">rice_bowl</span>
-                            </div>
-                            <div>
-                                <p class="font-bold text-slate-400">Beras Pandan Wangi 5kg</p>
-                                <p class="text-xs text-slate-600">Sembako • SKU-0021</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium text-slate-500">Rp72.000</td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium text-slate-500">Rp80.000</td>
-                    <td class="px-6 py-4">
-                        <span class="relative badge-stock-habis">
-                            <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-error"></span>
+                        @if ($product->current_stock == 0)
+                            <span class="relative badge-stock-habis">
+                                <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-error"></span>
+                                </span>
+                                0 unit
                             </span>
-                            0 unit
-                        </span>
+                        @elseif ($product->current_stock <= $product->min_stock_alert)
+                            <span class="badge-stock-menipis">{{ $product->current_stock }} unit</span>
+                        @else
+                            <span class="badge-stock-aman">{{ $product->current_stock }} unit</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 text-right">
                         <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">edit</span></button>
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
+                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">delete</span></button>
                     </td>
                 </tr>
-
-                {{-- Row 4: Aman --}}
-                <tr class="hover:bg-white/[0.02] transition-colors">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
-                                <span class="material-symbols-outlined">egg</span>
-                            </div>
-                            <div>
-                                <p class="font-bold text-white">Telur Ayam 1kg</p>
-                                <p class="text-xs text-slate-500">Sembako • SKU-5521</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium">Rp26.500</td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium text-primary">Rp28.000</td>
-                    <td class="px-6 py-4">
-                        <span class="badge-stock-aman">24 unit</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">edit</span></button>
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
-                    </td>
+                @empty
+                <tr>
+                    <td colspan="5" class="py-12 text-center text-slate-500">Toko baru? Silahkan "Tambah Produk".</td>
                 </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 
     {{-- Pagination --}}
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-24">
-        <p class="text-slate-500 text-sm font-medium">Menampilkan <span class="text-white font-bold font-jb">1-10</span> dari <span class="text-white font-bold font-jb">24</span> produk</p>
-        <div class="flex gap-2">
-            <button class="w-10 h-10 flex items-center justify-center rounded-xl glass-card text-slate-500 hover:text-white transition-all">
-                <span class="material-symbols-outlined">chevron_left</span>
-            </button>
-            <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-on-primary font-bold font-jb">1</button>
-            <button class="w-10 h-10 flex items-center justify-center rounded-xl glass-card text-slate-300 hover:bg-white/10 transition-all font-jb">2</button>
-            <button class="w-10 h-10 flex items-center justify-center rounded-xl glass-card text-slate-300 hover:bg-white/10 transition-all font-jb">3</button>
-            <button class="w-10 h-10 flex items-center justify-center rounded-xl glass-card text-slate-500 hover:text-white transition-all">
-                <span class="material-symbols-outlined">chevron_right</span>
-            </button>
-        </div>
+    <div class="mt-4 pb-24 text-slate-300">
+        {{ $products->links() }}
     </div>
 
-</x-layouts.app>
+</div>

@@ -1,5 +1,4 @@
-<x-layouts.app :title="'Dashboard'">
-
+<div>
     {{-- AI Insight Banner --}}
     <div class="mb-8 relative overflow-hidden glass-card rounded-2xl p-6 border border-violet-500/20 ai-glow flex flex-col md:flex-row items-center justify-between gap-6">
         <div class="absolute -top-12 -right-12 w-48 h-48 bg-violet-600/10 blur-[80px]"></div>
@@ -26,10 +25,9 @@
                 <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
                     <span class="material-symbols-outlined">trending_up</span>
                 </div>
-                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full">+12%</span>
             </div>
             <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Pendapatan</p>
-            <h4 class="text-3xl font-bold font-jb text-white tracking-tight">Rp 3.000k</h4>
+            <h4 class="text-3xl font-bold font-jb text-white tracking-tight">Rp {{ number_format($stats['revenue'], 0, ',', '.') }}</h4>
         </div>
 
         {{-- Profit --}}
@@ -38,10 +36,9 @@
                 <div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
                     <span class="material-symbols-outlined">savings</span>
                 </div>
-                <span class="text-[10px] font-bold text-secondary bg-secondary/10 px-2 py-1 rounded-full">+8%</span>
             </div>
             <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Keuntungan</p>
-            <h4 class="text-3xl font-bold font-jb text-white tracking-tight">Rp 500k</h4>
+            <h4 class="text-3xl font-bold font-jb text-white tracking-tight">Rp {{ number_format($stats['profit'], 0, ',', '.') }}</h4>
         </div>
 
         {{-- Low Stock --}}
@@ -50,10 +47,12 @@
                 <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
                     <span class="material-symbols-outlined">warning</span>
                 </div>
+                @if($stats['low_stock'] > 0)
                 <span class="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full">Kritis</span>
+                @endif
             </div>
             <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Stok Minim</p>
-            <h4 class="text-3xl font-bold font-jb text-white tracking-tight">5 <span class="text-sm font-normal text-slate-500">items</span></h4>
+            <h4 class="text-3xl font-bold font-jb text-white tracking-tight">{{ $stats['low_stock'] }} <span class="text-sm font-normal text-slate-500">items</span></h4>
         </div>
     </div>
 
@@ -122,34 +121,28 @@
             <div class="glass-card rounded-2xl p-6">
                 <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Transaksi Terakhir</h3>
                 <div class="space-y-4">
+                    @forelse($recentTransactions as $tx)
                     <div class="flex items-center justify-between group cursor-pointer">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                                <span class="material-symbols-outlined">north_east</span>
+                            <div class="w-10 h-10 rounded-lg {{ $tx->type == 'INCOME' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-error/10 text-error' }} flex items-center justify-center">
+                                <span class="material-symbols-outlined">{{ $tx->type == 'INCOME' ? 'north_east' : 'south_west' }}</span>
                             </div>
                             <div>
-                                <p class="text-sm font-bold text-white">Penjualan Seblak</p>
-                                <p class="text-[10px] text-slate-500 font-jb">Today, 09:24</p>
+                                <p class="text-sm font-bold text-white">{{ $tx->category }}</p>
+                                <p class="text-[10px] text-slate-500 font-jb">{{ $tx->created_at->format('d M, H:i') }}</p>
                             </div>
                         </div>
-                        <span class="text-sm font-bold text-emerald-400 font-jb">Rp 25.000</span>
+                        <span class="text-sm font-bold {{ $tx->type == 'INCOME' ? 'text-emerald-400' : 'text-error' }} font-jb">
+                            {{ $tx->type == 'INCOME' ? '+' : '-' }}Rp {{ number_format($tx->amount, 0, ',', '.') }}
+                        </span>
                     </div>
-                    <div class="flex items-center justify-between group cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-error/10 flex items-center justify-center text-error">
-                                <span class="material-symbols-outlined">south_west</span>
-                            </div>
-                            <div>
-                                <p class="text-sm font-bold text-white">Beli Bahan Baku</p>
-                                <p class="text-[10px] text-slate-500 font-jb">Today, 08:15</p>
-                            </div>
-                        </div>
-                        <span class="text-sm font-bold text-error font-jb">-Rp 150.000</span>
-                    </div>
+                    @empty
+                    <p class="text-xs text-slate-500">Belum ada transaksi.</p>
+                    @endforelse
                 </div>
                 <a href="{{ route('keuangan.index') }}" class="w-full mt-6 py-2 text-[10px] font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest border-t border-white/5 pt-4 block text-center" wire:navigate>Lihat Semua Riwayat</a>
             </div>
         </div>
     </div>
 
-</x-layouts.app>
+</div>
