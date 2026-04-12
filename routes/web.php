@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gudang
     Route::get('gudang', GudangManager::class)->name('gudang.index');
+    Route::get('gudang/export', [App\Http\Controllers\GudangExportController::class, 'export'])->name('gudang.pdf');
 
     // Keuangan
     Route::get('keuangan', TransactionManager::class)->name('keuangan.index');

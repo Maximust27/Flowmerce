@@ -13,12 +13,33 @@ class GudangManager extends Component
 {
     use WithPagination;
 
+    public string $filter = 'all';
+
+    public function setFilter($filter)
+    {
+        $this->filter = $filter;
+        $this->resetPage();
+    }
+
+    public function exportPdf()
+    {
+        return redirect()->route('gudang.pdf', ['filter' => $this->filter]);
+    }
+
     public function render()
     {
         $userId = Auth::id();
-        $logs = InventoryLog::whereHas('product', function ($query) use ($userId) {
+        $query = InventoryLog::whereHas('product', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->latest()->paginate(15);
+        });
+
+        if ($this->filter === 'in') {
+            $query->where('type', 'IN');
+        } elseif ($this->filter === 'out') {
+            $query->where('type', 'OUT');
+        }
+
+        $logs = $query->latest()->paginate(15);
         
         $totalStock = Product::where('user_id', $userId)->sum('current_stock');
         $inToday = InventoryLog::whereHas('product', function ($q) use ($userId) {

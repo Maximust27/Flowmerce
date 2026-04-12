@@ -9,11 +9,11 @@
             <div class="flex justify-between items-center mb-8 relative z-10">
                 <div>
                     <h2 class="text-xl font-bold text-white">Grafik Penjualan</h2>
-                    <p class="text-xs text-slate-500 mt-1">Statistik Pemasukan 7 hari terakhir</p>
+                    <p class="text-xs text-slate-500 mt-1">Statistik Pemasukan {{ $chartFilter === 'monthly' ? '6 bulan' : '7 hari' }} terakhir</p>
                 </div>
                 <div class="flex gap-2">
-                    <button class="px-3 py-1.5 rounded-lg bg-surface-container-highest text-xs font-bold text-slate-300">Mingguan</button>
-                    <button class="px-3 py-1.5 rounded-lg hover:bg-surface-container-highest text-xs font-bold text-slate-500 transition-colors">Bulanan</button>
+                    <button wire:click="setChartFilter('weekly')" class="px-3 py-1.5 rounded-lg {{ $chartFilter === 'weekly' ? 'bg-surface-container-highest text-slate-300' : 'hover:bg-surface-container-highest text-slate-500 transition-colors' }} text-xs font-bold">Mingguan</button>
+                    <button wire:click="setChartFilter('monthly')" class="px-3 py-1.5 rounded-lg {{ $chartFilter === 'monthly' ? 'bg-surface-container-highest text-slate-300' : 'hover:bg-surface-container-highest text-slate-500 transition-colors' }} text-xs font-bold">Bulanan</button>
                 </div>
             </div>
 

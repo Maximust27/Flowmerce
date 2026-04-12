@@ -92,8 +92,8 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">edit</span></button>
-                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
+                        <button wire:click="edit({{ $product->id }})" class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">edit</span></button>
+                        <button wire:click="delete({{ $product->id }})" wire:confirm="Yakin ingin menghapus produk ini?" class="p-2 text-slate-500 hover:text-error transition-colors"><span class="material-symbols-outlined">delete</span></button>
                     </td>
                 </tr>
                 @empty
@@ -125,7 +125,7 @@
              x-transition:enter-end="opacity-100 translate-y-0 scale-100">
             
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-white">Tambah Produk Baru</h3>
+                <h3 class="text-xl font-bold text-white">{{ $product_id ? 'Edit Produk' : 'Tambah Produk Baru' }}</h3>
                 <button wire:click="closeModal" class="text-slate-400 hover:text-white transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>

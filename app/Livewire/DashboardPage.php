@@ -10,6 +10,13 @@ use Carbon\Carbon;
 #[\Livewire\Attributes\Title('Dashboard')]
 class DashboardPage extends Component
 {
+    public string $chartFilter = 'weekly';
+
+    public function setChartFilter($filter)
+    {
+        $this->chartFilter = $filter;
+    }
+
     public function render()
     {
         $user = Auth::user();
@@ -20,27 +27,47 @@ class DashboardPage extends Component
             ->take(5)
             ->get();
 
-        // 2. Generate Data Grafik (7 Hari Terakhir untuk Pemasukan)
+        // 2. Generate Data Grafik
         $labels = [];
         $bars = [];
         $rawTotals = [];
         $maxTotal = 0;
 
         $hariIndo = ['Mon' => 'SEN', 'Tue' => 'SEL', 'Wed' => 'RAB', 'Thu' => 'KAM', 'Fri' => 'JUM', 'Sat' => 'SAB', 'Sun' => 'MIN'];
+        $bulanIndo = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            $dayName = $date->format('D');
-            $labels[] = $hariIndo[$dayName] ?? strtoupper($dayName);
-            
-            $dailyIncome = $user->transactions()
-                ->where('type', 'INCOME')
-                ->whereDate('created_at', $date)
-                ->sum('amount');
+        if ($this->chartFilter === 'monthly') {
+            $monthsCount = 6;
+            for ($i = $monthsCount - 1; $i >= 0; $i--) {
+                $date = Carbon::today()->startOfMonth()->subMonths($i);
+                $labels[] = strtoupper($bulanIndo[$date->month - 1]);
                 
-            $rawTotals[] = $dailyIncome;
-            if ($dailyIncome > $maxTotal) {
-                $maxTotal = $dailyIncome;
+                $monthlyIncome = $user->transactions()
+                    ->where('type', 'INCOME')
+                    ->whereMonth('created_at', $date->month)
+                    ->whereYear('created_at', $date->year)
+                    ->sum('amount');
+                    
+                $rawTotals[] = $monthlyIncome;
+                if ($monthlyIncome > $maxTotal) {
+                    $maxTotal = $monthlyIncome;
+                }
+            }
+        } else {
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::today()->subDays($i);
+                $dayName = $date->format('D');
+                $labels[] = $hariIndo[$dayName] ?? strtoupper($dayName);
+                
+                $dailyIncome = $user->transactions()
+                    ->where('type', 'INCOME')
+                    ->whereDate('created_at', $date)
+                    ->sum('amount');
+                    
+                $rawTotals[] = $dailyIncome;
+                if ($dailyIncome > $maxTotal) {
+                    $maxTotal = $dailyIncome;
+                }
             }
         }
 

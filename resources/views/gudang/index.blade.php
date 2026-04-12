@@ -49,10 +49,10 @@
             <div class="flex items-center justify-between">
                 <h3 class="text-xl font-bold text-white">Timeline Arus Barang</h3>
                 <div class="flex gap-2">
-                    <button class="text-xs px-4 py-2 rounded-full bg-surface-container-high text-slate-300">Semua</button>
-                    <button class="text-xs px-4 py-2 rounded-full bg-surface-container-high text-slate-300">Masuk</button>
-                    <button class="text-xs px-4 py-2 rounded-full bg-surface-container-high text-slate-300">Keluar</button>
-                    <button class="text-xs px-4 py-2 rounded-full border border-white/10 text-primary flex items-center gap-1"><span class="material-symbols-outlined text-sm">file_download</span> Export PDF</button>
+                    <button wire:click="setFilter('all')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'all' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Semua</button>
+                    <button wire:click="setFilter('in')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'in' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Masuk</button>
+                    <button wire:click="setFilter('out')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'out' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Keluar</button>
+                    <button wire:click="exportPdf()" class="text-xs px-4 py-2 rounded-full border border-white/10 text-primary flex items-center gap-1 hover:bg-primary/10 transition-colors"><span class="material-symbols-outlined text-sm">file_download</span> Export PDF</button>
                 </div>
             </div>
 
