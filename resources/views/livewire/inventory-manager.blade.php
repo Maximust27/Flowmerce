@@ -1,93 +1,168 @@
-<div class="bg-gray-800/80 backdrop-blur-md border border-gray-700/50 rounded-2xl p-6 mb-8 drop-shadow-xl" data-aos="fade-up" data-aos-duration="1000">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-white tracking-wide">📦 Inventaris Produk</h2>
-        <button wire:click="openModal" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-lg shadow-cyan-500/30">
-            + Tambah Produk
+<div>
+    {{-- Header --}}
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white mb-2">Inventaris</h2>
+            <p class="text-slate-400 font-medium">Kelola stok produk warung Anda dengan presisi AI.</p>
+        </div>
+        <button wire:click="openModal" class="btn btn-primary" id="btn-tambah-produk">
+            <span class="material-symbols-outlined">add</span>
+            Tambah Produk
         </button>
     </div>
 
     @if (session()->has('message'))
-        <div class="bg-green-500/20 border border-green-500/50 text-green-400 p-3 rounded-lg mb-4">
-            {{ session('message') }}
+        <div class="glass-card p-4 rounded-xl mb-6 border border-primary/30 flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">check_circle</span>
+            <span class="text-sm font-medium text-primary">{{ session('message') }}</span>
         </div>
     @endif
 
-    <div class="overflow-x-auto">
+    {{-- Overview Stats --}}
+    @php
+        $userId = auth()->id();
+        $totalProducts = \App\Models\Product::where('user_id', $userId)->count();
+        $outOfStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', 0)->count();
+        $lowStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', '>', 0)->whereColumn('current_stock', '<=', 'min_stock_alert')->count();
+    @endphp
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 stagger-enter">
+        <div class="glass-card p-6 rounded-2xl">
+            <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">Total Produk</p>
+            <p class="text-4xl font-bold text-white font-jb tracking-tighter">{{ $totalProducts }}</p>
+        </div>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-error/50">
+            <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">Stok Habis</p>
+            <p class="text-4xl font-bold text-error font-jb tracking-tighter">{{ $outOfStock }}</p>
+            <p class="mt-4 text-xs text-slate-500 font-medium">Perlu segera restock</p>
+        </div>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-amber-400/50">
+            <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">Stok Menipis</p>
+            <p class="text-4xl font-bold text-amber-400 font-jb tracking-tighter">{{ $lowStock }}</p>
+            <p class="mt-4 text-xs text-slate-500 font-medium">Di bawah batas aman</p>
+        </div>
+        <div class="glass-card p-6 rounded-2xl bg-gradient-to-br from-surface-container to-primary/5">
+            <p class="text-primary text-[11px] font-bold uppercase tracking-wider mb-2">Total Aset Stok</p>
+            <p class="text-sm text-slate-300 leading-relaxed font-medium font-jb">
+                Rp {{ number_format(\App\Models\Product::where('user_id', $userId)->selectRaw('SUM(buy_price * current_stock) as total')->value('total') ?? 0, 0, ',', '.') }}
+            </p>
+        </div>
+    </div>
+
+    {{-- Product Table --}}
+    <div class="glass-card rounded-2xl overflow-hidden mb-8">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="border-b border-gray-700 text-gray-400 text-sm uppercase tracking-wider">
-                    <th class="p-3">Nama Produk</th>
-                    <th class="p-3">Harga Beli</th>
-                    <th class="p-3">Harga Jual</th>
-                    <th class="p-3">Stok</th>
-                    <th class="p-3">Status</th>
+                <tr class="bg-white/5">
+                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">Produk</th>
+                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">Beli</th>
+                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">Jual</th>
+                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">Stok</th>
+                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-300">
+            <tbody class="divide-y divide-white/5 stagger-enter">
                 @forelse ($products as $product)
-                <tr class="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
-                    <td class="p-3 font-medium text-white">{{ $product->name }}</td>
-                    <td class="p-3">Rp {{ number_format($product->buy_price, 0, ',', '.') }}</td>
-                    <td class="p-3">Rp {{ number_format($product->sell_price, 0, ',', '.') }}</td>
-                    <td class="p-3 font-bold">{{ $product->current_stock }}</td>
-                    <td class="p-3">
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
+                                <span class="material-symbols-outlined">inventory_2</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-white">{{ $product->name }}</p>
+                                <p class="text-xs text-slate-500">ID: #{{ $product->id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 font-jb text-sm font-medium">Rp {{ number_format($product->buy_price, 0, ',', '.') }}</td>
+                    <td class="px-6 py-4 font-jb text-sm font-medium text-primary">Rp {{ number_format($product->sell_price, 0, ',', '.') }}</td>
+                    <td class="px-6 py-4">
                         @if ($product->current_stock == 0)
-                            <span class="px-2 py-1 text-xs rounded-full bg-red-500/20 text-red-400 border border-red-500/50">Habis</span>
+                            <span class="relative px-3 py-1.5 text-[10px] rounded-full bg-error/20 text-error font-bold uppercase tracking-wider border border-error/30">
+                                <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-error"></span>
+                                </span>
+                                {{ $product->current_stock }} unit
+                            </span>
                         @elseif ($product->current_stock <= $product->min_stock_alert)
-                            <span class="px-2 py-1 text-xs rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/50 hover:animate-pulse">Menipis</span>
+                            <span class="px-3 py-1.5 text-[10px] rounded-full bg-amber-400/20 text-amber-400 font-bold uppercase tracking-wider border border-amber-400/30">{{ $product->current_stock }} unit</span>
                         @else
-                            <span class="px-2 py-1 text-xs rounded-full bg-green-500/20 text-green-400 border border-green-500/50">Aman</span>
+                            <span class="px-3 py-1.5 text-[10px] rounded-full bg-primary/20 text-primary font-bold uppercase tracking-wider border border-primary/30">{{ $product->current_stock }} unit</span>
                         @endif
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">edit</span></button>
+                        <button class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="p-6 text-center text-gray-500">Belum ada data produk.</td>
+                    <td colspan="5" class="px-6 py-16 text-center">
+                        <span class="material-symbols-outlined text-4xl text-slate-600 mb-3 block">inventory_2</span>
+                        <p class="text-slate-500 font-medium">Belum ada data produk.</p>
+                        <p class="text-xs text-slate-600 mt-1">Klik "Tambah Produk" untuk mulai.</p>
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    <div class="mt-4">
+
+    {{-- Pagination --}}
+    <div class="pb-24">
         {{ $products->links(data: ['scrollTo' => false]) }}
     </div>
 
-    <!-- Modal Tambah Produk -->
+    {{-- Modal Tambah Produk --}}
     @if($isModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
-        <div class="bg-gray-900 rounded-2xl w-full max-w-md p-6 border border-gray-700 shadow-2xl" @click.away="$wire.closeModal()">
-            <h3 class="text-xl font-bold text-white mb-4">Tambah Produk Baru</h3>
-            <form wire:submit.prevent="save">
-                <div class="space-y-4">
+    <div class="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto" x-data x-init="$el.querySelector('input[type=text]')?.focus()">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeModal"></div>
+        
+        <div class="glass-card-strong w-full max-w-lg rounded-2xl p-6 relative z-10 shadow-2xl border border-white/10 m-4"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+            
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Tambah Produk Baru</h3>
+                <button wire:click="closeModal" class="text-slate-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form wire:submit.prevent="save" class="space-y-4">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Nama Produk</label>
+                    <input type="text" wire:model="name" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30" placeholder="Cth: Indomie Goreng">
+                    @error('name') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-gray-400 text-sm mb-1">Nama Produk</label>
-                        <input type="text" wire:model="name" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-white outline-none focus:border-cyan-500 transition-colors">
-                        @error('name') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                        <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Harga Beli</label>
+                        <input type="number" wire:model="buy_price" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                        @error('buy_price') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-400 text-sm mb-1">Harga Beli</label>
-                            <input type="number" wire:model="buy_price" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-white outline-none focus:border-cyan-500 transition-colors">
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 text-sm mb-1">Harga Jual</label>
-                            <input type="number" wire:model="sell_price" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-white outline-none focus:border-cyan-500 transition-colors">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-400 text-sm mb-1">Stok Awal</label>
-                            <input type="number" wire:model="current_stock" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-white outline-none focus:border-cyan-500 transition-colors">
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 text-sm mb-1">Peringatan Stok <</label>
-                            <input type="number" wire:model="min_stock_alert" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-white outline-none focus:border-cyan-500 transition-colors">
-                        </div>
+                    <div>
+                        <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Harga Jual</label>
+                        <input type="number" wire:model="sell_price" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                        @error('sell_price') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" wire:click="closeModal" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white transition-colors">Batal</button>
-                    <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg font-medium transition-colors">Simpan</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Stok Awal</label>
+                        <input type="number" wire:model="current_stock" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
+                        @error('current_stock') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Peringatan Stok ≤</label>
+                        <input type="number" wire:model="min_stock_alert" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="5">
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-3 justify-end">
+                    <button type="button" wire:click="closeModal" class="btn btn-ghost border border-white/10">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Produk</button>
                 </div>
             </form>
         </div>

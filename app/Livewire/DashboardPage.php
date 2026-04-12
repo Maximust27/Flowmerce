@@ -5,25 +5,58 @@ namespace App\Livewire;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
-use App\Models\Product;
-use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
 
 #[\Livewire\Attributes\Title('Dashboard')]
 class DashboardPage extends Component
 {
     public function render()
     {
-        $userId = Auth::id();
-        $stats = Cache::remember("dashboard_stats_{$userId}", 1800, function () use ($userId) {
-            return [
-                'revenue' => Transaction::where('user_id', $userId)->where('type', 'INCOME')->sum('amount'),
-                'profit' => Transaction::where('user_id', $userId)->where('type', 'INCOME')->sum('amount') - Transaction::where('user_id', $userId)->where('type', 'EXPENSE')->sum('amount'),
-                'low_stock' => Product::where('user_id', $userId)->where('current_stock', '<=', 5)->count(),
-            ];
-        });
+        $user = Auth::user();
 
-        $recentTransactions = Transaction::where('user_id', $userId)->latest()->take(5)->get();
+        // 1. Ambil 5 Transaksi Terakhir
+        $recentTransactions = $user->transactions()
+            ->latest()
+            ->take(5)
+            ->get();
 
-        return view('dashboard', compact('stats', 'recentTransactions'));
+        // 2. Generate Data Grafik (7 Hari Terakhir untuk Pemasukan)
+        $labels = [];
+        $bars = [];
+        $rawTotals = [];
+        $maxTotal = 0;
+
+        $hariIndo = ['Mon' => 'SEN', 'Tue' => 'SEL', 'Wed' => 'RAB', 'Thu' => 'KAM', 'Fri' => 'JUM', 'Sat' => 'SAB', 'Sun' => 'MIN'];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $dayName = $date->format('D');
+            $labels[] = $hariIndo[$dayName] ?? strtoupper($dayName);
+            
+            $dailyIncome = $user->transactions()
+                ->where('type', 'INCOME')
+                ->whereDate('created_at', $date)
+                ->sum('amount');
+                
+            $rawTotals[] = $dailyIncome;
+            if ($dailyIncome > $maxTotal) {
+                $maxTotal = $dailyIncome;
+            }
+        }
+
+        foreach ($rawTotals as $total) {
+            if ($maxTotal > 0) {
+                $bars[] = max(5, round(($total / $maxTotal) * 60)); 
+            } else {
+                $bars[] = 5;
+            }
+        }
+
+        // Mengembalikan ke nama view aslimu ('dashboard' atau 'livewire.dashboard')
+        return view('dashboard', [
+            'recentTransactions' => $recentTransactions,
+            'chartLabels' => $labels,
+            'chartBars' => $bars,
+        ]);
     }
 }

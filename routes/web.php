@@ -6,6 +6,7 @@ use App\Livewire\DashboardPage;
 use App\Livewire\InventoryManager;
 use App\Livewire\GudangManager;
 use App\Livewire\TransactionManager;
+use App\Livewire\AiChat;
 
 Route::view('/', 'welcome');
 
@@ -23,7 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('keuangan', TransactionManager::class)->name('keuangan.index');
 
     // Chat AI
-    Route::view('chat', 'chat.index')->name('chat.index');
+    Route::get('chat', AiChat::class)->name('chat.index');
 });
 
 Route::view('profile', 'profile')

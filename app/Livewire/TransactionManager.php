@@ -22,9 +22,10 @@ class TransactionManager extends Component
         'notes' => 'nullable|string',
     ];
 
-    public function openModal()
+    public function openModal($type = 'INCOME')
     {
         $this->resetValidation();
+        $this->type = $type;
         $this->isModalOpen = true;
     }
 
