@@ -11,12 +11,9 @@ class GudangExportController extends Controller
 {
     public function export(Request $request)
     {
-        $userId = Auth::id();
         $filter = $request->query('filter', 'all');
 
-        $query = InventoryLog::whereHas('product', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        });
+        $query = InventoryLog::query();
 
         if ($filter === 'in') {
             $query->where('type', 'IN');

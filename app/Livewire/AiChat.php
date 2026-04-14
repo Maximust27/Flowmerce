@@ -51,12 +51,11 @@ class AiChat extends Component
     
     public function getAiResponse($userMsg)
     {
-        $userId = Auth::id();
         $businessInfo = Auth::user()->only(['name', 'business_name', 'business_category']);
         
-        $revenue = Transaction::where('user_id', $userId)->where('type', 'INCOME')->sum('amount');
-        $expenses = Transaction::where('user_id', $userId)->where('type', 'EXPENSE')->sum('amount');
-        $lowStock = Product::where('user_id', $userId)->whereColumn('current_stock', '<=', 'min_stock_alert')->pluck('name');
+        $revenue = Transaction::where('type', 'INCOME')->sum('amount');
+        $expenses = Transaction::where('type', 'EXPENSE')->sum('amount');
+        $lowStock = Product::whereColumn('current_stock', '<=', 'min_stock_alert')->pluck('name');
         
         $context = [
             'business_profile' => $businessInfo,

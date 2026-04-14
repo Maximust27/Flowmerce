@@ -28,10 +28,7 @@ class GudangManager extends Component
 
     public function render()
     {
-        $userId = Auth::id();
-        $query = InventoryLog::whereHas('product', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        });
+        $query = InventoryLog::query();
 
         if ($this->filter === 'in') {
             $query->where('type', 'IN');
@@ -41,14 +38,10 @@ class GudangManager extends Component
 
         $logs = $query->latest()->paginate(15);
         
-        $totalStock = Product::where('user_id', $userId)->sum('current_stock');
-        $inToday = InventoryLog::whereHas('product', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })->whereDate('created_at', today())->where('type', 'IN')->sum('quantity');
+        $totalStock = Product::sum('current_stock');
+        $inToday = InventoryLog::whereDate('created_at', today())->where('type', 'IN')->sum('quantity');
         
-        $outToday = InventoryLog::whereHas('product', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })->whereDate('created_at', today())->where('type', 'OUT')->sum('quantity');
+        $outToday = InventoryLog::whereDate('created_at', today())->where('type', 'OUT')->sum('quantity');
 
         return view('gudang.index', compact('logs', 'totalStock', 'inToday', 'outToday'));
     }

@@ -19,11 +19,8 @@ class DashboardPage extends Component
 
     public function render()
     {
-        $user = Auth::user();
-
-        // 1. Ambil 5 Transaksi Terakhir
-        $recentTransactions = $user->transactions()
-            ->latest()
+        // 1. Ambil 5 Transaksi Terakhir (global)
+        $recentTransactions = Transaction::latest()
             ->take(5)
             ->get();
 
@@ -42,8 +39,7 @@ class DashboardPage extends Component
                 $date = Carbon::today()->startOfMonth()->subMonths($i);
                 $labels[] = strtoupper($bulanIndo[$date->month - 1]);
                 
-                $monthlyIncome = $user->transactions()
-                    ->where('type', 'INCOME')
+                $monthlyIncome = Transaction::where('type', 'INCOME')
                     ->whereMonth('created_at', $date->month)
                     ->whereYear('created_at', $date->year)
                     ->sum('amount');
@@ -59,8 +55,7 @@ class DashboardPage extends Component
                 $dayName = $date->format('D');
                 $labels[] = $hariIndo[$dayName] ?? strtoupper($dayName);
                 
-                $dailyIncome = $user->transactions()
-                    ->where('type', 'INCOME')
+                $dailyIncome = Transaction::where('type', 'INCOME')
                     ->whereDate('created_at', $date)
                     ->sum('amount');
                     

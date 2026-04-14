@@ -45,6 +45,13 @@
             <span class="material-symbols-outlined" @if(request()->routeIs('keuangan.*')) style="font-variation-settings: 'FILL' 1;" @endif>payments</span>
             <span>Keuangan</span>
         </a>
+
+        <a href="{{ route('pegawai.index') }}"
+           class="sidebar-link {{ request()->routeIs('pegawai.*') ? 'active' : '' }}"
+           wire:navigate>
+            <span class="material-symbols-outlined" @if(request()->routeIs('pegawai.*')) style="font-variation-settings: 'FILL' 1;" @endif>group</span>
+            <span>Manajemen Pegawai</span>
+        </a>
     </nav>
 
     {{-- Bottom Section --}}

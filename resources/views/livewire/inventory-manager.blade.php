@@ -20,10 +20,9 @@
 
     {{-- Overview Stats --}}
     @php
-        $userId = auth()->id();
-        $totalProducts = \App\Models\Product::where('user_id', $userId)->count();
-        $outOfStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', 0)->count();
-        $lowStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', '>', 0)->whereColumn('current_stock', '<=', 'min_stock_alert')->count();
+        $totalProducts = \App\Models\Product::count();
+        $outOfStock = \App\Models\Product::where('current_stock', 0)->count();
+        $lowStock = \App\Models\Product::where('current_stock', '>', 0)->whereColumn('current_stock', '<=', 'min_stock_alert')->count();
     @endphp
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 stagger-enter">
         <div class="glass-card p-6 rounded-2xl">
@@ -43,7 +42,7 @@
         <div class="glass-card p-6 rounded-2xl bg-gradient-to-br from-surface-container to-primary/5">
             <p class="text-primary text-[11px] font-bold uppercase tracking-wider mb-2">Total Aset Stok</p>
             <p class="text-sm text-slate-300 leading-relaxed font-medium font-jb">
-                Rp {{ number_format(\App\Models\Product::where('user_id', $userId)->selectRaw('SUM(buy_price * current_stock) as total')->value('total') ?? 0, 0, ',', '.') }}
+                Rp {{ number_format(\App\Models\Product::selectRaw('SUM(buy_price * current_stock) as total')->value('total') ?? 0, 0, ',', '.') }}
             </p>
         </div>
     </div>

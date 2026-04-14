@@ -76,7 +76,7 @@
         </div>
         <div class="glass-card p-6 rounded-2xl border-l-4 border-error/50">
             <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">Stok Habis</p>
-            <p class="text-4xl font-bold text-error font-jb tracking-tighter">{{ \App\Models\Product::where('user_id', Auth::id())->where('current_stock', 0)->count() }}</p>
+            <p class="text-4xl font-bold text-error font-jb tracking-tighter">{{ \App\Models\Product::where('current_stock', 0)->count() }}</p>
             <p class="mt-4 text-xs text-slate-500 font-medium">Perlu segera restock</p>
         </div>
         <div class="glass-card p-6 rounded-2xl border-l-4 border-amber-400/50">

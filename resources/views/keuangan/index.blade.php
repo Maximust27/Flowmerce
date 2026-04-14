@@ -75,7 +75,7 @@
                 <span class="text-primary text-xs font-bold font-jb tracking-tighter">+12% ↗</span>
             </div>
             <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Pemasukan</p>
-            <h3 class="text-3xl font-bold font-jb text-on-surface tracking-tighter">Rp {{ number_format(\App\Models\Transaction::where('user_id', Auth::id())->where('type', 'INCOME')->sum('amount'), 0, ',', '.') }}</h3>
+            <h3 class="text-3xl font-bold font-jb text-on-surface tracking-tighter">Rp {{ number_format(\App\Models\Transaction::where('type', 'INCOME')->sum('amount'), 0, ',', '.') }}</h3>
         </div>
 
         <div class="glass-card inner-glow p-6 rounded-2xl relative overflow-hidden group">
@@ -88,7 +88,7 @@
                 </div>
             </div>
             <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Pengeluaran</p>
-            <h3 class="text-3xl font-bold font-jb text-on-surface tracking-tighter">Rp {{ number_format(\App\Models\Transaction::where('user_id', Auth::id())->where('type', 'EXPENSE')->sum('amount'), 0, ',', '.') }}</h3>
+            <h3 class="text-3xl font-bold font-jb text-on-surface tracking-tighter">Rp {{ number_format(\App\Models\Transaction::where('type', 'EXPENSE')->sum('amount'), 0, ',', '.') }}</h3>
         </div>
 
         <div class="glass-card inner-glow p-6 rounded-2xl ai-glow-violet relative overflow-hidden group">
@@ -101,7 +101,7 @@
                 </div>
             </div>
             <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Laba Bersih</p>
-            <h3 class="text-3xl font-bold font-jb text-on-surface tracking-tighter">Rp {{ number_format(\App\Models\Transaction::where('user_id', Auth::id())->where('type', 'INCOME')->sum('amount') - \App\Models\Transaction::where('user_id', Auth::id())->where('type', 'EXPENSE')->sum('amount'), 0, ',', '.') }}</h3>
+            <h3 class="text-3xl font-bold font-jb text-on-surface tracking-tighter">Rp {{ number_format(\App\Models\Transaction::where('type', 'INCOME')->sum('amount') - \App\Models\Transaction::where('type', 'EXPENSE')->sum('amount'), 0, ',', '.') }}</h3>
         </div>
     </div>
 

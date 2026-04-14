@@ -40,25 +40,34 @@ class InventoryManager extends Component
     {
         $this->validate();
 
-        Product::updateOrCreate(
-            ['id' => $this->product_id, 'user_id' => Auth::id()],
-            [
+        if ($this->product_id) {
+            $product = Product::findOrFail($this->product_id);
+            $product->update([
                 'name' => $this->name,
                 'buy_price' => $this->buy_price,
                 'sell_price' => $this->sell_price,
                 'current_stock' => $this->current_stock,
                 'min_stock_alert' => $this->min_stock_alert,
-            ]
-        );
+            ]);
+        } else {
+            Product::create([
+                'user_id' => Auth::id(),
+                'name' => $this->name,
+                'buy_price' => $this->buy_price,
+                'sell_price' => $this->sell_price,
+                'current_stock' => $this->current_stock,
+                'min_stock_alert' => $this->min_stock_alert,
+            ]);
+        }
 
         $this->closeModal();
-        Cache::forget("dashboard_stats_" . Auth::id());
+        Cache::flush();
         session()->flash('message', $this->product_id ? 'Produk berhasil diubah.' : 'Produk berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
-        $product = Product::where('user_id', Auth::id())->findOrFail($id);
+        $product = Product::findOrFail($id);
         $this->product_id = $product->id;
         $this->name = $product->name;
         $this->buy_price = $product->buy_price;
@@ -70,15 +79,15 @@ class InventoryManager extends Component
 
     public function delete($id)
     {
-        $product = Product::where('user_id', Auth::id())->findOrFail($id);
+        $product = Product::findOrFail($id);
         $product->delete();
-        Cache::forget("dashboard_stats_" . Auth::id());
+        Cache::flush();
         session()->flash('message', 'Produk berhasil dihapus.');
     }
 
     public function render()
     {
-        $products = Product::where('user_id', Auth::id())->latest()->paginate(10);
+        $products = Product::latest()->paginate(10);
         return view('livewire.inventory-manager', compact('products'));
     }
 }

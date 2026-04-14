@@ -24,6 +24,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Keuangan
     Route::get('keuangan', TransactionManager::class)->name('keuangan.index');
 
+    // Pegawai
+    Route::get('pegawai', App\Livewire\EmployeeManager::class)->name('pegawai.index');
+    Route::get('pegawai/export', [App\Http\Controllers\EmployeeExportController::class, 'export'])->name('pegawai.export');
+
     // Chat AI
     Route::get('chat', AiChat::class)->name('chat.index');
 });

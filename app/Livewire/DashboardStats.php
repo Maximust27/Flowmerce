@@ -18,21 +18,16 @@ class DashboardStats extends Component
 
     public function mount()
     {
-        $userId = Auth::id();
-        
-        $stats = Cache::remember("dashboard_stats_{$userId}", 60 * 30, function () use ($userId) {
-            $revenue = Transaction::where('user_id', $userId)
-                ->where('type', 'INCOME')
+        $stats = Cache::remember("dashboard_stats_global", 60 * 30, function () {
+            $revenue = Transaction::where('type', 'INCOME')
                 ->sum('amount');
                 
-            $expenses = Transaction::where('user_id', $userId)
-                ->where('type', 'EXPENSE')
+            $expenses = Transaction::where('type', 'EXPENSE')
                 ->sum('amount');
                 
             $profit = $revenue - $expenses;
             
-            $lowStockCount = Product::where('user_id', $userId)
-                ->whereColumn('current_stock', '<=', 'min_stock_alert')
+            $lowStockCount = Product::whereColumn('current_stock', '<=', 'min_stock_alert')
                 ->count();
 
             return compact('revenue', 'profit', 'lowStockCount');
