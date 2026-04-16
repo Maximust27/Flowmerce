@@ -56,7 +56,7 @@ class DashboardPage extends Component
                 $labels[] = $hariIndo[$dayName] ?? strtoupper($dayName);
                 
                 $dailyIncome = Transaction::where('type', 'INCOME')
-                    ->whereDate('created_at', $date)
+                    ->whereBetween('created_at', [$date->copy()->startOfDay(), $date->copy()->endOfDay()])
                     ->sum('amount');
                     
                 $rawTotals[] = $dailyIncome;

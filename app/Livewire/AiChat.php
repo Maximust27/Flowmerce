@@ -75,25 +75,35 @@ class AiChat extends Component
             return;
         }
 
-        $prompt = "Anda adalah konsultan bisnis AI untuk UMKM Indonesia. Gunakan data JSON berikut untuk menjawab pertanyaan pengguna. Berikan jawaban dalam format Markdown singkat. \nData: " . json_encode($context) . "\n\nPertanyaan Pengguna: " . $userMsg;
+        $prompt = "Anda adalah konsultan bisnis AI UMKM. Gunakan data ini untuk menjawab:\n" . 
+                  "Owner: {$context['business_profile']['name']}\n" .
+                  "Bisnis: {$context['business_profile']['business_name']}\n" .
+                  "Kategori: {$context['business_profile']['business_category']}\n" .
+                  "Keuangan: Rev: " . number_format($context['financials']['revenue']) . ", Exp: " . number_format($context['financials']['expenses']) . ", Profit: " . number_format($context['financials']['profit']) . "\n" .
+                  "Stok Rendah: " . implode(', ', $context['low_stock_alerts']) . "\n\n" .
+                  "User: " . $userMsg;
 
-        // Dispatch Job to handle streaming in background
-        \App\Jobs\ProcessAiChat::dispatch($userId, $prompt, $apiKey);
-    }
-    
-    #[\Livewire\Attributes\On('echo-private:ai-chat.{userId},AiMessageChunkReceived')]
-    public function handleAiChunk($event)
-    {
-        $this->isTyping = false;
-        
-        if (!isset($this->chatHistory[count($this->chatHistory)-1])) return;
-        
-        if ($event['isDone']) {
-            $this->dispatch('message-received');
-            return;
+        try {
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+                'contents' => [['parts' => [['text' => $prompt]]]]
+            ]);
+
+            if ($response->successful()) {
+                $text = $response->json('candidates.0.content.parts.0.text');
+                $this->chatHistory[count($this->chatHistory)-1]['content'] = $text ?: "Maaf, AI tidak memberikan jawaban.";
+            } elseif ($response->status() === 429) {
+                $this->chatHistory[count($this->chatHistory)-1]['content'] = "Limit tercapai (Free Tier). Silakan tunggu ~60 detik sebelum pesan berikutnya.";
+            } else {
+                \Log::error("Gemini API Error [" . $response->status() . "]: " . $response->body());
+                $this->chatHistory[count($this->chatHistory)-1]['content'] = "Maaf, ada masalah teknis (Error " . $response->status() . ").";
+            }
+
+        } catch (\Exception $e) {
+            \Log::error("Gemini Request Error: " . $e->getMessage());
+            $this->chatHistory[count($this->chatHistory)-1]['content'] = "Koneksi ke server AI terputus. Silakan coba lagi.";
         }
-        
-        $this->chatHistory[count($this->chatHistory)-1]['content'] .= $event['chunk'];
+
+        $this->isTyping = false;
         $this->dispatch('message-received');
     }
 
