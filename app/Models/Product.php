@@ -14,10 +14,12 @@ class Product extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'category',
         'buy_price',
         'sell_price',
         'current_stock',
         'min_stock_alert',
+        'image',
     ];
 
     public function user(): BelongsTo
@@ -28,6 +30,11 @@ class Product extends Model
     public function inventoryLogs(): HasMany
     {
         return $this->hasMany(InventoryLog::class);
+    }
+
+    public function posOrderItems(): HasMany
+    {
+        return $this->hasMany(PosOrderItem::class);
     }
 
     protected static function booted()

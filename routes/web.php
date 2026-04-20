@@ -7,11 +7,12 @@ use App\Livewire\InventoryManager;
 use App\Livewire\GudangManager;
 use App\Livewire\TransactionManager;
 use App\Livewire\AiChat;
+use App\Livewire\Pos\Terminal;
 
 Route::view('/', 'welcome');
 
-// Authenticated routes
-Route::middleware(['auth', 'verified'])->group(function () {
+// Management routes — Only admin can access
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('dashboard', DashboardPage::class)->name('dashboard');
 
     // Inventaris
@@ -30,6 +31,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Chat AI
     Route::get('chat', AiChat::class)->name('chat.index');
+});
+
+// POS — Both admin and cashier can access
+Route::middleware(['auth', 'role:admin,cashier'])->group(function () {
+    Route::get('pos', Terminal::class)->name('pos.index');
 });
 
 Route::view('profile', 'profile')
