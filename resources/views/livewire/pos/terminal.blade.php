@@ -6,13 +6,15 @@
         </div>
         <div class="flex items-center gap-6">
             <!-- Search Bar -->
-            <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" data-icon="search">search</span>
+            <div class="relative w-72">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="search">search</span>
+                </div>
                 <input 
                     wire:model.live.debounce.300ms="search" 
                     type="text" 
                     placeholder="Cari produk..." 
-                    class="pl-10 pr-4 py-2 w-64 bg-surface-container-highest border border-white/5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                    class="block w-full pl-12 pr-4 py-2.5 bg-surface-container-highest border border-white/5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-[#10b981]/40 transition-all shadow-sm"
                 />
             </div>
 
@@ -160,7 +162,7 @@
                 <button 
                     wire:click="checkout" 
                     wire:loading.attr="disabled"
-                    class="w-full py-5 rounded-2xl bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold text-lg tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:hover:scale-100"
+                    class="w-full py-5 rounded-2xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-lg tracking-widest shadow-xl shadow-[#10b981]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:hover:scale-100"
                 >
                     <span wire:loading.remove wire:target="checkout" class="material-symbols-outlined text-2xl" data-icon="payments" data-weight="fill">payments</span>
                     <span wire:loading wire:target="checkout" class="material-symbols-outlined text-2xl animate-spin" data-icon="progress_activity">progress_activity</span>

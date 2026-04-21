@@ -12,7 +12,7 @@ use App\Livewire\Pos\Terminal;
 Route::view('/', 'welcome');
 
 // Management routes — Only admin can access
-Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('dashboard', DashboardPage::class)->name('dashboard');
 
     // Inventaris

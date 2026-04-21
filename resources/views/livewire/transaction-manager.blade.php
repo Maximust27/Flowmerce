@@ -26,8 +26,9 @@
 
     {{-- Summary Metrics --}}
     @php
-        $totalIncome = \App\Models\Transaction::where('type', 'INCOME')->sum('amount');
-        $totalExpense = \App\Models\Transaction::where('type', 'EXPENSE')->sum('amount');
+        $userId = auth()->id();
+        $totalIncome = \App\Models\Transaction::where('user_id', $userId)->where('type', 'INCOME')->sum('amount');
+        $totalExpense = \App\Models\Transaction::where('user_id', $userId)->where('type', 'EXPENSE')->sum('amount');
         $netProfit = $totalIncome - $totalExpense;
     @endphp
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 stagger-enter">

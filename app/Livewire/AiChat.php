@@ -67,7 +67,7 @@ class AiChat extends Component
             'low_stock_alerts' => $lowStock->toArray()
         ];
         
-        $apiKey = env('GEMINI_API_KEY');
+        $apiKey = config('services.gemini.api_key');
         
         if(empty($apiKey)) {
             $this->chatHistory[count($this->chatHistory)-1]['content'] = "Maaf, GEMINI_API_KEY belum dikonfigurasi di .env system.";
@@ -84,7 +84,7 @@ class AiChat extends Component
                   "User: " . $userMsg;
 
         try {
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={$apiKey}", [
                 'contents' => [['parts' => [['text' => $prompt]]]]
             ]);
 

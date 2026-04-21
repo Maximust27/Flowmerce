@@ -25,11 +25,32 @@ class Terminal extends Component
     }
 
     /**
+     * Resolve the owner (admin) user ID for the current user.
+     * - If current user is admin: return their own ID.
+     * - If current user is cashier: find the admin with the same business_name.
+     */
+    protected function getOwnerUserId(): int
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return $user->id;
+        }
+
+        // Cashier: find the admin sharing the same business_name
+        $owner = \App\Models\User::where('role', 'admin')
+            ->where('business_name', $user->business_name)
+            ->first();
+
+        return $owner ? $owner->id : $user->id;
+    }
+
+    /**
      * Get dynamic category list from DB products
      */
     public function getCategoriesProperty()
     {
-        return Product::where('user_id', Auth::id())
+        return Product::where('user_id', $this->getOwnerUserId())
             ->whereNotNull('category')
             ->where('category', '!=', '')
             ->distinct()
@@ -43,7 +64,7 @@ class Terminal extends Component
      */
     public function getProductsProperty()
     {
-        $query = Product::where('user_id', Auth::id());
+        $query = Product::where('user_id', $this->getOwnerUserId());
 
         // Filter by category
         if ($this->activeCategory !== 'Semua') {
@@ -205,7 +226,7 @@ class Terminal extends Component
                 ]);
 
                 // 6. Flush cache so dashboard sees fresh data
-                Cache::flush();
+                Cache::forget('dashboard_stats_' . Auth::id());
 
                 // Store for display
                 $this->orderNumber = $orderNumber;

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
 use Livewire\WithPagination;
@@ -47,6 +48,8 @@ class EmployeeManager extends Component
             'name' => $this->name,
             'email' => $this->email,
             'role' => $this->role,
+            'business_name' => Auth::user()->business_name,
+            'business_category' => Auth::user()->business_category ?? 'Umum',
         ];
 
         if ($this->password) {
@@ -61,7 +64,7 @@ class EmployeeManager extends Component
 
     public function edit($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::where('business_name', Auth::user()->business_name)->findOrFail($id);
         $this->employee_id = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
@@ -72,11 +75,11 @@ class EmployeeManager extends Component
 
     public function delete($id)
     {
-        if (\Illuminate\Support\Facades\Auth::id() == $id) {
+        if (Auth::id() == $id) {
             session()->flash('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
             return;
         }
-        User::findOrFail($id)->delete();
+        User::where('business_name', Auth::user()->business_name)->findOrFail($id)->delete();
         session()->flash('message', 'Pegawai berhasil dihapus.');
     }
 
@@ -87,11 +90,12 @@ class EmployeeManager extends Component
 
     public function render()
     {
-        $totalStaff = User::count();
-        $totalAdmins = User::where('role', 'admin')->count();
-        $totalCashiers = User::where('role', 'cashier')->count();
+        $businessName = Auth::user()->business_name;
+        $totalStaff = User::where('business_name', $businessName)->count();
+        $totalAdmins = User::where('business_name', $businessName)->where('role', 'admin')->count();
+        $totalCashiers = User::where('business_name', $businessName)->where('role', 'cashier')->count();
         
-        $employees = User::latest()->paginate(10);
+        $employees = User::where('business_name', $businessName)->latest()->paginate(10);
 
         return view('livewire.employee-manager', compact('employees', 'totalStaff', 'totalAdmins', 'totalCashiers'));
     }

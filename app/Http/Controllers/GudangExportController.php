@@ -12,8 +12,10 @@ class GudangExportController extends Controller
     public function export(Request $request)
     {
         $filter = $request->query('filter', 'all');
+        $userId = Auth::id();
+        $productIds = \App\Models\Product::where('user_id', $userId)->pluck('id');
 
-        $query = InventoryLog::query();
+        $query = InventoryLog::whereIn('product_id', $productIds);
 
         if ($filter === 'in') {
             $query->where('type', 'IN');

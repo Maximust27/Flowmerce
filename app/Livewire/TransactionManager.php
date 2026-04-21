@@ -49,14 +49,14 @@ class TransactionManager extends Component
         ]);
 
         $this->closeModal();
-        Cache::flush();
+        Cache::forget('dashboard_stats_' . Auth::id());
         session()->flash('message_tx', 'Transaksi berhasil dicatat.');
         $this->dispatch('transaction-saved'); // Untuk refresh dasbor secara asinkron (opsional)
     }
 
     public function render()
     {
-        $transactions = Transaction::latest()->paginate(10);
+        $transactions = Transaction::where('user_id', Auth::id())->latest()->paginate(10);
         return view('livewire.transaction-manager', compact('transactions'));
     }
 }

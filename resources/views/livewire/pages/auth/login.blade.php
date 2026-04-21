@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Forms\LoginForm;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -20,7 +21,10 @@ new #[Layout('layouts.guest')] class extends Component
 
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        // Role-based redirect: cashier → POS, admin → Dashboard
+        $route = Auth::user()->role === 'cashier' ? 'pos.index' : 'dashboard';
+
+        $this->redirect(route($route, absolute: false), navigate: true);
     }
 }; ?>
 

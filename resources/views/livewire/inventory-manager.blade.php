@@ -20,9 +20,10 @@
 
     {{-- Overview Stats --}}
     @php
-        $totalProducts = \App\Models\Product::count();
-        $outOfStock = \App\Models\Product::where('current_stock', 0)->count();
-        $lowStock = \App\Models\Product::where('current_stock', '>', 0)->whereColumn('current_stock', '<=', 'min_stock_alert')->count();
+        $userId = auth()->id();
+        $totalProducts = \App\Models\Product::where('user_id', $userId)->count();
+        $outOfStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', 0)->count();
+        $lowStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', '>', 0)->whereColumn('current_stock', '<=', 'min_stock_alert')->count();
     @endphp
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 stagger-enter">
         <div class="glass-card p-6 rounded-2xl">
@@ -42,7 +43,7 @@
         <div class="glass-card p-6 rounded-2xl bg-gradient-to-br from-surface-container to-primary/5">
             <p class="text-primary text-[11px] font-bold uppercase tracking-wider mb-2">Total Aset Stok</p>
             <p class="text-sm text-slate-300 leading-relaxed font-medium font-jb">
-                Rp {{ number_format(\App\Models\Product::selectRaw('SUM(buy_price * current_stock) as total')->value('total') ?? 0, 0, ',', '.') }}
+                Rp {{ number_format(\App\Models\Product::where('user_id', $userId)->selectRaw('SUM(buy_price * current_stock) as total')->value('total') ?? 0, 0, ',', '.') }}
             </p>
         </div>
     </div>
@@ -64,9 +65,13 @@
                 <tr class="hover:bg-white/[0.02] transition-colors">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
-                                <span class="material-symbols-outlined">inventory_2</span>
-                            </div>
+                            @if($product->image)
+                                <img src="{{ Storage::url($product->image) }}" class="w-12 h-12 rounded-lg object-cover bg-slate-800 shrink-0" alt="{{ $product->name }}">
+                            @else
+                                <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
+                                    <span class="material-symbols-outlined">inventory_2</span>
+                                </div>
+                            @endif
                             <div>
                                 <p class="font-bold text-white">{{ $product->name }}</p>
                                 <p class="text-xs text-slate-500">ID: #{{ $product->id }}</p>
@@ -110,7 +115,7 @@
 
     {{-- Pagination --}}
     <div class="pb-24">
-        {{ $products->links(data: ['scrollTo' => false]) }}
+        {{ $products->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
     </div>
 
     {{-- Modal Tambah Produk --}}
@@ -135,6 +140,17 @@
                     <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Nama Produk</label>
                     <input type="text" wire:model="name" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30" placeholder="Cth: Indomie Goreng">
                     @error('name') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Gambar Produk</label>
+                    <input type="file" wire:model="image" accept="image/*" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+                    <div wire:loading wire:target="image" class="text-xs text-slate-400 mt-2">Mengunggah...</div>
+                    @if ($image)
+                        <img src="{{ $image->temporaryUrl() }}" class="w-24 h-24 object-cover mt-2 rounded-xl">
+                    @elseif ($old_image)
+                        <img src="{{ Storage::url($old_image) }}" class="w-24 h-24 object-cover mt-2 rounded-xl">
+                    @endif
+                    @error('image') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>

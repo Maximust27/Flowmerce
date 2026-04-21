@@ -12,6 +12,8 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public string $name = '';
     public string $email = '';
+    public string $business_name = '';
+    public string $business_category = '';
     public string $password = '';
     public string $password_confirmation = '';
 
@@ -23,10 +25,13 @@ new #[Layout('layouts.guest')] class extends Component
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'business_name' => ['required', 'string', 'max:255'],
+            'business_category' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+        $validated['role'] = 'admin';
 
         event(new Registered($user = User::create($validated)));
 
@@ -50,6 +55,20 @@ new #[Layout('layouts.guest')] class extends Component
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <!-- Business Name -->
+        <div class="mt-4">
+            <x-input-label for="business_name" :value="__('Nama Bisnis')" />
+            <x-text-input wire:model="business_name" id="business_name" class="block mt-1 w-full" type="text" name="business_name" required placeholder="Cth: Warung Barokah" />
+            <x-input-error :messages="$errors->get('business_name')" class="mt-2" />
+        </div>
+
+        <!-- Business Category -->
+        <div class="mt-4">
+            <x-input-label for="business_category" :value="__('Kategori Bisnis')" />
+            <x-text-input wire:model="business_category" id="business_category" class="block mt-1 w-full" type="text" name="business_category" required placeholder="Cth: Coffee Shop, Warung Makan" />
+            <x-input-error :messages="$errors->get('business_category')" class="mt-2" />
         </div>
 
         <!-- Password -->

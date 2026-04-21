@@ -37,12 +37,21 @@ class PosOrder extends Model
     }
 
     /**
-     * Generate unique order number: FLW-XXXXX
+     * Generate unique order number: FLW-YYYYMMDD-XXXXX
+     * Uses timestamp + random suffix to avoid race conditions
      */
     public static function generateOrderNumber(): string
     {
-        $latest = static::latest('id')->first();
-        $nextId = $latest ? $latest->id + 1 : 1;
-        return 'FLW-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+        $prefix = 'FLW-' . now()->format('Ymd') . '-';
+        $random = strtoupper(substr(uniqid(), -5));
+        $orderNumber = $prefix . $random;
+
+        // Ensure uniqueness in the rare case of collision
+        while (static::where('order_number', $orderNumber)->exists()) {
+            $random = strtoupper(substr(uniqid(), -5));
+            $orderNumber = $prefix . $random;
+        }
+
+        return $orderNumber;
     }
 }
