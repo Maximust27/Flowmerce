@@ -150,7 +150,7 @@
         </table>
         
         <div class="p-4 border-t border-white/5">
-            {{ $transactions->links() }}
+            {{ $transactions->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
         </div>
     </div>
 

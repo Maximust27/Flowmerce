@@ -205,8 +205,9 @@ class Terminal extends Component
                         'subtotal' => $item['price'] * $item['qty'],
                     ]);
 
-                    // 3. Decrement stock
-                    $product->decrement('current_stock', $item['qty']);
+                    // 3. Decrement stock manually and save quietly to avoid duplicate log from observer
+                    $product->current_stock -= $item['qty'];
+                    $product->saveQuietly();
 
                     // 4. Create inventory log (OUT)
                     $product->inventoryLogs()->create([

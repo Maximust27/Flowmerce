@@ -171,7 +171,7 @@
 
     {{-- Pagination --}}
     <div class="mt-4 pb-24 text-slate-300">
-        {{ $products->links() }}
+        {{ $products->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
     </div>
 
 </div>

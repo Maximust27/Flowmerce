@@ -142,6 +142,11 @@
                     @error('name') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 <div>
+                    <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Kategori</label>
+                    <input type="text" wire:model="category" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30" placeholder="Cth: Makanan Ringan, Minuman, dll.">
+                    @error('category') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+                <div>
                     <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Gambar Produk</label>
                     <input type="file" wire:model="image" accept="image/*" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
                     <div wire:loading wire:target="image" class="text-xs text-slate-400 mt-2">Mengunggah...</div>

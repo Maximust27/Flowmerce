@@ -14,13 +14,14 @@ class InventoryManager extends Component
     use WithPagination, WithFileUploads;
 
     public $product_id;
-    public $name, $buy_price, $sell_price, $current_stock, $min_stock_alert = 5;
+    public $name, $category, $buy_price, $sell_price, $current_stock, $min_stock_alert = 5;
     public $image;
     public $old_image;
     public $isModalOpen = false;
 
     protected $rules = [
         'name' => 'required|string|max:255',
+        'category' => 'nullable|string|max:255',
         'buy_price' => 'required|numeric|min:0',
         'sell_price' => 'required|numeric|min:0',
         'current_stock' => 'required|integer|min:0',
@@ -37,7 +38,7 @@ class InventoryManager extends Component
     public function closeModal()
     {
         $this->isModalOpen = false;
-        $this->reset(['product_id', 'name', 'buy_price', 'sell_price', 'current_stock', 'min_stock_alert', 'image', 'old_image']);
+        $this->reset(['product_id', 'name', 'category', 'buy_price', 'sell_price', 'current_stock', 'min_stock_alert', 'image', 'old_image']);
         $this->resetValidation();
     }
 
@@ -54,6 +55,7 @@ class InventoryManager extends Component
             $product = Product::findOrFail($this->product_id);
             $product->update([
                 'name' => $this->name,
+                'category' => $this->category,
                 'buy_price' => $this->buy_price,
                 'sell_price' => $this->sell_price,
                 'current_stock' => $this->current_stock,
@@ -64,6 +66,7 @@ class InventoryManager extends Component
             Product::create([
                 'user_id' => Auth::id(),
                 'name' => $this->name,
+                'category' => $this->category,
                 'buy_price' => $this->buy_price,
                 'sell_price' => $this->sell_price,
                 'current_stock' => $this->current_stock,
@@ -82,6 +85,7 @@ class InventoryManager extends Component
         $product = Product::where('user_id', Auth::id())->findOrFail($id);
         $this->product_id = $product->id;
         $this->name = $product->name;
+        $this->category = $product->category;
         $this->buy_price = $product->buy_price;
         $this->sell_price = $product->sell_price;
         $this->current_stock = $product->current_stock;

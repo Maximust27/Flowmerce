@@ -118,7 +118,7 @@
 
     {{-- Pagination --}}
     <div class="pb-24">
-        {{ $transactions->links(data: ['scrollTo' => false]) }}
+        {{ $transactions->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
     </div>
 
     {{-- P&L Report --}}

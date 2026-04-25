@@ -146,7 +146,7 @@
             </table>
         </div>
         <div class="p-4 border-t border-white/5">
-            {{ $employees->links() }}
+            {{ $employees->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
         </div>
     </div>
 
