@@ -47,44 +47,44 @@
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col selection:bg-primary selection:text-on-primary" x-data="menuApp()" :class="{'no-scroll': (cartOpen && window.innerWidth < 1024) || qrisOpen || orderDone}">
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col selection:bg-primary selection:text-on-primary overflow-hidden" x-data="menuApp()" :class="{'no-scroll': (cartOpen && window.innerWidth < 1024) || qrisOpen || orderDone}">
 
 {{-- ===== HEADER ===== --}}
-<header class="sticky top-0 z-40 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-white/5 px-4 lg:px-8 py-3 lg:py-4 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-4 lg:px-8 h-16 bg-[#0a0e1a] bg-opacity-50 backdrop-blur-xl border-b border-white/5 shadow-[0_8px_32px_rgba(5,7,10,0.4)]">
     <div class="flex items-center gap-3">
-        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
-            <span class="material-symbols-outlined text-[24px] lg:text-[28px]" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+        <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
+            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
         </div>
         <div>
-            <p class="text-[10px] lg:text-xs text-on-surface-variant font-medium tracking-wider uppercase">{{ $owner->business_name ?? 'Flowmerce' }}</p>
-            <h1 class="text-base lg:text-xl font-bold text-primary tracking-tight">{{ $table->table_number }}</h1>
+            <p class="text-[10px] text-on-surface-variant font-medium tracking-wider uppercase">{{ $owner->business_name ?? 'Flowmerce' }}</p>
+            <h1 class="text-sm lg:text-base font-bold text-primary tracking-tight">{{ $table->table_number }}</h1>
         </div>
     </div>
-    <button @click="cartOpen = true" class="lg:hidden relative p-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors">
-        <span class="material-symbols-outlined text-on-surface-variant">shopping_cart</span>
+    <button @click="cartOpen = true" class="lg:hidden relative p-2 rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors">
+        <span class="material-symbols-outlined text-on-surface-variant text-[20px]">shopping_cart</span>
         <span x-show="cartCount > 0" x-cloak x-text="cartCount"
-              class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary-container text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md"></span>
+              class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary-container text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-md"></span>
     </button>
 </header>
 
-<div class="flex-1 flex flex-col lg:flex-row max-w-[1600px] mx-auto w-full">
+<div class="h-[calc(100vh-4rem)] mt-16 flex flex-col lg:flex-row max-w-[1600px] mx-auto w-full">
     
     {{-- ===== LEFT SIDE: MENU ===== --}}
-    <main class="flex-1 flex flex-col min-w-0 lg:border-r border-white/5">
+    <main class="flex-1 flex flex-col min-w-0 lg:p-6 overflow-hidden">
         
         {{-- ===== CATEGORY TABS ===== --}}
-        <div class="sticky top-[64px] lg:top-[76px] z-30 bg-surface/95 backdrop-blur-md px-4 lg:px-8 py-4 flex gap-2 overflow-x-auto scrollbar-none border-b border-white/5 shadow-sm">
+        <div class="flex-none flex items-center gap-3 mb-4 lg:mb-6 overflow-x-auto pb-2 scrollbar-none px-4 pt-4 lg:p-0">
             @foreach($categories as $cat)
             <button @click="activeCategory = '{{ $cat }}'"
                     :class="activeCategory === '{{ $cat }}' ? 'bg-primary-container text-white shadow-lg shadow-primary/20' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'"
-                    class="px-5 py-2 lg:py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200">
+                    class="px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200">
                 {{ $cat }}
             </button>
             @endforeach
         </div>
 
         {{-- ===== PRODUCT GRID ===== --}}
-        <div class="p-4 lg:p-8 pb-32 lg:pb-8 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
+        <div class="flex-1 min-h-0 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-5 overflow-y-auto px-4 lg:px-2 pt-3 -mt-3 pb-32 lg:pb-8 content-start custom-scrollbar">
             @foreach($products as $product)
             <div x-show="activeCategory === 'Semua' || activeCategory === '{{ addslashes($product->category ?? '') }}'"
                  x-transition:enter="transition ease-out duration-300"
@@ -136,9 +136,9 @@
 
     {{-- Cart Container --}}
     <aside :class="cartCount === 0 ? 'translate-y-[120%] lg:translate-y-0' : (cartOpen ? 'translate-y-0' : 'translate-y-[calc(100%-84px)] lg:translate-y-0')"
-           class="fixed lg:sticky top-auto lg:top-[76px] bottom-0 left-0 right-0 lg:left-auto lg:right-auto z-50 lg:z-10 w-full lg:w-[420px] xl:w-[480px] bg-surface-container lg:bg-transparent h-[85vh] lg:h-[calc(100vh-76px)] flex flex-col rounded-t-[2rem] lg:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.3)] lg:shadow-none transition-transform duration-400 ease-[cubic-bezier(0.2,1,0.2,1)] will-change-transform">
+           class="fixed lg:relative top-auto bottom-0 left-0 right-0 z-50 lg:z-10 w-full lg:w-[420px] bg-surface-container flex flex-col rounded-t-[2rem] lg:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.3)] lg:shadow-[-20px_0_40px_rgba(0,0,0,0.1)] transition-transform duration-400 ease-[cubic-bezier(0.2,1,0.2,1)] will-change-transform border-t lg:border-t-0 lg:border-l border-white/5 h-[85vh] lg:h-full">
         
-        <div class="flex-1 flex flex-col h-full bg-surface-container lg:bg-surface-container-lowest/30 backdrop-blur-xl lg:border-l border-white/5 overflow-hidden rounded-t-[2rem] lg:rounded-none">
+        <div class="flex-1 flex flex-col h-full bg-surface-container lg:bg-transparent overflow-hidden rounded-t-[2rem] lg:rounded-none">
             
             {{-- Cart Header --}}
             <div @click="if(window.innerWidth < 1024) cartOpen = !cartOpen" class="flex-none flex items-center justify-between px-6 py-5 lg:py-6 border-b border-white/5 bg-surface-container lg:bg-transparent cursor-pointer lg:cursor-default rounded-t-[2rem] lg:rounded-none">
@@ -223,17 +223,17 @@
             </div>
 
             {{-- Cart Footer / Checkout --}}
-            <div class="flex-none p-5 lg:p-6 border-t border-white/5 bg-surface-container lg:bg-transparent">
+            <div class="flex-none p-5 lg:p-6 bg-surface-container-high border-t border-white/10 lg:rounded-t-3xl lg:shadow-[-20px_0_40px_rgba(0,0,0,0.3)] z-20 relative">
                 <div class="space-y-3 mb-5 lg:mb-6">
                     <div class="flex justify-between items-center text-sm lg:text-base">
                         <span class="text-on-surface-variant">Subtotal</span>
                         <span class="font-mono text-on-surface">IDR <span x-text="formatRp(subtotalDisplay)"></span></span>
                     </div>
                     <div class="flex justify-between items-center text-sm lg:text-base">
-                        <span class="text-on-surface-variant flex items-center gap-1">Pajak <span class="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white">11%</span></span>
+                        <span class="text-on-surface-variant flex items-center gap-1">Pajak (11%)</span>
                         <span class="font-mono text-on-surface">IDR <span x-text="formatRp(taxDisplay)"></span></span>
                     </div>
-                    <div class="h-px w-full bg-white/5 my-1"></div>
+                    <div class="h-px w-full bg-white/5 my-2"></div>
                     <div class="flex justify-between items-end">
                         <span class="text-base lg:text-lg font-bold text-on-surface">Total Bill</span>
                         <span class="font-mono text-xl lg:text-2xl font-black text-primary tracking-tight">IDR <span x-text="formatRp(total)"></span></span>
