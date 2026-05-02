@@ -52,6 +52,13 @@
             <span class="material-symbols-outlined" @if(request()->routeIs('pegawai.*')) style="font-variation-settings: 'FILL' 1;" @endif>group</span>
             <span>Manajemen Pegawai</span>
         </a>
+
+        <a href="{{ route('meja.index') }}"
+           class="sidebar-link {{ request()->routeIs('meja.*') ? 'active' : '' }}"
+           wire:navigate>
+            <span class="material-symbols-outlined" @if(request()->routeIs('meja.*')) style="font-variation-settings: 'FILL' 1;" @endif>table_restaurant</span>
+            <span>Scan to Order</span>
+        </a>
     </nav>
 
     {{-- Bottom Section --}}

@@ -17,15 +17,12 @@
                     class="block w-full pl-12 pr-4 py-2.5 bg-surface-container-highest border border-white/5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-[#10b981]/40 transition-all shadow-sm"
                 />
             </div>
-
             <div class="h-6 w-[1px] bg-white/10"></div>
-            
             <!-- User Info -->
             <div class="flex items-center gap-2 text-on-surface-variant text-sm">
                 <span class="material-symbols-outlined text-[18px]" data-icon="person">person</span>
                 <span class="font-['Plus_Jakarta_Sans'] font-medium">{{ Auth::user()->name }}</span>
             </div>
-
             <div class="h-6 w-[1px] bg-white/10"></div>
             <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
                 @csrf
@@ -54,30 +51,22 @@
             </div>
 
             <!-- Product Grid -->
-            <!-- p-2 dan margin negatif untuk menjaga animasi hover agar tidak terpotong (clipped) -->
             <div class="flex-1 min-h-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 overflow-y-auto p-2 pr-4 custom-scrollbar content-start pb-8 -ml-2 -mt-2">
                 @forelse($products as $product)
                     <div wire:click="addToCart({{ $product->id }})" class="group bg-surface-container rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-primary/40 hover:-translate-y-1 flex flex-col h-[280px] {{ $product->current_stock <= 0 ? 'opacity-50 pointer-events-none' : '' }}">
-                        
-                        <!-- Top Image Area -->
                         <div class="relative flex-1 bg-surface-container-high flex items-center justify-center overflow-hidden">
-                            <!-- Minimalist Stock Label -->
                             <div class="absolute top-4 right-4 text-[10px] font-mono font-bold @if($product->current_stock < 5) text-error @else text-primary @endif tracking-wider z-10">
                                 {{ $product->current_stock }} IN STOCK
                             </div>
-                            
                             @if($product->image)
                                 <img alt="{{ $product->name }}" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500" src="{{ $product->image }}"/>
                             @else
                                 <span class="material-symbols-outlined text-[80px] text-on-surface-variant/20" data-icon="inventory_2">inventory_2</span>
                             @endif
                         </div>
-
-                        <!-- Bottom Info Area -->
                         <div class="p-4 bg-surface-container flex flex-col justify-end">
                             <h3 class="text-on-surface font-semibold text-base mb-0.5 line-clamp-1">{{ $product->name }}</h3>
                             <p class="text-xs text-on-surface-variant/70 mb-4">{{ $product->category ?? 'Uncategorized' }}</p>
-                            
                             <div class="flex justify-between items-center">
                                 <span class="font-mono text-base font-bold text-primary">IDR {{ number_format($product->sell_price, 0, ',', '.') }}</span>
                                 <div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-colors shadow-sm">
@@ -98,6 +87,25 @@
 
         <!-- Right Side: Order Summary -->
         <aside class="w-[420px] bg-surface-container flex flex-col border-l border-white/5 shadow-2xl relative z-10">
+
+            <!-- ===== TAB TOGGLE ===== -->
+            <div class="flex border-b border-white/5">
+                <button wire:click="switchTab('manual')"
+                    class="flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-colors
+                        {{ $activeTab === 'manual' ? 'text-primary border-b-2 border-primary bg-surface-container-high' : 'text-on-surface-variant hover:text-on-surface' }}">
+                    <span class="material-symbols-outlined text-[18px]">point_of_sale</span>
+                    Manual
+                </button>
+                <button wire:click="switchTab('online')"
+                    class="flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-colors
+                        {{ $activeTab === 'online' ? 'text-primary border-b-2 border-primary bg-surface-container-high' : 'text-on-surface-variant hover:text-on-surface' }}">
+                    <span class="material-symbols-outlined text-[18px]">qr_code_scanner</span>
+                    Scan to Order
+                </button>
+            </div>
+
+            @if($activeTab === 'manual')
+            {{-- =================== TAB MANUAL =================== --}}
             <!-- Summary Header -->
             <div class="p-6 border-b border-white/5 flex justify-between items-center">
                 <div>
@@ -108,7 +116,6 @@
                     <span class="material-symbols-outlined" data-icon="delete">delete</span>
                 </button>
             </div>
-
             <!-- Items List -->
             <div class="flex-grow overflow-y-auto p-4 custom-scrollbar space-y-4">
                 @forelse($cart as $id => $item)
@@ -118,7 +125,7 @@
                                 <img alt="Item" class="w-full h-full object-cover" src="{{ $item['image'] }}"/>
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-on-surface-variant/30">
-                                    <span class="material-symbols-outlined text-[24px]" data-icon="inventory_2">inventory_2</span>
+                                    <span class="material-symbols-outlined text-[24px]">inventory_2</span>
                                 </div>
                             @endif
                         </div>
@@ -131,11 +138,11 @@
                                 <span class="text-xs text-on-surface-variant">IDR {{ number_format($item['price'], 0, ',', '.') }} / unit</span>
                                 <div class="flex items-center gap-3 bg-surface-container-highest rounded-lg p-1 px-2 border border-white/5">
                                     <button wire:click.stop="decreaseQty({{ $id }})" class="text-on-surface-variant hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
+                                        <span class="material-symbols-outlined text-sm">remove</span>
                                     </button>
                                     <span class="font-mono text-sm font-bold">{{ $item['qty'] }}</span>
                                     <button wire:click.stop="increaseQty({{ $id }})" class="text-on-surface-variant hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                                        <span class="material-symbols-outlined text-sm">add</span>
                                     </button>
                                 </div>
                             </div>
@@ -148,7 +155,78 @@
                 @endforelse
             </div>
 
-            <!-- Calculation Section -->
+            @else
+            {{-- =================== TAB SCAN TO ORDER =================== --}}
+            <div class="p-5 border-b border-white/5">
+                <p class="text-xs text-on-surface-variant mb-3 font-mono uppercase tracking-widest">Kode Pesanan Pelanggan</p>
+                <div class="flex gap-2">
+                    <input wire:model="guestOrderCode"
+                           wire:keydown.enter="loadGuestOrder"
+                           type="text"
+                           placeholder="Contoh: KSR-8B3F2"
+                           class="flex-1 bg-surface-container-highest border border-white/10 rounded-xl px-4 py-3 text-sm font-mono uppercase text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+                    <button wire:click="loadGuestOrder"
+                            class="px-4 py-3 rounded-xl bg-primary-container text-white font-semibold text-sm flex items-center gap-1 hover:bg-[#059669] transition-colors active:scale-95">
+                        <span class="material-symbols-outlined text-[18px]">search</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-grow overflow-y-auto p-4 custom-scrollbar">
+                @if($loadedGuestOrder)
+                    <!-- Info Pesanan -->
+                    <div class="mb-4 bg-surface-container-high rounded-2xl p-4 border border-primary/20">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[18px]">table_restaurant</span>
+                                <span class="font-semibold text-sm">{{ $loadedGuestOrder['table'] }}</span>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full font-mono
+                                {{ $loadedGuestOrder['payment_method'] === 'QRIS' ? 'bg-green-900/40 text-green-400' : 'bg-surface-container-highest text-on-surface-variant' }}">
+                                {{ $loadedGuestOrder['payment_method'] === 'QRIS' ? '✅ QRIS Lunas' : '💵 Bayar di Kasir' }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant font-mono">{{ $loadedGuestOrder['order_code'] }}</p>
+                    </div>
+
+                    <!-- Items dari Guest Order -->
+                    <div class="space-y-3">
+                        @forelse($cart as $id => $item)
+                            <div class="bg-surface-container-high/50 p-3 rounded-xl border border-white/5">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm font-semibold text-on-surface line-clamp-1">{{ $item['name'] }}</span>
+                                    <span class="font-mono text-sm font-bold text-primary">IDR {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-on-surface-variant">x{{ $item['qty'] }} @ IDR {{ number_format($item['price'], 0, ',', '.') }}</span>
+                                </div>
+                                @if(!empty($item['notes']))
+                                    <p class="text-xs text-primary/70 mt-1.5 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">sticky_note_2</span>
+                                        {{ $item['notes'] }}
+                                    </p>
+                                @endif
+                            </div>
+                        @empty
+                            <p class="text-sm text-on-surface-variant/50 text-center py-8">Tidak ada item</p>
+                        @endforelse
+                    </div>
+
+                    <button wire:click="cancelGuestOrder"
+                            class="mt-4 w-full py-2 rounded-xl border border-error/30 text-error text-sm hover:bg-error/10 transition-colors">
+                        Batalkan & Kembali
+                    </button>
+                @else
+                    <div class="flex flex-col items-center justify-center h-48 text-on-surface-variant/40">
+                        <span class="material-symbols-outlined text-[48px] mb-3">qr_code_scanner</span>
+                        <p class="text-sm">Masukkan kode pesanan pelanggan</p>
+                        <p class="text-xs mt-1">Contoh: KSR-8B3F2</p>
+                    </div>
+                @endif
+            </div>
+            @endif
+
+            <!-- Calculation Section (shared) -->
             <div class="p-6 bg-surface-container-high border-t border-white/10 rounded-t-3xl shadow-[-20px_0_40px_rgba(0,0,0,0.3)]">
                 <div class="space-y-3 mb-6">
                     <div class="flex justify-between text-sm">
@@ -172,14 +250,16 @@
                 >
                     <span wire:loading.remove wire:target="checkout" class="material-symbols-outlined text-2xl" data-icon="payments" data-weight="fill">payments</span>
                     <span wire:loading wire:target="checkout" class="material-symbols-outlined text-2xl animate-spin" data-icon="progress_activity">progress_activity</span>
-                    <span wire:loading.remove wire:target="checkout">BAYAR SEKARANG</span>
+                    <span wire:loading.remove wire:target="checkout">
+                        {{ $activeTab === 'online' && $loadedGuestOrder ? 'PROSES PESANAN' : 'BAYAR SEKARANG' }}
+                    </span>
                     <span wire:loading wire:target="checkout">MEMPROSES...</span>
                 </button>
             </div>
         </aside>
     </main>
 
-    <!-- Payment Success Modal dengan AlpineJS -->
+    <!-- Payment Success Modal -->
     <div 
         x-data="{ show: false }"
         x-on:payment-successful.window="show = true; setTimeout(() => show = false, 3500)"

@@ -17,6 +17,7 @@ class PosOrder extends Model
         'total',
         'payment_method',
         'status',
+        'guest_order_id',
     ];
 
     protected $casts = [
@@ -34,6 +35,11 @@ class PosOrder extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PosOrderItem::class);
+    }
+
+    public function guestOrder(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(GuestOrder::class);
     }
 
     /**

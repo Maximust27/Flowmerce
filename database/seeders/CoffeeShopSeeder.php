@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\PosOrder;
 use App\Models\PosOrderItem;
 use App\Models\Transaction;
+use App\Models\Table;
+use App\Models\GuestOrder;
+use App\Models\GuestOrderItem;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -60,7 +63,22 @@ class CoffeeShopSeeder extends Seeder
 
         $products = [];
         foreach ($productsData as $data) {
-            $products[] = Product::create(array_merge($data, ['user_id' => $admin->id]));
+            $products[] = Product::create(array_merge($data, [
+                'user_id' => $admin->id,
+                'is_available_online' => true,
+            ]));
+        }
+
+        // 2.5 Create Tables
+        $this->command->info('Seeding tables...');
+        $tables = [];
+        for ($t = 1; $t <= 5; $t++) {
+            $tables[] = Table::create([
+                'user_id' => $admin->id,
+                'table_number' => 'Meja ' . $t,
+                'table_code' => Table::generateTableCode(),
+                'is_active' => true,
+            ]);
         }
 
         // 3. Create Historical Orders (Last 30 Days)
@@ -98,7 +116,7 @@ class CoffeeShopSeeder extends Seeder
 
             $order = PosOrder::create([
                 'user_id' => $admin->id,
-                'order_number' => 'FLW-' . str_pad($i + 1, 5, '0', STR_PAD_LEFT),
+                'order_number' => 'FLW-' . date('ymd') . '-' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT) . '-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT),
                 'subtotal' => $subtotal,
                 'tax_rate' => $taxRate,
                 'tax_amount' => $taxAmount,
@@ -142,6 +160,53 @@ class CoffeeShopSeeder extends Seeder
                 'created_at' => $date,
                 'updated_at' => $date,
             ]));
+        }
+
+        // 5. Create Active Guest Orders (Scan to Order)
+        $this->command->info('Seeding active guest orders...');
+        for ($g = 0; $g < 3; $g++) {
+            $table = collect($tables)->random();
+            $guestOrder = GuestOrder::create([
+                'user_id' => $admin->id,
+                'table_id' => $table->id,
+                'order_code' => GuestOrder::generateOrderCode(),
+                'subtotal' => 0,
+                'tax_rate' => 0.11,
+                'tax_amount' => 0,
+                'total' => 0,
+                'payment_method' => collect(['CASHIER', 'QRIS'])->random(),
+                'payment_status' => 'UNPAID',
+                'order_status' => collect(['PENDING', 'PROCESSING'])->random(),
+            ]);
+
+            $gSubtotal = 0;
+            $gNumItems = rand(1, 3);
+            $gSelected = array_rand($products, $gNumItems);
+            if (!is_array($gSelected)) $gSelected = [$gSelected];
+
+            foreach ($gSelected as $idx) {
+                $p = $products[$idx];
+                $qty = rand(1, 2);
+                $itemTotal = $p->sell_price * $qty;
+                
+                GuestOrderItem::create([
+                    'guest_order_id' => $guestOrder->id,
+                    'product_id' => $p->id,
+                    'product_name' => $p->name,
+                    'quantity' => $qty,
+                    'unit_price' => $p->sell_price,
+                    'subtotal' => $itemTotal,
+                    'notes' => rand(0, 1) ? 'Less sugar' : null,
+                ]);
+                $gSubtotal += $itemTotal;
+            }
+
+            $gTaxAmount = $gSubtotal * 0.11;
+            $guestOrder->update([
+                'subtotal' => $gSubtotal,
+                'tax_amount' => $gTaxAmount,
+                'total' => $gSubtotal + $gTaxAmount,
+            ]);
         }
 
         $this->command->info('Coffee Shop Seeding completed!');
