@@ -37,11 +37,11 @@
         </div>
     </header>
 
-    <main class="pt-16 h-screen flex">
+    <main class="h-[calc(100vh-4rem)] mt-16 flex overflow-hidden">
         <!-- Main Product Section -->
-        <section class="flex-grow flex flex-col p-6 overflow-hidden">
+        <section class="flex-1 flex flex-col p-6 overflow-hidden">
             <!-- Categories / Filters -->
-            <div class="flex items-center gap-3 mb-8 overflow-x-auto pb-2 custom-scrollbar">
+            <div class="flex-none flex items-center gap-3 mb-6 overflow-x-auto pb-2 custom-scrollbar">
                 @foreach($categories as $cat)
                     <button 
                         wire:click="setCategory('{{ $cat }}')"
@@ -54,28 +54,34 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 overflow-y-auto pr-2 custom-scrollbar">
+            <!-- p-2 dan margin negatif untuk menjaga animasi hover agar tidak terpotong (clipped) -->
+            <div class="flex-1 min-h-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 overflow-y-auto p-2 pr-4 custom-scrollbar content-start pb-8 -ml-2 -mt-2">
                 @forelse($products as $product)
-                    <div wire:click="addToCart({{ $product->id }})" class="group bg-surface-container rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-primary/40 hover:-translate-y-1 {{ $product->current_stock <= 0 ? 'opacity-50 pointer-events-none' : '' }}">
-                        <div class="relative h-44 w-full bg-surface-container-high">
-                            @if($product->image)
-                                <img alt="{{ $product->name }}" class="w-full h-full object-cover" src="{{ $product->image }}"/>
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-on-surface-variant/30">
-                                    <span class="material-symbols-outlined text-[64px]" data-icon="inventory_2">inventory_2</span>
-                                </div>
-                            @endif
-                            <div class="absolute top-2 right-2 px-2 py-1 bg-surface-lowest/80 backdrop-blur-md rounded text-[10px] font-mono font-bold @if($product->current_stock < 5) text-error @else text-primary @endif">
+                    <div wire:click="addToCart({{ $product->id }})" class="group bg-surface-container rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-primary/40 hover:-translate-y-1 flex flex-col h-[280px] {{ $product->current_stock <= 0 ? 'opacity-50 pointer-events-none' : '' }}">
+                        
+                        <!-- Top Image Area -->
+                        <div class="relative flex-1 bg-surface-container-high flex items-center justify-center overflow-hidden">
+                            <!-- Minimalist Stock Label -->
+                            <div class="absolute top-4 right-4 text-[10px] font-mono font-bold @if($product->current_stock < 5) text-error @else text-primary @endif tracking-wider z-10">
                                 {{ $product->current_stock }} IN STOCK
                             </div>
+                            
+                            @if($product->image)
+                                <img alt="{{ $product->name }}" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500" src="{{ $product->image }}"/>
+                            @else
+                                <span class="material-symbols-outlined text-[80px] text-on-surface-variant/20" data-icon="inventory_2">inventory_2</span>
+                            @endif
                         </div>
-                        <div class="p-4">
-                            <h3 class="text-on-surface font-semibold mb-1 line-clamp-1">{{ $product->name }}</h3>
-                            <p class="text-xs text-on-surface-variant mb-3">{{ $product->category ?? 'Uncategorized' }}</p>
-                            <div class="flex justify-between items-end">
-                                <span class="font-mono text-lg font-bold text-primary">IDR {{ number_format($product->sell_price, 0, ',', '.') }}</span>
-                                <div class="p-1.5 rounded-lg bg-surface-container-highest group-hover:bg-primary group-hover:text-on-primary transition-colors">
-                                    <span class="material-symbols-outlined" data-icon="add">add</span>
+
+                        <!-- Bottom Info Area -->
+                        <div class="p-4 bg-surface-container flex flex-col justify-end">
+                            <h3 class="text-on-surface font-semibold text-base mb-0.5 line-clamp-1">{{ $product->name }}</h3>
+                            <p class="text-xs text-on-surface-variant/70 mb-4">{{ $product->category ?? 'Uncategorized' }}</p>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="font-mono text-base font-bold text-primary">IDR {{ number_format($product->sell_price, 0, ',', '.') }}</span>
+                                <div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-colors shadow-sm">
+                                    <span class="material-symbols-outlined text-lg" data-icon="add">add</span>
                                 </div>
                             </div>
                         </div>

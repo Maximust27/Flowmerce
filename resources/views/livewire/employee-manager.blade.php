@@ -27,42 +27,59 @@
     @endif
 
     <!-- Summary Bento Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="glass-card p-6 rounded-xl relative overflow-hidden group">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 stagger-enter">
+        <div class="glass-card inner-glow p-6 rounded-2xl ai-glow-emerald relative overflow-hidden group border border-white/5">
             <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <span class="material-symbols-outlined text-6xl">groups</span>
+                <span class="material-symbols-outlined text-7xl">groups</span>
             </div>
-            <p class="text-slate-400 text-xs font-label tracking-widest uppercase mb-4">Total Pegawai</p>
-            <div class="flex items-baseline gap-2">
-                <h3 class="text-4xl font-bold font-mono text-white">{{ number_format($totalStaff) }}</h3>
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined">groups</span>
+                </div>
             </div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Pegawai</p>
+            <h3 class="text-3xl font-bold font-jb text-white tracking-tighter">{{ number_format($totalStaff) }}</h3>
         </div>
-        <div class="glass-card p-6 rounded-xl relative overflow-hidden group">
+
+        <div class="glass-card inner-glow p-6 rounded-2xl relative overflow-hidden group border border-white/5">
             <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <span class="material-symbols-outlined text-6xl">admin_panel_settings</span>
+                <span class="material-symbols-outlined text-7xl">admin_panel_settings</span>
             </div>
-            <p class="text-slate-400 text-xs font-label tracking-widest uppercase mb-4">Total Admin</p>
-            <div class="flex items-baseline gap-2">
-                <h3 class="text-4xl font-bold font-mono text-white">{{ number_format($totalAdmins) }}</h3>
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                    <span class="material-symbols-outlined">admin_panel_settings</span>
+                </div>
             </div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Admin</p>
+            <h3 class="text-3xl font-bold font-jb text-white tracking-tighter">{{ number_format($totalAdmins) }}</h3>
         </div>
-        <div class="glass-card p-6 rounded-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <span class="material-symbols-outlined text-6xl">payments</span>
+
+        <div class="glass-card inner-glow p-6 rounded-2xl ai-glow-violet relative overflow-hidden group border border-white/5">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-tertiary">
+                <span class="material-symbols-outlined text-7xl">payments</span>
             </div>
-            <p class="text-slate-400 text-xs font-label tracking-widest uppercase mb-4">Total Kasir</p>
-            <div class="flex items-baseline gap-2">
-                <h3 class="text-4xl font-bold font-mono text-white">{{ number_format($totalCashiers) }}</h3>
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+                    <span class="material-symbols-outlined">payments</span>
+                </div>
             </div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Kasir</p>
+            <h3 class="text-3xl font-bold font-jb text-white tracking-tighter">{{ number_format($totalCashiers) }}</h3>
         </div>
-        <div class="glass-card p-6 rounded-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <span class="material-symbols-outlined text-6xl">analytics</span>
+
+        <div class="glass-card inner-glow p-6 rounded-2xl relative overflow-hidden group border border-white/5">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-white/20">
+                <span class="material-symbols-outlined text-7xl">analytics</span>
             </div>
-            <p class="text-slate-400 text-xs font-label tracking-widest uppercase mb-4">Retensi</p>
-            <div class="flex items-baseline gap-2">
-                <h3 class="text-4xl font-bold font-mono text-white">100%</h3>
-                <span class="text-emerald-400 text-sm font-medium">Optimal</span>
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined">analytics</span>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Retensi</p>
+            <div class="flex items-center gap-2">
+                <h3 class="text-3xl font-bold font-jb text-white tracking-tighter">100%</h3>
+                <span class="text-[10px] px-2 py-0.5 bg-primary/20 text-primary rounded-full font-bold uppercase tracking-widest shadow-sm shadow-primary/20 border border-primary/30">Optimal</span>
             </div>
         </div>
     </div>
