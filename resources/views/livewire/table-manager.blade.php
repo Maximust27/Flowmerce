@@ -3,13 +3,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
             <h1 class="text-3xl font-bold tracking-tight">Manajemen Meja</h1>
-            <p class="text-slate-400 mt-1">Kelola QR Code meja dan pengaturan QRIS GoPay.</p>
+            <p class="text-slate-400 mt-1">Kelola QR Code meja dan pengaturan QRIS.</p>
         </div>
         <div class="flex gap-3">
-            <button wire:click="openGopayUpload"
+            <button wire:click="openQrisUpload"
                     class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-white/10 text-sm font-semibold hover:bg-surface-container-high transition-colors">
                 <span class="material-symbols-outlined text-[18px] text-primary">qr_code_2</span>
-                Upload QR GoPay
+                Upload QR Qris
             </button>
             <button wire:click="openAdd"
                     class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-container text-white text-sm font-bold hover:bg-[#059669] transition-colors">
@@ -19,23 +19,23 @@
         </div>
     </div>
 
-    <!-- GoPay QR Status Banner -->
-    <div class="mb-6 p-4 rounded-2xl border {{ $gopayQrImage ? 'border-primary/30 bg-primary-container/10' : 'border-yellow-500/30 bg-yellow-500/10' }}">
+    <!-- QRIS QR Status Banner -->
+    <div class="mb-6 p-4 rounded-2xl border {{ $qrisImage ? 'border-primary/30 bg-primary-container/10' : 'border-yellow-500/30 bg-yellow-500/10' }}">
         <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined {{ $gopayQrImage ? 'text-primary' : 'text-yellow-400' }}">
-                {{ $gopayQrImage ? 'check_circle' : 'warning' }}
+            <span class="material-symbols-outlined {{ $qrisImage ? 'text-primary' : 'text-yellow-400' }}">
+                {{ $qrisImage ? 'check_circle' : 'warning' }}
             </span>
             <div>
-                @if($gopayQrImage)
-                    <p class="text-sm font-semibold text-primary">QR GoPay sudah dikonfigurasi ✅</p>
+                @if($qrisImage)
+                    <p class="text-sm font-semibold text-primary">QR Qris sudah dikonfigurasi ✅</p>
                     <p class="text-xs text-on-surface-variant mt-0.5">Pelanggan yang memilih QRIS akan melihat QR ini.</p>
                 @else
-                    <p class="text-sm font-semibold text-yellow-400">QR GoPay belum dikonfigurasi</p>
-                    <p class="text-xs text-on-surface-variant mt-0.5">Upload gambar QR GoPay agar pelanggan bisa bayar via QRIS.</p>
+                    <p class="text-sm font-semibold text-yellow-400">QR Qris belum dikonfigurasi</p>
+                    <p class="text-xs text-on-surface-variant mt-0.5">Upload gambar QR Qris agar pelanggan bisa bayar via QRIS.</p>
                 @endif
             </div>
-            @if($gopayQrImage)
-            <img src="{{ Storage::url($gopayQrImage) }}" alt="QR GoPay" class="w-12 h-12 object-contain bg-white rounded-lg p-1 ml-auto"/>
+            @if($qrisImage)
+            <img src="{{ Storage::url($qrisImage) }}" alt="QR Qris" class="w-12 h-12 object-contain bg-white rounded-lg p-1 ml-auto"/>
             @endif
         </div>
     </div>
@@ -134,27 +134,27 @@
     </div>
     @endif
 
-    <!-- ===== MODAL UPLOAD GOPAY QR ===== -->
-    @if($showGopayModal)
+    <!-- ===== MODAL UPLOAD QRIS QR ===== -->
+    @if($showQrisModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
         <div class="bg-surface-container rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl border border-white/10">
-            <h3 class="text-xl font-bold mb-2">Upload QR GoPay</h3>
-            <p class="text-sm text-on-surface-variant mb-6">Upload foto/screenshot QR Code GoPay Anda. Gambar ini akan ditampilkan ke pelanggan yang memilih bayar via QRIS.</p>
+            <h3 class="text-xl font-bold mb-2">Upload QR Qris</h3>
+            <p class="text-sm text-on-surface-variant mb-6">Upload foto/screenshot QR Qris Anda. Gambar ini akan ditampilkan ke pelanggan yang memilih bayar via QRIS.</p>
             <div class="border-2 border-dashed border-white/20 rounded-2xl p-6 text-center mb-4">
-                <input type="file" wire:model="gopayQrFile" accept="image/*" class="hidden" id="gopayFileInput"/>
-                <label for="gopayFileInput" class="cursor-pointer flex flex-col items-center gap-2">
+                <input type="file" wire:model="qrisFile" accept="image/*" class="hidden" id="qrisFileInput"/>
+                <label for="qrisFileInput" class="cursor-pointer flex flex-col items-center gap-2">
                     <span class="material-symbols-outlined text-[40px] text-on-surface-variant/50">upload</span>
                     <span class="text-sm text-on-surface-variant">Klik untuk pilih gambar</span>
                     <span class="text-xs text-on-surface-variant/50">PNG, JPG, maks 2MB</span>
                 </label>
-                @if($gopayQrFile)
-                    <p class="text-xs text-primary mt-2 font-semibold">✅ File dipilih: {{ $gopayQrFile->getClientOriginalName() }}</p>
+                @if($qrisFile)
+                    <p class="text-xs text-primary mt-2 font-semibold">✅ File dipilih: {{ $qrisFile->getClientOriginalName() }}</p>
                 @endif
             </div>
-            @error('gopayQrFile')<p class="text-xs text-error mb-3">{{ $message }}</p>@enderror
+            @error('qrisFile')<p class="text-xs text-error mb-3">{{ $message }}</p>@enderror
             <div class="flex gap-3">
-                <button wire:click="$set('showGopayModal', false)" class="flex-1 py-3 rounded-xl border border-white/10 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high transition-colors">Batal</button>
-                <button wire:click="saveGopayQr" class="flex-1 py-3 rounded-xl bg-primary-container text-white text-sm font-bold hover:bg-[#059669] transition-colors">Simpan</button>
+                <button wire:click="$set('showQrisModal', false)" class="flex-1 py-3 rounded-xl border border-white/10 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high transition-colors">Batal</button>
+                <button wire:click="saveQrisQr" class="flex-1 py-3 rounded-xl bg-primary-container text-white text-sm font-bold hover:bg-[#059669] transition-colors">Simpan</button>
             </div>
         </div>
     </div>

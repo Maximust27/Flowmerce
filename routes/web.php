@@ -25,6 +25,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // Inventaris
     Route::get('inventaris', InventoryManager::class)->name('inventaris.index');
+    Route::get('inventaris/export', [App\Http\Controllers\InventoryExportController::class, 'export'])->name('inventaris.pdf');
 
     // Gudang
     Route::get('gudang', GudangManager::class)->name('gudang.index');
@@ -32,6 +33,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // Keuangan
     Route::get('keuangan', TransactionManager::class)->name('keuangan.index');
+    Route::get('keuangan/export', [App\Http\Controllers\TransactionExportController::class, 'export'])->name('keuangan.excel');
 
     // Pegawai
     Route::get('pegawai', App\Livewire\EmployeeManager::class)->name('pegawai.index');

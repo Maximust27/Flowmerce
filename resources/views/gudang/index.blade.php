@@ -95,7 +95,7 @@
                 @endforelse
                 
                 <div class="pl-12 pt-4">
-                    {{ $logs->links() }}
+                    {{ $logs->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
                 </div>
             </div>
         </div>

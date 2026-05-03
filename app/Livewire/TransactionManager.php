@@ -14,6 +14,18 @@ class TransactionManager extends Component
 
     public $type = 'INCOME', $amount, $category, $notes;
     public $isModalOpen = false;
+    public string $filter = 'all';
+
+    public function setFilter($filter)
+    {
+        $this->filter = $filter;
+        $this->resetPage();
+    }
+
+    public function exportExcel()
+    {
+        return redirect()->route('keuangan.excel', ['filter' => $this->filter]);
+    }
 
     protected $rules = [
         'type' => 'required|in:INCOME,EXPENSE',
@@ -56,7 +68,15 @@ class TransactionManager extends Component
 
     public function render()
     {
-        $transactions = Transaction::where('user_id', Auth::id())->latest()->paginate(10);
+        $query = Transaction::where('user_id', Auth::id());
+        
+        if ($this->filter === 'in') {
+            $query->where('type', 'INCOME');
+        } elseif ($this->filter === 'out') {
+            $query->where('type', 'EXPENSE');
+        }
+        
+        $transactions = $query->latest()->paginate(10);
         return view('livewire.transaction-manager', compact('transactions'));
     }
 }

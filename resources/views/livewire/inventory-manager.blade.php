@@ -5,10 +5,15 @@
             <h2 class="text-4xl font-extrabold tracking-tight text-white mb-2">Inventaris</h2>
             <p class="text-slate-400 font-medium">Kelola stok produk warung Anda dengan presisi AI.</p>
         </div>
-        <button wire:click="openModal" class="btn btn-primary" id="btn-tambah-produk">
-            <span class="material-symbols-outlined">add</span>
-            Tambah Produk
-        </button>
+        <div class="flex gap-2">
+            <a href="{{ route('inventaris.pdf') }}" class="btn btn-ghost border border-white/10 text-primary flex items-center gap-1 hover:bg-primary/10 transition-colors" target="_blank">
+                <span class="material-symbols-outlined text-sm">file_download</span> Export PDF
+            </a>
+            <button wire:click="openModal" class="btn btn-primary" id="btn-tambah-produk">
+                <span class="material-symbols-outlined">add</span>
+                Tambah Produk
+            </button>
+        </div>
     </div>
 
     @if (session()->has('message'))

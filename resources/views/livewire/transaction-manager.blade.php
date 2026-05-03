@@ -73,8 +73,14 @@
     </div>
 
     {{-- Transaction Table --}}
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
         <h3 class="text-xl font-bold text-white">Daftar Transaksi</h3>
+        <div class="flex flex-wrap gap-2">
+            <button wire:click="setFilter('all')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'all' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Semua</button>
+            <button wire:click="setFilter('in')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'in' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Pemasukan</button>
+            <button wire:click="setFilter('out')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'out' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Pengeluaran</button>
+            <button wire:click="exportExcel" class="text-xs px-4 py-2 rounded-full border border-white/10 text-primary flex items-center gap-1 hover:bg-primary/10 transition-colors"><span class="material-symbols-outlined text-sm">table_view</span> Export Excel</button>
+        </div>
     </div>
 
     <div class="glass-card rounded-2xl overflow-hidden mb-8">
@@ -118,7 +124,7 @@
 
     {{-- Pagination --}}
     <div class="pb-24">
-        {{ $transactions->links(data: ['scrollTo' => false]) }}
+        {{ $transactions->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
     </div>
 
     {{-- P&L Report --}}

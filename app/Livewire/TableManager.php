@@ -22,9 +22,9 @@ class TableManager extends Component
     public $table_number = '';
     public $is_active = true;
 
-    // GoPay QR upload
-    public $gopayQrFile = null;
-    public $showGopayModal = false;
+    // QRIS QR upload
+    public $qrisFile = null;
+    public $showQrisModal = false;
 
     public function mount()
     {
@@ -108,15 +108,15 @@ class TableManager extends Component
         $this->showQrModal = true;
     }
 
-    public function openGopayUpload()
+    public function openQrisUpload()
     {
-        $this->gopayQrFile  = null;
-        $this->showGopayModal = true;
+        $this->qrisFile  = null;
+        $this->showQrisModal = true;
     }
 
-    public function saveGopayQr()
+    public function saveQrisQr()
     {
-        $this->validate(['gopayQrFile' => 'required|image|max:2048']);
+        $this->validate(['qrisFile' => 'required|image|max:2048']);
 
         $user = Auth::user();
 
@@ -125,12 +125,12 @@ class TableManager extends Component
             Storage::disk('public')->delete($user->gopay_qr_image);
         }
 
-        $path = $this->gopayQrFile->store('gopay-qr', 'public');
+        $path = $this->qrisFile->store('qris-qr', 'public');
         $user->update(['gopay_qr_image' => $path]);
 
-        $this->gopayQrFile   = null;
-        $this->showGopayModal = false;
-        $this->dispatch('notify', message: 'QR GoPay berhasil disimpan!', type: 'success');
+        $this->qrisFile   = null;
+        $this->showQrisModal = false;
+        $this->dispatch('notify', message: 'QR QRIS berhasil disimpan!', type: 'success');
     }
 
     public function getMenuUrl(string $tableCode): string
@@ -141,7 +141,7 @@ class TableManager extends Component
     public function render()
     {
         return view('livewire.table-manager', [
-            'gopayQrImage' => Auth::user()->gopay_qr_image,
+            'qrisImage' => Auth::user()->gopay_qr_image,
         ])->layout('components.layouts.app', ['title' => 'Manajemen Meja']);
     }
 }

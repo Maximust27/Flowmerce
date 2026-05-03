@@ -47,6 +47,17 @@ class Product extends Model
                     'quantity' => $product->current_stock,
                     'reason' => 'Stok awal produk baru',
                 ]);
+
+                $totalCost = $product->current_stock * $product->buy_price;
+                if ($totalCost > 0) {
+                    \App\Models\Transaction::create([
+                        'user_id' => $product->user_id,
+                        'type' => 'EXPENSE',
+                        'amount' => $totalCost,
+                        'category' => 'Modal Stok Awal',
+                        'notes' => 'Stok awal produk: ' . $product->name . ' (' . $product->current_stock . ' unit)',
+                    ]);
+                }
             }
         });
 
@@ -62,6 +73,19 @@ class Product extends Model
                         'quantity' => abs($diff),
                         'reason' => 'Penyesuaian stok (Manual)',
                     ]);
+
+                    if ($diff > 0) {
+                        $totalCost = $diff * $product->buy_price;
+                        if ($totalCost > 0) {
+                            \App\Models\Transaction::create([
+                                'user_id' => $product->user_id,
+                                'type' => 'EXPENSE',
+                                'amount' => $totalCost,
+                                'category' => 'Belanja Stok',
+                                'notes' => 'Penambahan stok manual: ' . $product->name . ' (' . $diff . ' unit)',
+                            ]);
+                        }
+                    }
                 }
             }
         });

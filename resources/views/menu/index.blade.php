@@ -299,7 +299,7 @@
         </div>
         
         <h2 class="text-2xl font-bold mb-2 text-center">Bayar dengan QRIS</h2>
-        <p class="text-on-surface-variant text-sm text-center mb-8 px-4">Scan QR Code di bawah menggunakan aplikasi GoPay, OVO, Dana, atau Mobile Banking Anda.</p>
+        <p class="text-on-surface-variant text-sm text-center mb-8 px-4">Scan QR Code di bawah menggunakan aplikasi e-Wallet atau Mobile Banking Anda.</p>
         
         <div class="bg-white rounded-[2rem] p-4 mb-8 shadow-lg ring-8 ring-white/5">
             @if($owner->gopay_qr_image)
@@ -370,7 +370,7 @@
             <div class="flex justify-between items-center text-sm">
                 <span class="text-on-surface-variant flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">payments</span> Metode</span>
                 <span class="font-bold flex items-center gap-1 text-on-surface">
-                    <span x-text="paymentMethod === 'QRIS' ? 'QRIS / GoPay' : 'Bayar Kasir'"></span>
+                    <span x-text="paymentMethod === 'QRIS' ? 'QRIS / e-Wallet' : 'Bayar Kasir'"></span>
                     <span x-show="paymentMethod === 'QRIS'" class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings:'FILL' 1">check_circle</span>
                 </span>
             </div>
