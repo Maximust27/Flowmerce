@@ -231,16 +231,16 @@
                 <div class="space-y-3 mb-6">
                     <div class="flex justify-between text-sm">
                         <span class="text-on-surface-variant">Subtotal</span>
-                        <span class="font-mono text-on-surface">IDR {{ number_format($this->subtotal, 0, ',', '.') }}</span>
+                        <span class="font-mono text-on-surface">IDR {{ number_format($this->getSubtotal(), 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-on-surface-variant">Tax (11%)</span>
-                        <span class="font-mono text-on-surface">IDR {{ number_format($this->taxAmount, 0, ',', '.') }}</span>
+                        <span class="font-mono text-on-surface">IDR {{ number_format($this->getTaxAmount(), 0, ',', '.') }}</span>
                     </div>
                     <div class="h-px bg-white/5 my-2"></div>
                     <div class="flex justify-between items-center">
                         <span class="text-lg font-bold">Total Bill</span>
-                        <span class="font-mono text-2xl font-black text-primary">IDR {{ number_format($this->total, 0, ',', '.') }}</span>
+                        <span class="font-mono text-2xl font-black text-primary">IDR {{ number_format($this->getTotal(), 0, ',', '.') }}</span>
                     </div>
                 </div>
                 <button 

@@ -177,13 +177,13 @@ class Terminal extends Component
         else $this->cart = [];
     }
 
-    public function getSubtotalProperty()
+    public function getSubtotal()
     {
         return collect($this->cart)->sum(fn($item) => $item['price'] * $item['qty']);
     }
 
-    public function getTaxAmountProperty() { return $this->subtotal * $this->tax; }
-    public function getTotalProperty() { return $this->subtotal + $this->taxAmount; }
+    public function getTaxAmount() { return $this->getSubtotal() * $this->tax; }
+    public function getTotal() { return $this->getSubtotal() + $this->getTaxAmount(); }
 
     public function checkout()
     {
@@ -193,9 +193,9 @@ class Terminal extends Component
         try {
             DB::transaction(function () use ($guestOrderId) {
                 $orderNumber = PosOrder::generateOrderNumber();
-                $subtotal    = $this->subtotal;
-                $taxAmount   = $this->taxAmount;
-                $total       = $this->total;
+                $subtotal    = $this->getSubtotal();
+                $taxAmount   = $this->getTaxAmount();
+                $total       = $this->getTotal();
 
                 // Tentukan payment method
                 $paymentMethod = 'CASH';
