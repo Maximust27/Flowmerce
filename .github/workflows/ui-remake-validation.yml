@@ -1,0 +1,58 @@
+name: Flowmerce UI Remake Validation
+
+on:
+  push:
+    branches:
+      - feature/ui-ux-remake
+  pull_request:
+    branches:
+      - main2
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Blade, Vite, and Laravel tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, sqlite3, dom, fileinfo, curl
+          coverage: none
+          tools: composer:v2
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Configure application
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan optimize:clear
+
+      - name: Install frontend dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Build frontend bundle
+        run: npm run build
+
+      - name: Compile Blade templates
+        run: php artisan view:cache
+
+      - name: List registered routes
+        run: php artisan route:list
+
+      - name: Execute Laravel tests
+        run: php artisan test
