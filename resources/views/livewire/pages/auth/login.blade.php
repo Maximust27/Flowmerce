@@ -29,47 +29,16 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form wire:submit="login">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
+  <p class="fm-section-eyebrow">Selamat datang</p><h1>Masuk ke Flowmerce</h1><p style="margin-top:10px">Kelola aktivitas bisnis Anda dari satu tempat.</p>
+  @if(session('status'))<x-ui.feedback style="margin-top:17px">{{ session('status') }}</x-ui.feedback>@endif
+  <form wire:submit="login" class="fm-form" style="margin-top:25px">
+    <x-ui.field field="form.email" label="Alamat Email" type="email" wire:model="form.email" autocomplete="username" placeholder="email@bisnis.com" required autofocus />
+    <x-ui.field field="form.password" label="Kata Sandi" type="password" wire:model="form.password" autocomplete="current-password" placeholder="Masukkan kata sandi" required />
+    <div class="flex items-center justify-between gap-3">
+      <label class="flex items-center gap-2 fm-muted" style="font-size:11px"><input type="checkbox" wire:model="form.remember" name="remember" style="accent-color:var(--fm-accent)">Ingat saya</label>
+      @if(Route::has('password.request'))<a class="fm-auth__link" href="{{ route('password.request') }}" wire:navigate>Lupa kata sandi?</a>@endif
+    </div>
+    <x-ui.button type="submit" class="fm-auth__submit" wire:loading.attr="disabled" wire:target="login">Masuk <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></x-ui.button>
+  </form>
+  <p style="margin-top:22px;text-align:center">Belum punya akun? <a href="{{ route('register') }}" wire:navigate class="fm-auth__link">Daftar Sekarang</a></p>
 </div>

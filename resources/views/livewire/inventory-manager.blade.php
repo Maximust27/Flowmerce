@@ -1,191 +1,77 @@
-<div>
-    {{-- Header --}}
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-        <div>
-            <h2 class="text-4xl font-extrabold tracking-tight text-white mb-2">Inventaris</h2>
-            <p class="text-slate-400 font-medium">Kelola stok produk warung Anda dengan presisi AI.</p>
-        </div>
-        <button wire:click="openModal" class="btn btn-primary" id="btn-tambah-produk">
-            <span class="material-symbols-outlined">add</span>
-            Tambah Produk
-        </button>
-    </div>
+<div class="fm-page">
+  <x-ui.page-header eyebrow="Produk & Persediaan" title="Inventaris" description="Kelola katalog produk, pantau ketersediaan, dan jaga nilai stok tetap terkendali.">
+    <x-slot:actions><x-ui.button wire:click="openModal" id="btn-tambah-produk"><span class="material-symbols-outlined" aria-hidden="true">add</span> Tambah Produk</x-ui.button></x-slot:actions>
+  </x-ui.page-header>
 
-    @if (session()->has('message'))
-        <div class="glass-card p-4 rounded-xl mb-6 border border-primary/30 flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary">check_circle</span>
-            <span class="text-sm font-medium text-primary">{{ session('message') }}</span>
-        </div>
-    @endif
+  @if(session()->has('message'))<x-ui.feedback>{{ session('message') }}</x-ui.feedback>@endif
 
-    {{-- Overview Stats --}}
-    @php
-        $userId = auth()->id();
-        $totalProducts = \App\Models\Product::where('user_id', $userId)->count();
-        $outOfStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', 0)->count();
-        $lowStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', '>', 0)->whereColumn('current_stock', '<=', 'min_stock_alert')->count();
-    @endphp
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 stagger-enter">
-        <div class="glass-card p-6 rounded-2xl">
-            <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">Total Produk</p>
-            <p class="text-4xl font-bold text-white font-jb tracking-tighter">{{ $totalProducts }}</p>
-        </div>
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-error/50">
-            <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">Stok Habis</p>
-            <p class="text-4xl font-bold text-error font-jb tracking-tighter">{{ $outOfStock }}</p>
-            <p class="mt-4 text-xs text-slate-500 font-medium">Perlu segera restock</p>
-        </div>
-        <div class="glass-card p-6 rounded-2xl border-l-4 border-amber-400/50">
-            <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">Stok Menipis</p>
-            <p class="text-4xl font-bold text-amber-400 font-jb tracking-tighter">{{ $lowStock }}</p>
-            <p class="mt-4 text-xs text-slate-500 font-medium">Di bawah batas aman</p>
-        </div>
-        <div class="glass-card p-6 rounded-2xl bg-gradient-to-br from-surface-container to-primary/5">
-            <p class="text-primary text-[11px] font-bold uppercase tracking-wider mb-2">Total Aset Stok</p>
-            <p class="text-sm text-slate-300 leading-relaxed font-medium font-jb">
-                Rp {{ number_format(\App\Models\Product::where('user_id', $userId)->selectRaw('SUM(buy_price * current_stock) as total')->value('total') ?? 0, 0, ',', '.') }}
-            </p>
-        </div>
-    </div>
+  @php
+    $userId = auth()->id();
+    $totalProducts = \App\Models\Product::where('user_id', $userId)->count();
+    $outOfStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', 0)->count();
+    $lowStock = \App\Models\Product::where('user_id', $userId)->where('current_stock', '>', 0)->whereColumn('current_stock', '<=', 'min_stock_alert')->count();
+    $stockAsset = \App\Models\Product::where('user_id', $userId)->selectRaw('SUM(buy_price * current_stock) as total')->value('total') ?? 0;
+  @endphp
 
-    {{-- Product Table --}}
-    <div class="glass-card rounded-2xl overflow-hidden mb-8">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-white/5">
-                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">Produk</th>
-                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">Beli</th>
-                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">Jual</th>
-                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">Stok</th>
-                    <th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-white/5 stagger-enter">
-                @forelse ($products as $product)
-                <tr class="hover:bg-white/[0.02] transition-colors">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-4">
-                            @if($product->image)
-                                <img src="{{ Storage::url($product->image) }}" class="w-12 h-12 rounded-lg object-cover bg-slate-800 shrink-0" alt="{{ $product->name }}">
-                            @else
-                                <div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
-                                    <span class="material-symbols-outlined">inventory_2</span>
-                                </div>
-                            @endif
-                            <div>
-                                <p class="font-bold text-white">{{ $product->name }}</p>
-                                <p class="text-xs text-slate-500">ID: #{{ $product->id }}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium">Rp {{ number_format($product->buy_price, 0, ',', '.') }}</td>
-                    <td class="px-6 py-4 font-jb text-sm font-medium text-primary">Rp {{ number_format($product->sell_price, 0, ',', '.') }}</td>
-                    <td class="px-6 py-4">
-                        @if ($product->current_stock == 0)
-                            <span class="relative px-3 py-1.5 text-[10px] rounded-full bg-error/20 text-error font-bold uppercase tracking-wider border border-error/30">
-                                <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-error"></span>
-                                </span>
-                                {{ $product->current_stock }} unit
-                            </span>
-                        @elseif ($product->current_stock <= $product->min_stock_alert)
-                            <span class="px-3 py-1.5 text-[10px] rounded-full bg-amber-400/20 text-amber-400 font-bold uppercase tracking-wider border border-amber-400/30">{{ $product->current_stock }} unit</span>
-                        @else
-                            <span class="px-3 py-1.5 text-[10px] rounded-full bg-primary/20 text-primary font-bold uppercase tracking-wider border border-primary/30">{{ $product->current_stock }} unit</span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <button wire:click="edit({{ $product->id }})" class="p-2 text-slate-500 hover:text-white transition-colors"><span class="material-symbols-outlined">edit</span></button>
-                        <button wire:click="delete({{ $product->id }})" wire:confirm="Yakin ingin menghapus produk ini?" class="p-2 text-slate-500 hover:text-error transition-colors"><span class="material-symbols-outlined">delete</span></button>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="px-6 py-16 text-center">
-                        <span class="material-symbols-outlined text-4xl text-slate-600 mb-3 block">inventory_2</span>
-                        <p class="text-slate-500 font-medium">Belum ada data produk.</p>
-                        <p class="text-xs text-slate-600 mt-1">Klik "Tambah Produk" untuk mulai.</p>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+  <section class="fm-kpi-grid fm-kpi-grid--four" aria-label="Ringkasan inventaris">
+    <x-ui.stat-card label="Total Produk" :value="number_format($totalProducts, 0, ',', '.')" icon="category" hint="Produk terdaftar" />
+    <x-ui.stat-card label="Stok Habis" :value="number_format($outOfStock, 0, ',', '.')" icon="production_quantity_limits" tone="warning" hint="Perlu ditambahkan" />
+    <x-ui.stat-card label="Stok Menipis" :value="number_format($lowStock, 0, ',', '.')" icon="inventory" tone="warning" hint="Di bawah batas aman" />
+    <x-ui.stat-card label="Nilai Aset Stok" :value="'Rp '.number_format($stockAsset, 0, ',', '.')" icon="wallet" variant="accent" hint="Estimasi dari harga beli" />
+  </section>
 
-    {{-- Pagination --}}
-    <div class="pb-24">
-        {{ $products->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
-    </div>
+  <x-ui.section-header title="Daftar Produk" description="Informasi katalog beserta harga dan status ketersediaan.">
+    <x-slot:actions><x-ui.badge tone="accent">{{ number_format($totalProducts, 0, ',', '.') }} produk</x-ui.badge></x-slot:actions>
+  </x-ui.section-header>
 
-    {{-- Modal Tambah Produk --}}
-    @if($isModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto" x-data x-init="$el.querySelector('input[type=text]')?.focus()">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeModal"></div>
-        
-        <div class="glass-card-strong w-full max-w-lg rounded-2xl p-6 relative z-10 shadow-2xl border border-white/10 m-4"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 scale-100">
-            
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-white">{{ $product_id ? 'Edit Produk' : 'Tambah Produk Baru' }}</h3>
-                <button wire:click="closeModal" class="text-slate-400 hover:text-white transition-colors">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
+  <x-ui.table label="Daftar inventaris produk">
+    <x-slot:head><tr><th scope="col">Nama produk</th><th scope="col">Harga beli</th><th scope="col">Harga jual</th><th scope="col">Stok tersedia</th><th scope="col" class="text-right">Tindakan</th></tr></x-slot:head>
+    @forelse($products as $product)
+      <tr wire:key="product-{{ $product->id }}">
+        <td><div class="fm-data-table__product">
+          @if($product->image)<img src="{{ Storage::url($product->image) }}" class="fm-data-table__img" alt="Foto {{ $product->name }}" loading="lazy">
+          @else <div class="fm-data-table__img fm-data-table__placeholder"><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span></div>@endif
+          <div><p class="fm-data-table__product-name">{{ $product->name }}</p><p class="fm-data-table__secondary">{{ $product->category ?: 'Tanpa kategori' }} · #{{ $product->id }}</p></div>
+        </div></td>
+        <td class="fm-mono fm-nowrap">Rp {{ number_format($product->buy_price, 0, ',', '.') }}</td>
+        <td class="fm-mono fm-nowrap">Rp {{ number_format($product->sell_price, 0, ',', '.') }}</td>
+        <td>@if($product->current_stock <= 0)<x-ui.badge tone="danger">Habis · 0 unit</x-ui.badge>
+            @elseif($product->current_stock <= $product->min_stock_alert)<x-ui.badge tone="warning">Menipis · {{ $product->current_stock }} unit</x-ui.badge>
+            @else<x-ui.badge tone="success">Aman · {{ $product->current_stock }} unit</x-ui.badge>@endif
+        </td>
+        <td><div class="fm-data-table__actions">
+          <button type="button" class="fm-icon-button" wire:click="edit({{ $product->id }})" aria-label="Ubah {{ $product->name }}" title="Ubah produk"><span class="material-symbols-outlined" aria-hidden="true">edit</span></button>
+          <button type="button" class="fm-icon-button" data-tone="danger" wire:click="delete({{ $product->id }})" wire:confirm="Yakin ingin menghapus produk ini?" aria-label="Hapus {{ $product->name }}" title="Hapus produk"><span class="material-symbols-outlined" aria-hidden="true">delete_outline</span></button>
+        </div></td>
+      </tr>
+    @empty
+      <tr><td colspan="5"><x-ui.empty-state icon="inventory_2" title="Belum ada produk" description="Mulai buat katalog dengan menambahkan produk pertama." /></td></tr>
+    @endforelse
+    <x-slot:footer>{{ $products->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}</x-slot:footer>
+  </x-ui.table>
 
-            <form wire:submit.prevent="save" class="space-y-4">
-                <div>
-                    <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Nama Produk</label>
-                    <input type="text" wire:model="name" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30" placeholder="Cth: Indomie Goreng">
-                    @error('name') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Kategori</label>
-                    <input type="text" wire:model="category" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm focus:ring-2 focus:ring-primary/30" placeholder="Cth: Makanan Ringan, Minuman, dll.">
-                    @error('category') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Gambar Produk</label>
-                    <input type="file" wire:model="image" accept="image/*" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
-                    <div wire:loading wire:target="image" class="text-xs text-slate-400 mt-2">Mengunggah...</div>
-                    @if ($image)
-                        <img src="{{ $image->temporaryUrl() }}" class="w-24 h-24 object-cover mt-2 rounded-xl">
-                    @elseif ($old_image)
-                        <img src="{{ Storage::url($old_image) }}" class="w-24 h-24 object-cover mt-2 rounded-xl">
-                    @endif
-                    @error('image') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Harga Beli</label>
-                        <input type="number" wire:model="buy_price" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
-                        @error('buy_price') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Harga Jual</label>
-                        <input type="number" wire:model="sell_price" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
-                        @error('sell_price') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Stok Awal</label>
-                        <input type="number" wire:model="current_stock" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="0">
-                        @error('current_stock') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-300 mb-2 uppercase tracking-widest text-[10px]">Peringatan Stok ≤</label>
-                        <input type="number" wire:model="min_stock_alert" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface text-sm font-jb focus:ring-2 focus:ring-primary/30" placeholder="5">
-                    </div>
-                </div>
-                <div class="pt-4 flex gap-3 justify-end">
-                    <button type="button" wire:click="closeModal" class="btn btn-ghost border border-white/10">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Produk</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    @endif
+  @if($isModalOpen)
+  <x-ui.modal :title="$product_id ? 'Edit Produk' : 'Tambah Produk'">
+    <form wire:submit.prevent="save" class="fm-form">
+      <x-ui.field field="name" label="Nama Produk" wire:model="name" placeholder="Contoh: Kopi Susu Gula Aren" required />
+      <x-ui.field field="category" label="Kategori" wire:model="category" placeholder="Contoh: Minuman" />
+      <div class="fm-field"><label class="fm-field__label" for="product-image">Foto Produk</label>
+        <input id="product-image" type="file" wire:model="image" accept="image/*" class="fm-field__input">
+        <p class="fm-upload-hint" wire:loading wire:target="image">Mengunggah gambar…</p>
+        @if($image)<img class="fm-file-preview" src="{{ $image->temporaryUrl() }}" alt="Pratinjau foto produk">
+        @elseif($old_image)<img class="fm-file-preview" src="{{ Storage::url($old_image) }}" alt="Foto produk saat ini">@endif
+        @error('image')<p class="fm-field__error" role="alert">{{ $message }}</p>@enderror
+      </div>
+      <div class="fm-form__grid">
+        <x-ui.field field="buy_price" label="Harga Beli (Rp)" type="number" min="0" step="any" wire:model="buy_price" placeholder="0" required />
+        <x-ui.field field="sell_price" label="Harga Jual (Rp)" type="number" min="0" step="any" wire:model="sell_price" placeholder="0" required />
+      </div>
+      <div class="fm-form__grid">
+        <x-ui.field field="current_stock" label="Jumlah Stok" type="number" min="0" wire:model="current_stock" placeholder="0" required />
+        <x-ui.field field="min_stock_alert" label="Peringatan Stok ≤" type="number" min="0" wire:model="min_stock_alert" placeholder="5" required />
+      </div>
+      <div class="fm-form__actions"><x-ui.button variant="secondary" wire:click="closeModal">Batal</x-ui.button><x-ui.button type="submit" wire:loading.attr="disabled" wire:target="save"><span class="material-symbols-outlined" aria-hidden="true">save</span>Simpan Produk</x-ui.button></div>
+    </form>
+  </x-ui.modal>
+  @endif
 </div>

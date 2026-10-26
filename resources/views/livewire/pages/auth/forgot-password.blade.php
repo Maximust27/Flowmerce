@@ -36,26 +36,8 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form wire:submit="sendPasswordResetLink">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
-    </form>
+<div><p class="fm-section-eyebrow">Keamanan Akun</p><h1>Lupa Kata Sandi?</h1><p style="margin-top:11px">Masukkan email akun. Kami akan mengirimkan tautan untuk membuat kata sandi baru.</p>
+  @if(session('status'))<x-ui.feedback style="margin-top:18px">{{ session('status') }}</x-ui.feedback>@endif
+  <form wire:submit="sendPasswordResetLink" class="fm-form" style="margin-top:25px"><x-ui.field field="email" label="Alamat Email" type="email" wire:model="email" autocomplete="username" placeholder="email@bisnis.com" autofocus required /><x-ui.button type="submit" class="fm-auth__submit" wire:loading.attr="disabled" wire:target="sendPasswordResetLink">Kirim Tautan Pemulihan <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></x-ui.button></form>
+  <p style="margin-top:21px;text-align:center"><a class="fm-auth__link" href="{{ route('login') }}" wire:navigate>Kembali ke login</a></p>
 </div>

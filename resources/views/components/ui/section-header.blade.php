@@ -1,0 +1,2 @@
+@props(['title', 'description' => null])
+<div class="fm-section-header"><div><h2 class="fm-panel-title">{{ $title }}</h2>@if($description)<p class="fm-panel-description">{{ $description }}</p>@endif</div>@if(isset($actions))<div class="fm-section-header__actions">{{ $actions }}</div>@endif</div>

@@ -1,220 +1,97 @@
-<div>
-    <!-- Top Navigation Bar -->
-    <header class="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-16 bg-[#0a0e1a] bg-opacity-50 backdrop-blur-xl border-b border-white/5 shadow-[0_8px_32px_rgba(5,7,10,0.4)]">
-        <div class="flex items-center gap-2">
-            <span class="text-2xl font-bold tracking-tight text-[#10b981] dark:text-[#4edea3]">FlowmercePos</span>
-        </div>
-        <div class="flex items-center gap-6">
-            <!-- Search Bar -->
-            <div class="relative w-72">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span class="material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="search">search</span>
-                </div>
-                <input 
-                    wire:model.live.debounce.300ms="search" 
-                    type="text" 
-                    placeholder="Cari produk..." 
-                    class="block w-full pl-12 pr-4 py-2.5 bg-surface-container-highest border border-white/5 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-[#10b981]/40 transition-all shadow-sm"
-                />
-            </div>
+<div class="fm-pos" x-data="{ cartOpen: false }" @keydown.escape.window="cartOpen=false">
+  <header class="fm-pos__header">
+    <a class="fm-pos__brand" href="{{ auth()->user()->role === 'admin' ? route('dashboard') : route('pos.index') }}">
+      <span class="fm-pos__brand-mark"><span class="material-symbols-outlined" aria-hidden="true">hub</span></span>Flowmerce <span class="fm-muted" style="font-size:12px;font-weight:600">/ POS</span>
+    </a>
+    <div class="fm-pos__search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input type="search" wire:model.live.debounce.300ms="search" aria-label="Cari produk" placeholder="Cari nama produk…">
+    </div>
+    <div class="fm-pos__header-actions">
+      <button type="button" class="fm-button fm-pos__mobile-cart" data-variant="secondary" @click="cartOpen=true" aria-label="Buka keranjang">
+        <span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span>Keranjang ({{ count($cart) }})
+      </button>
+      @if(auth()->user()->role === 'admin')<a class="fm-button" data-variant="secondary" href="{{ route('dashboard') }}"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span><span class="hidden sm:inline">Dashboard</span></a>@endif
+      <span class="fm-pos__user">{{ auth()->user()->name }}</span>
+      <div x-data="flowmerceShell()"><x-ui.theme-toggle /></div>
+      <form action="{{ route('logout') }}" method="POST">@csrf<button class="fm-icon-button" type="submit" aria-label="Keluar" title="Keluar"><span class="material-symbols-outlined" aria-hidden="true">logout</span></button></form>
+    </div>
+  </header>
 
-            <div class="h-6 w-[1px] bg-white/10"></div>
-            
-            <!-- User Info -->
-            <div class="flex items-center gap-2 text-on-surface-variant text-sm">
-                <span class="material-symbols-outlined text-[18px]" data-icon="person">person</span>
-                <span class="font-['Plus_Jakarta_Sans'] font-medium">{{ Auth::user()->name }}</span>
+  <div class="fm-pos__layout">
+    <main class="fm-pos__catalog" id="pos-catalog">
+      <div class="fm-pos__intro"><div><p class="fm-section-eyebrow">Point of Sale</p><h1 class="fm-pos__title">Kasir & Penjualan</h1><p class="fm-pos__subtitle">Pilih produk untuk menambahkan ke keranjang transaksi.</p></div><x-ui.badge tone="accent">Order #{{ $orderNumber }}</x-ui.badge></div>
+      <div class="fm-pos__categories" role="group" aria-label="Filter kategori produk">
+        @foreach($categories as $cat)
+          <button type="button" class="fm-pill" wire:click="setCategory(@js($cat))" aria-pressed="{{ $activeCategory === $cat ? 'true' : 'false' }}">{{ $cat }}</button>
+        @endforeach
+      </div>
+      <div class="fm-pos__grid">
+        @forelse($products as $product)
+          <button type="button" class="fm-product" wire:key="pos-product-{{ $product->id }}" wire:click="addToCart({{ $product->id }})" @disabled($product->current_stock <= 0) aria-label="Tambahkan {{ $product->name }} ke keranjang">
+            <div class="fm-product__image">
+              @if($product->image)<img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" loading="lazy">
+              @else<span class="material-symbols-outlined" aria-hidden="true" style="font-size:42px">inventory_2</span>@endif
+              <span class="fm-product__stock" data-low="{{ $product->current_stock <= $product->min_stock_alert ? 'true' : 'false' }}">{{ $product->current_stock <= 0 ? 'Habis' : $product->current_stock.' tersedia' }}</span>
             </div>
-
-            <div class="h-6 w-[1px] bg-white/10"></div>
-            <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
-                @csrf
-                <button type="submit" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-highest border border-white/5 text-error hover:bg-error/10 transition-all duration-200 active:scale-95 font-medium">
-                    <span class="material-symbols-outlined text-[18px]" data-icon="logout">logout</span>
-                    <span class="font-['Plus_Jakarta_Sans'] text-sm tracking-wide">Logout</span>
-                </button>
-            </form>
-        </div>
-    </header>
-
-    <main class="pt-16 h-screen flex">
-        <!-- Main Product Section -->
-        <section class="flex-grow flex flex-col p-6 overflow-hidden">
-            <!-- Categories / Filters -->
-            <div class="flex items-center gap-3 mb-8 overflow-x-auto pb-2 custom-scrollbar">
-                @foreach($categories as $cat)
-                    <button 
-                        wire:click="setCategory('{{ $cat }}')"
-                        class="px-6 py-2.5 rounded-full font-semibold transition-all whitespace-nowrap
-                            {{ $activeCategory === $cat 
-                                ? 'bg-primary-container text-on-primary-container shadow-lg shadow-primary/20' 
-                                : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high' }}"
-                    >{{ $cat }}</button>
-                @endforeach
+            <div class="fm-product__body"><p class="fm-product__name">{{ $product->name }}</p><p class="fm-product__category">{{ $product->category ?: 'Tanpa kategori' }}</p>
+              <div class="fm-product__footer"><span class="fm-product__price">Rp {{ number_format($product->sell_price, 0, ',', '.') }}</span><span class="fm-product__add"><span class="material-symbols-outlined" aria-hidden="true">add</span></span></div>
             </div>
-
-            <!-- Product Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 overflow-y-auto pr-2 custom-scrollbar">
-                @forelse($products as $product)
-                    <div wire:click="addToCart({{ $product->id }})" class="group bg-surface-container rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-primary/40 hover:-translate-y-1 {{ $product->current_stock <= 0 ? 'opacity-50 pointer-events-none' : '' }}">
-                        <div class="relative h-44 w-full bg-surface-container-high">
-                            @if($product->image)
-                                <img alt="{{ $product->name }}" class="w-full h-full object-cover" src="{{ $product->image }}"/>
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-on-surface-variant/30">
-                                    <span class="material-symbols-outlined text-[64px]" data-icon="inventory_2">inventory_2</span>
-                                </div>
-                            @endif
-                            <div class="absolute top-2 right-2 px-2 py-1 bg-surface-lowest/80 backdrop-blur-md rounded text-[10px] font-mono font-bold @if($product->current_stock < 5) text-error @else text-primary @endif">
-                                {{ $product->current_stock }} IN STOCK
-                            </div>
-                        </div>
-                        <div class="p-4">
-                            <h3 class="text-on-surface font-semibold mb-1 line-clamp-1">{{ $product->name }}</h3>
-                            <p class="text-xs text-on-surface-variant mb-3">{{ $product->category ?? 'Uncategorized' }}</p>
-                            <div class="flex justify-between items-end">
-                                <span class="font-mono text-lg font-bold text-primary">IDR {{ number_format($product->sell_price, 0, ',', '.') }}</span>
-                                <div class="p-1.5 rounded-lg bg-surface-container-highest group-hover:bg-primary group-hover:text-on-primary transition-colors">
-                                    <span class="material-symbols-outlined" data-icon="add">add</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-full flex flex-col items-center justify-center py-24 text-on-surface-variant/40">
-                        <span class="material-symbols-outlined text-[64px] mb-4" data-icon="inventory_2">inventory_2</span>
-                        <p class="text-lg font-semibold">Belum ada produk</p>
-                        <p class="text-sm mt-1">Tambahkan produk melalui panel Inventaris</p>
-                    </div>
-                @endforelse
-            </div>
-        </section>
-
-        <!-- Right Side: Order Summary -->
-        <aside class="w-[420px] bg-surface-container flex flex-col border-l border-white/5 shadow-2xl relative z-10">
-            <!-- Summary Header -->
-            <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                <div>
-                    <h2 class="text-xl font-bold tracking-tight">Order Summary</h2>
-                    <p class="text-xs text-on-surface-variant mt-1 font-mono">ORDER #{{ $orderNumber }}</p>
-                </div>
-                <button wire:click="clearCart" class="p-2 text-on-surface-variant hover:text-error transition-colors">
-                    <span class="material-symbols-outlined" data-icon="delete">delete</span>
-                </button>
-            </div>
-
-            <!-- Items List -->
-            <div class="flex-grow overflow-y-auto p-4 custom-scrollbar space-y-4">
-                @forelse($cart as $id => $item)
-                    <div class="flex gap-4 bg-surface-container-high/50 p-3 rounded-xl border border-white/5 group">
-                        <div class="w-16 h-16 rounded-lg overflow-hidden bg-surface-container-highest shrink-0">
-                            @if(!empty($item['image']))
-                                <img alt="Item" class="w-full h-full object-cover" src="{{ $item['image'] }}"/>
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-on-surface-variant/30">
-                                    <span class="material-symbols-outlined text-[24px]" data-icon="inventory_2">inventory_2</span>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="flex-grow">
-                            <div class="flex justify-between">
-                                <h4 class="text-sm font-semibold text-on-surface line-clamp-1">{{ $item['name'] }}</h4>
-                                <span class="font-mono text-sm font-bold text-primary">IDR {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}</span>
-                            </div>
-                            <div class="flex justify-between items-center mt-3">
-                                <span class="text-xs text-on-surface-variant">IDR {{ number_format($item['price'], 0, ',', '.') }} / unit</span>
-                                <div class="flex items-center gap-3 bg-surface-container-highest rounded-lg p-1 px-2 border border-white/5">
-                                    <button wire:click.stop="decreaseQty({{ $id }})" class="text-on-surface-variant hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
-                                    </button>
-                                    <span class="font-mono text-sm font-bold">{{ $item['qty'] }}</span>
-                                    <button wire:click.stop="increaseQty({{ $id }})" class="text-on-surface-variant hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-sm" data-icon="add">add</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="flex h-full items-center justify-center text-on-surface-variant/50">
-                        <p class="text-sm font-mono">Cart is empty</p>
-                    </div>
-                @endforelse
-            </div>
-
-            <!-- Calculation Section -->
-            <div class="p-6 bg-surface-container-high border-t border-white/10 rounded-t-3xl shadow-[-20px_0_40px_rgba(0,0,0,0.3)]">
-                <div class="space-y-3 mb-6">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-on-surface-variant">Subtotal</span>
-                        <span class="font-mono text-on-surface">IDR {{ number_format($this->subtotal, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-on-surface-variant">Tax (11%)</span>
-                        <span class="font-mono text-on-surface">IDR {{ number_format($this->taxAmount, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="h-px bg-white/5 my-2"></div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold">Total Bill</span>
-                        <span class="font-mono text-2xl font-black text-primary">IDR {{ number_format($this->total, 0, ',', '.') }}</span>
-                    </div>
-                </div>
-                <button 
-                    wire:click="checkout" 
-                    wire:loading.attr="disabled"
-                    class="w-full py-5 rounded-2xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-lg tracking-widest shadow-xl shadow-[#10b981]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:hover:scale-100"
-                >
-                    <span wire:loading.remove wire:target="checkout" class="material-symbols-outlined text-2xl" data-icon="payments" data-weight="fill">payments</span>
-                    <span wire:loading wire:target="checkout" class="material-symbols-outlined text-2xl animate-spin" data-icon="progress_activity">progress_activity</span>
-                    <span wire:loading.remove wire:target="checkout">BAYAR SEKARANG</span>
-                    <span wire:loading wire:target="checkout">MEMPROSES...</span>
-                </button>
-            </div>
-        </aside>
+          </button>
+        @empty
+          <div style="grid-column:1/-1"><x-ui.empty-state icon="inventory_2" title="Produk tidak ditemukan" description="Coba kategori lain atau tambahkan produk baru melalui Inventaris." /></div>
+        @endforelse
+      </div>
     </main>
 
-    <!-- Payment Success Modal dengan AlpineJS -->
-    <div 
-        x-data="{ show: false }"
-        x-on:payment-successful.window="show = true; setTimeout(() => show = false, 3500)"
-        x-show="show"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 scale-90 translate-y-4"
-        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-        x-transition:leave-end="opacity-0 scale-90 translate-y-4"
-        style="display: none;"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-    >
-        <div class="bg-surface-container rounded-3xl p-8 flex flex-col items-center shadow-2xl border border-white/10 max-w-sm w-full mx-4">
-            <div class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_#10b981]">
-                <span class="material-symbols-outlined text-[40px] text-on-primary-container">check_circle</span>
+    <aside class="fm-pos__summary" :class="{ 'is-open': cartOpen }" aria-label="Ringkasan keranjang">
+      <div class="fm-pos__summary-head"><div><h2 class="fm-pos__summary-title">Keranjang Belanja</h2><p class="fm-pos__summary-id">Nomor pesanan: {{ $orderNumber }}</p></div><div class="flex gap-2">
+        <button type="button" class="fm-icon-button" wire:click="clearCart" aria-label="Kosongkan keranjang" title="Kosongkan keranjang" @disabled(empty($cart))><span class="material-symbols-outlined" aria-hidden="true">delete_outline</span></button>
+        <button type="button" class="fm-icon-button fm-pos__summary-mobile-close" @click="cartOpen=false" aria-label="Tutup keranjang"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+      </div></div>
+      <div class="fm-pos__basket">
+        @forelse($cart as $id => $item)
+          <div class="fm-pos__basket-item" wire:key="cart-item-{{ $id }}">
+            <div class="fm-pos__basket-img">
+              @if(!empty($item['image']))<img src="{{ Storage::url($item['image']) }}" alt="{{ $item['name'] }}">
+              @else<span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>@endif
             </div>
-            <h2 class="text-2xl font-bold text-on-surface mb-2">Pembayaran Berhasil!</h2>
-            <p class="text-on-surface-variant text-center mb-6">Terima kasih, data pesanan telah tersimpan.</p>
-            <button @click="show = false" class="w-full py-3 rounded-xl bg-surface-container-high hover:bg-surface-highest transition-colors font-semibold">Tutup</button>
-        </div>
-    </div>
+            <div class="fm-pos__basket-details"><p class="fm-pos__basket-name">{{ $item['name'] }}</p><p class="fm-pos__basket-price">Rp {{ number_format($item['price'], 0, ',', '.') }} / item</p>
+              <div class="fm-pos__stepper">
+                <button type="button" wire:click="decreaseQty({{ $id }})" aria-label="Kurangi {{ $item['name'] }}"><span class="material-symbols-outlined" aria-hidden="true">remove</span></button>
+                <span class="fm-pos__qty" aria-label="{{ $item['qty'] }} unit">{{ $item['qty'] }}</span>
+                <button type="button" wire:click="increaseQty({{ $id }})" aria-label="Tambah {{ $item['name'] }}"><span class="material-symbols-outlined" aria-hidden="true">add</span></button>
+              </div>
+            </div>
+            <span class="fm-pos__basket-total">Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}</span>
+          </div>
+        @empty
+          <div class="fm-pos__empty"><span class="material-symbols-outlined" aria-hidden="true" style="font-size:36px;display:block;margin-bottom:9px">shopping_cart</span>Keranjang masih kosong.<br>Pilih produk untuk memulai transaksi.</div>
+        @endforelse
+      </div>
+      <div class="fm-pos__checkout">
+        <div class="fm-pos__receipt-row"><span>Subtotal</span><strong>Rp {{ number_format($this->subtotal, 0, ',', '.') }}</strong></div>
+        <div class="fm-pos__receipt-row"><span>Pajak ({{ number_format($tax * 100, 0) }}%)</span><strong>Rp {{ number_format($this->taxAmount, 0, ',', '.') }}</strong></div>
+        <div class="fm-pos__receipt-total"><span>Total Tagihan</span><strong>Rp {{ number_format($this->total, 0, ',', '.') }}</strong></div>
+        <button type="button" wire:click="checkout" wire:loading.attr="disabled" wire:target="checkout" @disabled(empty($cart)) class="fm-button fm-pos__pay">
+          <span wire:loading.remove wire:target="checkout" class="material-symbols-outlined" aria-hidden="true">payments</span>
+          <span wire:loading wire:target="checkout" class="material-symbols-outlined" aria-hidden="true">progress_activity</span>
+          <span wire:loading.remove wire:target="checkout">Proses Pembayaran</span>
+          <span wire:loading wire:target="checkout">Memproses…</span>
+        </button>
+        <p class="fm-note" style="text-align:center;margin-top:10px">Metode pembayaran: Tunai</p>
+      </div>
+    </aside>
+  </div>
 
-    <!-- Notification Toast -->
-    <div
-        x-data="{ show: false, message: '', type: 'error' }"
-        x-on:notify.window="message = $event.detail.message; type = $event.detail.type; show = true; setTimeout(() => show = false, 3000)"
-        x-show="show"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 translate-y-4"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-4"
-        style="display: none;"
-        class="fixed bottom-6 right-6 z-[100]"
-    >
-        <div class="px-6 py-4 rounded-xl shadow-2xl border border-white/10 flex items-center gap-3 bg-surface-container-high"
-             :class="type === 'error' ? 'border-error/30' : 'border-primary/30'">
-            <span class="material-symbols-outlined" :class="type === 'error' ? 'text-error' : 'text-primary'" x-text="type === 'error' ? 'error' : 'check_circle'"></span>
-            <span class="text-sm font-medium text-on-surface" x-text="message"></span>
-        </div>
-    </div>
+  <div class="fm-modal" x-data="{show:false}" x-show="show" x-cloak x-on:payment-successful.window="show=true" @keydown.escape.window="show=false">
+    <div class="fm-modal__scrim" @click="show=false"></div>
+    <section class="fm-modal__panel" role="dialog" aria-modal="true" aria-label="Pembayaran berhasil" style="max-width:400px">
+      <div class="fm-modal__body" style="padding:34px;text-align:center"><span class="fm-success-mark"><span class="material-symbols-outlined" style="font-size:35px" aria-hidden="true">check_circle</span></span><h2 class="fm-modal__title">Pembayaran Berhasil!</h2><p class="fm-muted" style="font-size:12px;margin:10px 0 23px">Pesanan tersimpan dan stok produk sudah diperbarui.</p><button type="button" class="fm-button" style="width:100%" @click="show=false;cartOpen=false">Selesai</button></div>
+    </section>
+  </div>
+
+  <div class="fm-toast" x-data="{show:false,message:'',type:'error'}" x-show="show" x-cloak x-on:notify.window="message=$event.detail.message;type=$event.detail.type;show=true;setTimeout(()=>show=false,3000)" :data-tone="type==='error' ? 'danger' : 'success'" role="status">
+    <span class="material-symbols-outlined" aria-hidden="true" x-text="type==='error' ? 'error_outline' : 'check_circle'"></span><span x-text="message"></span>
+  </div>
 </div>

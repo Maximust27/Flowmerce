@@ -1,0 +1,2 @@
+@props(['icon' => 'inbox', 'title' => 'Belum ada data', 'description' => 'Data akan muncul di sini setelah ditambahkan.'])
+<div {{ $attributes->class(['fm-empty-state']) }}><span class="fm-empty-state__icon"><span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span></span><p class="fm-empty-state__title">{{ $title }}</p><p class="fm-empty-state__description">{{ $description }}</p>@if(isset($action))<div class="fm-empty-state__action">{{ $action }}</div>@endif</div>

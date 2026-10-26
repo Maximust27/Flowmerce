@@ -1,0 +1,2 @@
+@props(['tone' => 'success'])
+<div data-tone="{{ $tone }}" role="{{ $tone === 'danger' ? 'alert' : 'status' }}" {{ $attributes->class(['fm-feedback']) }}><span class="material-symbols-outlined" aria-hidden="true">{{ $tone === 'danger' ? 'error' : 'check_circle' }}</span><span>{{ $slot }}</span></div>

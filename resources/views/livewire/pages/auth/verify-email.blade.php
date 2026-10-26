@@ -35,24 +35,7 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-    </div>
-
-    @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
-    @endif
-
-    <div class="mt-4 flex items-center justify-between">
-        <x-primary-button wire:click="sendVerification">
-            {{ __('Resend Verification Email') }}
-        </x-primary-button>
-
-        <button wire:click="logout" type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            {{ __('Log Out') }}
-        </button>
-    </div>
+<div><p class="fm-section-eyebrow">Verifikasi Akun</p><h1>Verifikasi Email Anda</h1><p style="margin-top:11px">Buka tautan verifikasi yang telah kami kirim ke email Anda. Tidak menerimanya? Kirim ulang di bawah.</p>
+  @if(session('status') === 'verification-link-sent')<x-ui.feedback style="margin-top:17px">Tautan verifikasi baru telah dikirim.</x-ui.feedback>@endif
+  <div class="fm-form" style="margin-top:25px"><x-ui.button wire:click="sendVerification" class="fm-auth__submit" wire:loading.attr="disabled" wire:target="sendVerification">Kirim Ulang Verifikasi</x-ui.button><x-ui.button variant="secondary" wire:click="logout" class="fm-auth__submit">Keluar</x-ui.button></div>
 </div>
