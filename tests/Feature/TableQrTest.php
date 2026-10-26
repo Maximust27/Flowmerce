@@ -198,6 +198,39 @@ class TableQrTest extends TestCase
         $this->assertSame(14, $product->fresh()->current_stock);
     }
 
+    public function test_pos_checkout_ignores_manipulated_client_prices(): void
+    {
+        $owner = $this->owner();
+        $product = $this->product($owner);
+
+        Livewire::actingAs($owner)->test(Terminal::class)
+            ->call('addToCart', $product->id)
+            ->set('cart.'.$product->id.'.price', 1)
+            ->call('checkout');
+
+        $this->assertDatabaseHas('transactions', [
+            'user_id' => $owner->id,
+            'type' => 'INCOME',
+            'amount' => 22200,
+        ]);
+        $this->assertSame(14, $product->fresh()->current_stock);
+    }
+
+    public function test_inactive_table_cannot_receive_new_orders(): void
+    {
+        $owner = $this->owner();
+        $table = $this->table($owner);
+        $product = $this->product($owner);
+        $table->update(['is_active' => false]);
+
+        $this->postJson(route('guest.order.store', ['tableCode' => $table->table_code]), [
+            'items' => [['product_id' => $product->id, 'quantity' => 1]],
+            'payment_method' => 'CASHIER',
+        ])->assertNotFound();
+
+        $this->assertDatabaseCount('guest_orders', 0);
+    }
+
     public function test_deleted_meja_cannot_access_guest_menu(): void
     {
         $owner = $this->owner();

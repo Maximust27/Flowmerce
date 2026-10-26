@@ -21,6 +21,7 @@ class Terminal extends Component
     public string $search = '';
     public string $activeCategory = 'Semua';
     public string $orderNumber = '';
+    #[Locked]
     public float $tax = 0.11;
 
     public string $activeTab = 'manual';
@@ -243,7 +244,7 @@ class Terminal extends Component
                 $guest = null;
                 $lines = [];
                 $paymentMethod = 'CASH';
-                $rate = $this->tax;
+                $rate = 0.11; // Server-defined tax rate, never trusted from Livewire state.
 
                 if ($guestId) {
                     $guest = GuestOrder::where('user_id', $ownerId)
