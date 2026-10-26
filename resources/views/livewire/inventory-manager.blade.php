@@ -49,7 +49,7 @@
         <td><div class="fm-data-table__product">
           @if($product->image)<img src="{{ Storage::url($product->image) }}" class="fm-data-table__img" alt="Foto {{ $product->name }}" loading="lazy">
           @else <div class="fm-data-table__img fm-data-table__placeholder"><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span></div>@endif
-          <div><p class="fm-data-table__product-name">{{ $product->name }}</p><p class="fm-data-table__secondary">{{ $product->category ?: 'Tanpa kategori' }} · #{{ $product->id }}</p></div>
+          <div><p class="fm-data-table__product-name">{{ $product->name }}</p><p class="fm-data-table__secondary">{{ $product->category ?: 'Tanpa kategori' }} · #{{ $product->id }} · {{ $product->is_available_online ? 'Tampil di menu QR' : 'Tidak tampil di menu QR' }}</p></div>
         </div></td>
         <td class="fm-mono fm-nowrap">Rp {{ number_format($product->buy_price, 0, ',', '.') }}</td>
         <td class="fm-mono fm-nowrap">Rp {{ number_format($product->sell_price, 0, ',', '.') }}</td>
@@ -88,6 +88,10 @@
         <x-ui.field field="current_stock" label="Jumlah Stok" type="number" min="0" wire:model="current_stock" placeholder="0" required />
         <x-ui.field field="min_stock_alert" label="Peringatan Stok ≤" type="number" min="0" wire:model="min_stock_alert" placeholder="5" required />
       </div>
+      <label class="fm-tables__switch-row" for="fm-online-menu">
+        <span><strong>Tampilkan di menu QR meja</strong><small>Produk dengan stok tersedia dapat dipesan melalui halaman menu pelanggan.</small></span>
+        <input type="checkbox" id="fm-online-menu" wire:model="is_available_online">
+      </label>
       <div class="fm-form__actions"><x-ui.button variant="secondary" wire:click="closeModal">Batal</x-ui.button><x-ui.button type="submit" wire:loading.attr="disabled" wire:target="save"><span class="material-symbols-outlined" aria-hidden="true">save</span>Simpan Produk</x-ui.button></div>
     </form>
   </x-ui.modal>

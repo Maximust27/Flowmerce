@@ -8,8 +8,19 @@ use App\Livewire\GudangManager;
 use App\Livewire\TransactionManager;
 use App\Livewire\AiChat;
 use App\Livewire\Pos\Terminal;
+use App\Livewire\TableManager;
+use App\Http\Controllers\GuestMenuController;
+use App\Http\Controllers\GuestOrderController;
 
 Route::view('/', 'welcome');
+
+// Public table menus and guest ordering. Orders are rate-limited and verified
+// on the server; no cashier/admin login is required to scan a table QR.
+Route::get('menu/{tableCode}', [GuestMenuController::class, 'show'])->name('guest.menu');
+Route::post('menu/{tableCode}/order', [GuestOrderController::class, 'store'])
+    ->middleware('throttle:10,1')->name('guest.order.store');
+Route::get('order/{orderCode}/status', [GuestOrderController::class, 'status'])
+    ->middleware('throttle:60,1')->name('guest.order.status');
 
 // Management routes — Only admin can access
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -28,6 +39,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Pegawai
     Route::get('pegawai', App\Livewire\EmployeeManager::class)->name('pegawai.index');
     Route::get('pegawai/export', [App\Http\Controllers\EmployeeExportController::class, 'export'])->name('pegawai.export');
+
+    // Table QR management (owner only)
+    Route::get('meja', TableManager::class)->name('meja.index');
 
     // Chat AI
     Route::get('chat', AiChat::class)->name('chat.index');

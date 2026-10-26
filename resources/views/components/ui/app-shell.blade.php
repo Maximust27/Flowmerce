@@ -38,13 +38,16 @@
         </a>
       </div>
     </header>
-    <nav class="fm-topnav" aria-label="Akses cepat">
-      @foreach(array_slice($menu,0,4) as $item)
-        <a href="{{ route($item['route']) }}" wire:navigate @if(request()->routeIs($item['match'])) aria-current="page" @endif>{{ $item['label'] }}</a>
+    <nav class="fm-topnav" aria-label="Navigasi modul">
+      @foreach($menu as $item)
+        <a href="{{ route($item['route']) }}" wire:navigate
+           @if(request()->routeIs($item['match'])) aria-current="page" @endif>
+          {{ $item['label'] }}
+          @if($item['route'] === 'chat.index')
+            <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+          @endif
+        </a>
       @endforeach
-      @if(auth()->user()->role === 'admin')
-        <a href="{{ route('chat.index') }}" wire:navigate @if(request()->routeIs('chat.*')) aria-current="page" @endif>Asisten AI <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span></a>
-      @endif
     </nav>
     <main class="fm-content" id="main-content">{{ $slot }}</main>
   </div>

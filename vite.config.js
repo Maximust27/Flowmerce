@@ -6,7 +6,7 @@ export default defineConfig({
     base: '/build/',
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/css/flowmerce-studio.css', 'resources/css/flowmerce-experience.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/css/flowmerce-studio.css', 'resources/css/flowmerce-experience.css', 'resources/js/app.js', 'resources/js/guest-menu.js'],
             refresh: true,
         }),
         tailwindcss(),

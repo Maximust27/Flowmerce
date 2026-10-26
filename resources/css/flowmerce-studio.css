@@ -1,3 +1,5 @@
+@import "./flowmerce-qr.css";
+
 /* Flowmerce Studio — bespoke product-level polish.
    Semantic color / spacing tokens live in flowmerce-ui.css.
    This stylesheet is loaded AFTER legacy migrations so it intentionally
@@ -410,4 +412,183 @@
         scroll-behavior:auto!important;
     }
     .fm-product:hover,.fm-stat-card:hover,.fm-welcome__feature:hover { transform:none; }
+}
+
+
+/* ===== Flowmerce Studio V5 / Motion + readable 4px typography scale ===== */
+:root {
+  --fm-type-caption:12px;
+  --fm-type-body:16px;
+  --fm-type-section:20px;
+  --fm-type-title:32px;
+  --fm-type-display:40px;
+}
+
+/* Never keep a translateY transform on a Livewire page after its entrance.
+   A transformed ancestor traps position:fixed dialogs inside the content box. */
+.fm-app .fm-page, .fm-app .fm-dashboard {
+  animation:fm-page-opacity 320ms ease-out both;
+}
+@keyframes fm-page-opacity { from {opacity:0} to {opacity:1} }
+.fm-app .fm-modal, .fm-app .fm-command {
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  max-width:none;
+  z-index:1050;
+}
+.fm-app .fm-modal__scrim,.fm-app .fm-command__scrim {
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  background:var(--fm-overlay);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+/* Visible backdrop applies across the complete viewport; the panel floats above it. */
+.fm-app .fm-modal__panel,.fm-app .fm-command__dialog { z-index:1; }
+.fm-app .fm-command__dialog { width:min(100%,580px); }
+.fm-app .fm-command__search { gap:13px; padding:14px 19px; }
+.fm-app .fm-command__search input {
+  padding:10px 12px 10px 14px !important;
+  margin-left:4px;
+  font-size:16px;
+  line-height:1.45;
+}
+
+/* The existing .fm-report__row:last-child rules reset its bottom padding.
+   Explicitly restore balanced inset for the summary ribbon. */
+.fm-app .fm-report .fm-report__row.fm-report__total {
+  padding:22px 24px;
+  margin-top:4px;
+  min-height:72px;
+  border:0;
+  border-radius:14px;
+  gap:20px;
+  align-items:center;
+}
+.fm-app .fm-report__total span { font-size:14px; font-weight:800; }
+.fm-app .fm-report__total strong { font-size:20px; line-height:1.4; }
+
+/* Single type ramp: captions 12, body 16, section 20, headings 32+, no
+   9px or 10px labels in primary workflows. Dense controls stay >=12px. */
+.fm-app { font-size:var(--fm-type-body); }
+.fm-app .fm-page-header__eyebrow,.fm-app .fm-overview__micro-label,
+.fm-app .fm-section-eyebrow,.fm-app .fm-card__eyebrow,.fm-app .fm-command__caption,
+.fm-app .fm-rail__caption { font-size:12px; line-height:1.5; }
+.fm-app .fm-page-header__title {font-size:clamp(28px,2.9vw,36px); line-height:1.22;}
+.fm-app .fm-page-header__description {font-size:14px; line-height:1.7;}
+.fm-app .fm-section-header h2,.fm-app .fm-studio-panel-title,
+.fm-app .fm-panel-title {font-size:20px;line-height:1.35;}
+.fm-app .fm-section-header p,.fm-app .fm-panel-description {font-size:14px;line-height:1.6;}
+.fm-app .fm-topbar__crumb,.fm-app .fm-topnav a {font-size:13px;}
+.fm-app .fm-search-trigger__placeholder,.fm-app .fm-topbar__quick {font-size:13px;}
+.fm-app .fm-profile__name,.fm-app .fm-profile__role {font-size:12px;}
+.fm-app .fm-button {font-size:14px;line-height:1.4;}
+.fm-app .fm-badge,.fm-app .fm-pill,.fm-app .fm-label {font-size:12px;}
+.fm-app .fm-data-table th {font-size:12px;line-height:1.5;}
+.fm-app .fm-data-table td {font-size:14px;line-height:1.6;}
+.fm-app .fm-data-table__product-name {font-size:14px;}
+.fm-app .fm-data-table__secondary {font-size:12px;}
+.fm-app .fm-stat-card__label {font-size:14px;}
+.fm-app .fm-stat-card__hint {font-size:12px;line-height:1.5;}
+.fm-app .fm-stat-card__value {font-size:clamp(24px,2vw,32px);}
+.fm-app .fm-overview__metrics .fm-stat-card__label {font-size:12px;}
+.fm-app .fm-overview__metrics .fm-stat-card__hint {font-size:12px;}
+.fm-app .fm-overview__metrics .fm-stat-card__value {font-size:clamp(18px,1.65vw,24px);}
+.fm-app .fm-overview__balance-subtext,.fm-app .fm-overview__balance-bottom span,
+.fm-app .fm-lineplot__legend,.fm-app .fm-lineplot__axis {font-size:12px;}
+.fm-app .fm-overview__balance-link {font-size:14px;}
+.fm-app .fm-list__row,.fm-app .fm-activity-row__body p,.fm-app .fm-stock-alert__body p {font-size:14px;}
+.fm-app .fm-activity-row__body span,.fm-app .fm-stock-alert__body span {font-size:12px;}
+.fm-app .fm-activity-row__amount {font-size:14px;}
+.fm-app .fm-field__label,.fm-app .fm-account .fm-field__label {font-size:14px;}
+.fm-app .fm-field__input,.fm-app .fm-field__hint,.fm-app .fm-note {font-size:14px;}
+.fm-app .fm-field__error {font-size:12px;}
+.fm-app .fm-modal__eyebrow,.fm-app .fm-command__footer {font-size:12px;}
+.fm-app .fm-modal__title {font-size:24px;}
+.fm-app .fm-command__result {font-size:16px; min-height:53px;}
+.fm-app .fm-command__caption {margin-left:20px;}
+.fm-app .fm-empty-state__title {font-size:16px;}
+.fm-app .fm-empty-state__description {font-size:14px;}
+.fm-app .fm-report__row {font-size:16px;}
+.fm-app .fm-report__row strong {font-size:14px;}
+
+/* Main navigation is scrollable rather than hiding important employee/table pages. */
+.fm-app .fm-topnav {
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+.fm-app .fm-topnav a {padding:10px 14px;flex-shrink:0;}
+.fm-app .fm-topnav a[aria-current="page"] {border-radius:10px;}
+
+/* Both theme icons occupy the same button. Opacity + rotation allow the
+   toggle to interpolate, unlike display:none on the old theme switch. */
+.fm-theme-toggle {display:grid;place-items:center;position:relative;isolation:isolate;overflow:hidden;}
+.fm-theme-toggle .fm-theme-toggle__sun,
+.fm-theme-toggle .fm-theme-toggle__moon {
+  grid-area:1/1;
+  display:inline-grid!important;
+  place-items:center;
+  transition:opacity 360ms var(--fm-ease),transform 450ms var(--fm-ease);
+  will-change:opacity,transform;
+}
+html[data-fm-theme="light"] .fm-theme-toggle__sun,
+html:not([data-fm-theme]) .fm-theme-toggle__sun {opacity:0;transform:rotate(-58deg) scale(.55);pointer-events:none;}
+html[data-fm-theme="light"] .fm-theme-toggle__moon,
+html:not([data-fm-theme]) .fm-theme-toggle__moon {opacity:1;transform:rotate(0deg) scale(1);}
+html[data-fm-theme="dark"] .fm-theme-toggle__sun {opacity:1;transform:rotate(0) scale(1);}
+html[data-fm-theme="dark"] .fm-theme-toggle__moon {opacity:0;transform:rotate(58deg) scale(.55);pointer-events:none;}
+
+/* Only animate color changes when the user intentionally clicks the theme
+   toggle; initial load and wire:navigate are instantaneous/no flash. */
+html.fm-theme-morph,
+html.fm-theme-morph body,
+html.fm-theme-morph .fm-app,
+html.fm-theme-morph .fm-auth,
+html.fm-theme-morph .fm-welcome,
+html.fm-theme-morph .fm-pos,
+html.fm-theme-morph .fm-public {
+  transition:background-color 480ms var(--fm-ease),color 480ms var(--fm-ease);
+}
+html.fm-theme-morph :is(
+  .fm-sidebar,.fm-topbar,.fm-topnav,.fm-card,.fm-modal__panel,
+  .fm-command__dialog,.fm-command__result,.fm-profile,.fm-button,
+  .fm-field__input,.fm-auth-panel,.fm-auth-main,.fm-auth-main__top,
+  .fm-public__header,.fm-public-feature,.fm-product-preview,
+  .fm-list-toolbar,.fm-data-table thead,.fm-data-table tr,
+  .fm-report__total,.fm-pos__summary,.fm-pos__checkout
+) {
+  transition-property:background-color,color,border-color,box-shadow,opacity,transform;
+  transition-duration:480ms;
+  transition-timing-function:var(--fm-ease);
+}
+.fm-app .fm-chat__bubble {font-size:16px;line-height:1.8;}
+.fm-app .fm-chat__disclaimer,.fm-app .fm-chat__status {font-size:12px;}
+.fm-app .fm-chat__input,.fm-app .fm-chat__submit {font-size:16px;}
+.fm-app .fm-chat__suggestions .fm-pill {font-size:12px;}
+.fm-pos .fm-pos__subtitle,.fm-pos .fm-product__category,
+.fm-pos .fm-pos__basket-price,.fm-pos .fm-pos__receipt-row {font-size:14px;}
+.fm-pos .fm-pos__title {font-size:28px;}
+.fm-pos .fm-product__name,.fm-pos .fm-product__price {font-size:16px;}
+.fm-pos .fm-pos__summary-title {font-size:20px;}
+.fm-pos .fm-pos__basket-name,.fm-pos .fm-pos__basket-total {font-size:14px;}
+
+@media (max-width:767px) {
+ .fm-app .fm-topnav {display:none;}
+ .fm-app .fm-page-header__title {font-size:28px;}
+ .fm-app .fm-report .fm-report__row.fm-report__total {padding:19px 18px;}
+ .fm-app .fm-report__total strong {font-size:16px;}
+ .fm-app .fm-command__search input {padding-left:12px!important;}
+}
+@media (prefers-reduced-motion:reduce) {
+ .fm-app .fm-page,.fm-app .fm-dashboard {animation:none!important;}
+ .fm-theme-toggle .fm-theme-toggle__sun,
+ .fm-theme-toggle .fm-theme-toggle__moon {transition:none!important;}
+ html.fm-theme-morph * {transition:none!important;}
 }

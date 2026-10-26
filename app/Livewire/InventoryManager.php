@@ -18,6 +18,7 @@ class InventoryManager extends Component
     public $image;
     public $old_image;
     public $isModalOpen = false;
+    public bool $is_available_online = true;
 
     // Presentation-only filters: do not mutate inventory or stock rules.
     public string $search = '';
@@ -36,6 +37,7 @@ class InventoryManager extends Component
         'current_stock' => 'required|integer|min:0',
         'min_stock_alert' => 'required|integer|min:0',
         'image' => 'nullable|image|max:2048',
+        'is_available_online' => 'boolean',
     ];
 
     public function openModal()
@@ -47,7 +49,7 @@ class InventoryManager extends Component
     public function closeModal()
     {
         $this->isModalOpen = false;
-        $this->reset(['product_id', 'name', 'category', 'buy_price', 'sell_price', 'current_stock', 'min_stock_alert', 'image', 'old_image']);
+        $this->reset(['product_id', 'name', 'category', 'buy_price', 'sell_price', 'current_stock', 'min_stock_alert', 'image', 'old_image', 'is_available_online']);
         $this->resetValidation();
     }
 
@@ -72,6 +74,7 @@ class InventoryManager extends Component
                 'current_stock' => $this->current_stock,
                 'min_stock_alert' => $this->min_stock_alert,
                 'image' => $imagePath,
+                'is_available_online' => $this->is_available_online,
             ]);
         } else {
             Product::create([
@@ -102,6 +105,7 @@ class InventoryManager extends Component
         $this->current_stock = $product->current_stock;
         $this->min_stock_alert = $product->min_stock_alert;
         $this->old_image = $product->image;
+        $this->is_available_online = (bool) $product->is_available_online;
         $this->isModalOpen = true;
     }
 
