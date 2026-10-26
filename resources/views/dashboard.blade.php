@@ -3,7 +3,7 @@
   $greeting = now()->hour < 11 ? 'Selamat pagi' : (now()->hour < 15 ? 'Selamat siang' : (now()->hour < 18 ? 'Selamat sore' : 'Selamat malam'));
 @endphp
 <div class="fm-dashboard fm-dashboard--studio">
-  <x-ui.page-header eyebrow="OVERVIEW / WORKSPACE" :title="$greeting.', '.$firstName.'!" description="Ringkasan performa usaha, dalam satu tampilan yang lebih sederhana.">
+  <x-ui.page-header eyebrow="OVERVIEW / WORKSPACE" :title="$greeting.', '.$firstName.'!'" description="Ringkasan performa usaha, dalam satu tampilan yang lebih sederhana.">
     <x-slot:actions>
       <x-ui.button variant="secondary" :href="route('chat.index')"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>Tanya Asisten AI</x-ui.button>
       <x-ui.button :href="route('pos.index')"><span class="material-symbols-outlined" aria-hidden="true">add</span>Transaksi Baru</x-ui.button>
