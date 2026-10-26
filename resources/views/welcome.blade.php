@@ -12,7 +12,7 @@
 </head>
 <body class="fm-welcome">
   <header class="fm-welcome__header"><nav class="fm-welcome__nav" aria-label="Navigasi utama">
-    <a href="{{ url('/') }}" class="fm-welcome__brand"><span class="fm-welcome__brand-icon"><span class="material-symbols-outlined" aria-hidden="true">hub</span></span>Flowmerce</a>
+    <x-ui.brand :href="url('/')" class="fm-welcome__brand" />
     <div class="fm-welcome__links"><a href="#fitur">Fitur</a><a href="#keunggulan">Keunggulan</a><a href="#mulai">Mulai</a></div>
     <div class="fm-toolbar__group">
       <div x-data="flowmerceShell()"><x-ui.theme-toggle /></div>

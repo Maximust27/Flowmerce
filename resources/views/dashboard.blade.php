@@ -1,79 +1,90 @@
-<div class="fm-dashboard">
-  <x-ui.page-header eyebrow="Business Overview" :title="'Selamat datang, '.explode(' ', auth()->user()->name)[0].' 👋'" description="Berikut gambaran singkat performa bisnis dan aktivitas toko Anda.">
-    <x-slot:actions><x-ui.button href="{{ route('pos.index') }}"><span class="material-symbols-outlined" aria-hidden="true">point_of_sale</span>Buka Kasir</x-ui.button></x-slot:actions>
+@php
+  $firstName = explode(' ', trim(auth()->user()->name))[0];
+  $greeting = now()->hour < 11 ? 'Selamat pagi' : (now()->hour < 15 ? 'Selamat siang' : (now()->hour < 18 ? 'Selamat sore' : 'Selamat malam'));
+@endphp
+<div class="fm-dashboard fm-dashboard--studio">
+  <x-ui.page-header eyebrow="OVERVIEW / WORKSPACE" :title="$greeting.', '.$firstName.'!" description="Ringkasan performa usaha, dalam satu tampilan yang lebih sederhana.">
+    <x-slot:actions>
+      <x-ui.button variant="secondary" :href="route('chat.index')"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>Tanya Asisten AI</x-ui.button>
+      <x-ui.button :href="route('pos.index')"><span class="material-symbols-outlined" aria-hidden="true">add</span>Transaksi Baru</x-ui.button>
+    </x-slot:actions>
   </x-ui.page-header>
 
-  <div class="fm-dashboard__hero">
-    <x-ui.card padding="lg">
-      <p class="fm-section-eyebrow">Workspace hari ini</p>
-      <h2 class="fm-dashboard__hero-title" style="margin-top:12px">Satu tempat untuk<br>semua aktivitas usaha.</h2>
-      <p class="fm-dashboard__hero-copy">Pantau pendapatan, periksa persediaan, kelola tim, dan lihat transaksi dengan alur kerja yang lebih sederhana.</p>
-      <div class="fm-dashboard__hero-actions">
-        <x-ui.button href="{{ route('inventaris.index') }}"><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>Kelola Inventaris</x-ui.button>
-        <x-ui.button variant="secondary" href="{{ route('keuangan.index') }}">Lihat Keuangan <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></x-ui.button>
+  <section class="fm-overview-grid" aria-label="Ringkasan bisnis">
+    <x-ui.card class="fm-overview__balance" padding="none">
+      <div class="fm-overview__balance-top"><span class="fm-overview__eyebrow"><span class="fm-overview__eyebrow-dot"></span>RINGKASAN KEUANGAN</span><span class="fm-overview__balance-icon"><span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span></span></div>
+      <div class="fm-overview__balance-main">
+        <p class="fm-overview__micro-label">Total pemasukan bisnis</p>
+        <p class="fm-overview__balance-number">Rp {{ number_format($revenue, 0, ',', '.') }}</p>
+        <p class="fm-overview__balance-subtext">Akumulasi seluruh transaksi pemasukan yang tercatat.</p>
+      </div>
+      <div class="fm-overview__balance-bottom">
+        <div><span>Keuntungan bersih</span><strong>Rp {{ number_format($profit,0,',','.') }}</strong></div>
+        <div><span>Pendapatan hari ini</span><strong>Rp {{ number_format($todayIncome,0,',','.') }}</strong></div>
+      </div>
+      <div class="fm-overview__balance-actions">
+        <a href="{{ route('keuangan.index') }}" wire:navigate class="fm-overview__balance-link">Lihat keuangan <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
       </div>
     </x-ui.card>
-    <x-ui.card variant="accent" padding="lg">
-      <div class="fm-dashboard__focus"><p class="fm-dashboard__focus-label">Total pendapatan tercatat</p><span class="material-symbols-outlined" aria-hidden="true">trending_up</span></div>
-      <p class="fm-dashboard__focus-value">Rp {{ number_format($revenue, 0, ',', '.') }}</p>
-      <p style="font-size:11px;opacity:.82;margin-top:11px">Akumulasi transaksi masuk pada akun bisnis ini.</p>
-      <div style="height:1px;background:rgb(255 255 255 / 27%);margin:22px 0 15px"></div>
-      <p style="font-size:11px;opacity:.92">Keuntungan tercatat <strong class="fm-mono" style="font-size:13px;margin-left:6px">Rp {{ number_format($profit, 0, ',', '.') }}</strong></p>
-    </x-ui.card>
-  </div>
 
-  @if($lowStockCount > 0)
-    <x-ui.card variant="notice" padding="sm" class="fm-notice" role="status">
-      <div class="fm-notice__content"><span class="fm-notice__icon"><span class="material-symbols-outlined" aria-hidden="true">warning_amber</span></span><div><p class="fm-notice__title">{{ $lowStockCount }} produk mencapai batas minimum</p><p class="fm-notice__description">Tinjau stok agar aktivitas penjualan tidak terhambat.</p></div></div>
-      <x-ui.button variant="secondary" href="{{ route('inventaris.index') }}">Periksa Stok <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></x-ui.button>
-    </x-ui.card>
-  @endif
+    <div class="fm-overview__metrics">
+      <x-ui.stat-card label="Pendapatan hari ini" :value="'Rp '.number_format($todayIncome, 0, ',', '.')" icon="payments" tone="accent" variant="accent" hint="Pemasukan hari berjalan" />
+      <x-ui.stat-card label="Total Produk" :value="number_format($totalProducts,0,',','.')" icon="inventory_2" hint="Terdaftar di inventaris" />
+      <x-ui.stat-card label="Keuntungan Bersih" :value="'Rp '.number_format($profit,0,',','.')" icon="savings" tone="success" hint="Total pemasukan − pengeluaran" />
+      <x-ui.stat-card label="Stok Menipis" :value="$lowStockCount.' produk'" icon="error_outline" tone="warning" hint="Perlu pengecekan stok" />
+    </div>
 
-  <section class="fm-kpi-grid" aria-label="Ringkasan operasional">
-    <x-ui.stat-card label="Pendapatan" :value="'Rp '.number_format($revenue, 0, ',', '.')" icon="payments" tone="success" hint="Total pemasukan bisnis" />
-    <x-ui.stat-card label="Keuntungan Bersih" :value="'Rp '.number_format($profit, 0, ',', '.')" icon="monitoring" hint="Pemasukan dikurangi pengeluaran" />
-    <x-ui.stat-card label="Stok Perlu Perhatian" :value="number_format($lowStockCount, 0, ',', '.').' produk'" icon="inventory_2" tone="warning" hint="Pada atau di bawah batas stok" />
+    <x-ui.card class="fm-overview__chart" padding="md">
+      <div class="fm-studio-panel-heading">
+        <div><p class="fm-overview__micro-label">ANALYTICS</p><h2 class="fm-studio-panel-title">Tren pemasukan</h2></div>
+        <div class="fm-segmented" role="group" aria-label="Periode tren">
+          <button type="button" wire:click="setChartFilter('weekly')" aria-pressed="{{ $chartFilter === 'weekly' ? 'true' : 'false' }}" wire:loading.attr="disabled" wire:target="setChartFilter">7 hari</button>
+          <button type="button" wire:click="setChartFilter('monthly')" aria-pressed="{{ $chartFilter === 'monthly' ? 'true' : 'false' }}" wire:loading.attr="disabled" wire:target="setChartFilter">6 bulan</button>
+        </div>
+      </div>
+      <div wire:loading.class="fm-overview__chart--loading" wire:target="setChartFilter">
+        <x-ui.revenue-chart :labels="$chartLabels" :values="$chartValues" :period="$chartFilter" />
+      </div>
+    </x-ui.card>
   </section>
 
-  <div class="fm-dashboard-grid">
-    <x-ui.card padding="lg">
-      <div class="fm-panel-header"><div><h2 class="fm-panel-title">Grafik Penjualan</h2><p class="fm-panel-description">Pemasukan {{ $chartFilter === 'monthly' ? '6 bulan' : '7 hari' }} terakhir berdasarkan catatan keuangan.</p></div>
-        <div class="fm-segmented" role="group" aria-label="Rentang grafik penjualan">
-          <button type="button" wire:click="setChartFilter('weekly')" wire:loading.attr="disabled" wire:target="setChartFilter" aria-pressed="{{ $chartFilter === 'weekly' ? 'true' : 'false' }}">7 Hari</button>
-          <button type="button" wire:click="setChartFilter('monthly')" wire:loading.attr="disabled" wire:target="setChartFilter" aria-pressed="{{ $chartFilter === 'monthly' ? 'true' : 'false' }}">6 Bulan</button>
+  <section class="fm-insights-grid" aria-label="Aktivitas dan prioritas">
+    <x-ui.card class="fm-insights__stock" padding="md">
+      <div class="fm-studio-panel-heading"><div><p class="fm-overview__micro-label">INVENTORY HEALTH</p><h2 class="fm-studio-panel-title">Perlu perhatian</h2></div><x-ui.badge :tone="$lowStockCount > 0 ? 'warning' : 'success'">{{ $lowStockCount > 0 ? $lowStockCount.' produk' : 'Aman' }}</x-ui.badge></div>
+      @forelse($stockAlerts as $product)
+        <div class="fm-stock-alert" wire:key="stock-alert-{{ $product->id }}">
+          <span class="fm-stock-alert__icon"><span class="material-symbols-outlined" aria-hidden="true">{{ $product->current_stock <= 0 ? 'production_quantity_limits' : 'inventory_2' }}</span></span>
+          <div class="fm-stock-alert__body"><p>{{ $product->name }}</p><span>Minimum {{ $product->min_stock_alert }} unit</span></div>
+          <x-ui.badge :tone="$product->current_stock <= 0 ? 'danger' : 'warning'">{{ $product->current_stock <= 0 ? 'Habis' : $product->current_stock.' unit' }}</x-ui.badge>
         </div>
-      </div>
-      <div class="fm-chart" role="img" aria-label="Grafik pemasukan {{ $chartFilter === 'monthly' ? '6 bulan terakhir' : '7 hari terakhir' }}">
-        <div class="fm-chart__plot" aria-hidden="true">
-          @foreach($chartBars as $i => $height)<div class="fm-chart__item" wire:key="chart-{{ $chartFilter }}-{{ $i }}"><div class="fm-chart__bar" style="--fm-bar-height: {{ min(100, max(0, $height / 60 * 100)) }}%"></div></div>@endforeach
-        </div>
-        <div class="fm-chart__labels" aria-hidden="true">@foreach($chartLabels as $label)<span>{{ $label }}</span>@endforeach</div>
-        <p class="fm-chart__summary">Dihitung dari <strong>transaksi pemasukan</strong> yang tercatat.</p>
+      @empty
+        <div class="fm-insights__healthy"><span class="material-symbols-outlined" aria-hidden="true">verified</span><p>Persediaan terkendali</p><span>Belum ada produk yang melewati batas minimum stok.</span></div>
+      @endforelse
+      <div class="fm-insights__footer"><a class="fm-text-link" href="{{ route('inventaris.index') }}" wire:navigate>Lihat inventaris <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a></div>
+    </x-ui.card>
+
+    <x-ui.card class="fm-insights__activity" padding="md">
+      <div class="fm-studio-panel-heading"><div><p class="fm-overview__micro-label">RECENT ACTIVITY</p><h2 class="fm-studio-panel-title">Transaksi terbaru</h2></div><a class="fm-text-link" href="{{ route('keuangan.index') }}" wire:navigate>Semua <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a></div>
+      <div class="fm-activity-list">
+        @forelse($recentTransactions as $tx)
+          <div class="fm-activity-row" wire:key="fm-activity-{{ $tx->id }}">
+            <span class="fm-activity-row__icon" data-type="{{ $tx->type === 'INCOME' ? 'income' : 'expense' }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $tx->type === 'INCOME' ? 'south_west' : 'north_east' }}</span></span>
+            <div class="fm-activity-row__body"><p>{{ $tx->category ?: 'Transaksi' }}</p><span>{{ $tx->created_at->format('d M Y · H:i') }}</span></div>
+            <strong class="fm-activity-row__amount" data-type="{{ $tx->type === 'INCOME' ? 'income' : 'expense' }}">{{ $tx->type === 'INCOME' ? '+' : '−' }}Rp {{ number_format($tx->amount,0,',','.') }}</strong>
+          </div>
+        @empty
+          <x-ui.empty-state icon="receipt_long" title="Belum ada transaksi" description="Catatan keuangan terbaru akan tampil di sini." />
+        @endforelse
       </div>
     </x-ui.card>
-    <div class="fm-stack">
-      <x-ui.card padding="md">
-        <x-ui.section-header title="Akses Cepat" description="Buka pekerjaan yang paling sering dilakukan." />
-        <nav class="fm-shortcuts" aria-label="Akses cepat" style="margin-top:20px">
-          <a href="{{ route('inventaris.index') }}" wire:navigate class="fm-shortcut"><span class="fm-shortcut__label"><span class="material-symbols-outlined" aria-hidden="true">add_box</span>Kelola Produk</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
-          <a href="{{ route('keuangan.index') }}" wire:navigate class="fm-shortcut"><span class="fm-shortcut__label"><span class="material-symbols-outlined" aria-hidden="true">add_card</span>Catat Keuangan</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
-          <a href="{{ route('chat.index') }}" wire:navigate class="fm-shortcut"><span class="fm-shortcut__label"><span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>Asisten AI</span><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
-        </nav>
-      </x-ui.card>
-      <x-ui.card padding="md">
-        <x-ui.section-header title="Transaksi Terakhir" description="Lima aktivitas keuangan terbaru." />
-        <div class="fm-transaction-list" style="margin-top:15px">
-          @forelse($recentTransactions as $tx)
-            <div class="fm-transaction" data-type="{{ $tx->type === 'INCOME' ? 'income' : 'expense' }}" wire:key="tx-dashboard-{{ $tx->id }}">
-              <div class="fm-transaction__left"><span class="fm-transaction__icon"><span class="material-symbols-outlined" aria-hidden="true">{{ $tx->type === 'INCOME' ? 'south_west' : 'north_east' }}</span></span><div><p class="fm-transaction__category">{{ $tx->category ?: 'Transaksi' }}</p><p class="fm-transaction__date">{{ $tx->created_at->format('d M Y, H:i') }}</p></div></div>
-              <span class="fm-transaction__amount">{{ $tx->type === 'INCOME' ? '+' : '−' }}Rp {{ number_format($tx->amount, 0, ',', '.') }}</span>
-            </div>
-          @empty
-            <x-ui.empty-state icon="receipt_long" title="Belum ada transaksi" description="Aktivitas keuangan akan muncul setelah transaksi dibuat." />
-          @endforelse
-        </div>
-        <div class="fm-panel-footer"><a href="{{ route('keuangan.index') }}" wire:navigate class="fm-text-link">Semua transaksi <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a></div>
-      </x-ui.card>
+  </section>
+
+  <section class="fm-studio-shortcuts" aria-label="Pintasan pekerjaan">
+    <div><p class="fm-overview__micro-label">QUICK ACTIONS</p><h2 class="fm-studio-panel-title">Apa yang ingin dikerjakan?</h2></div>
+    <div class="fm-studio-shortcuts__links">
+      <a href="{{ route('inventaris.index') }}" wire:navigate><span class="material-symbols-outlined" aria-hidden="true">add_box</span>Kelola Produk<span class="material-symbols-outlined" aria-hidden="true">arrow_outward</span></a>
+      <a href="{{ route('gudang.index') }}" wire:navigate><span class="material-symbols-outlined" aria-hidden="true">warehouse</span>Arus Gudang<span class="material-symbols-outlined" aria-hidden="true">arrow_outward</span></a>
+      <a href="{{ route('pegawai.index') }}" wire:navigate><span class="material-symbols-outlined" aria-hidden="true">group</span>Kelola Tim<span class="material-symbols-outlined" aria-hidden="true">arrow_outward</span></a>
     </div>
-  </div>
+  </section>
 </div>

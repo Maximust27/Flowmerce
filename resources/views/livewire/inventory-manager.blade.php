@@ -24,6 +24,24 @@
     <x-slot:actions><x-ui.badge tone="accent">{{ number_format($totalProducts, 0, ',', '.') }} produk</x-ui.badge></x-slot:actions>
   </x-ui.section-header>
 
+  <div class="fm-list-toolbar" role="search" aria-label="Cari dan filter inventaris">
+    <label class="fm-list-toolbar__search" for="fm-inventory-search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input id="fm-inventory-search" type="search" placeholder="Cari produk atau kategori..." wire:model.live.debounce.350ms="search" autocomplete="off">
+    </label>
+    <div class="fm-list-toolbar__filters">
+      <label class="fm-list-toolbar__select"><span class="sr-only">Filter kategori</span><select wire:model.live="categoryFilter">
+        <option value="all">Semua kategori</option>
+        @foreach($categories as $category)<option value="{{ $category }}">{{ $category }}</option>@endforeach
+      </select><span class="material-symbols-outlined" aria-hidden="true">expand_more</span></label>
+      <label class="fm-list-toolbar__select"><span class="sr-only">Filter status stok</span><select wire:model.live="stockFilter">
+        <option value="all">Semua stok</option>
+        <option value="normal">Stok aman</option>
+        <option value="low">Stok menipis</option>
+        <option value="out">Stok habis</option>
+      </select><span class="material-symbols-outlined" aria-hidden="true">expand_more</span></label>
+    </div>
+  </div>
   <x-ui.table label="Daftar inventaris produk">
     <x-slot:head><tr><th scope="col">Nama produk</th><th scope="col">Harga beli</th><th scope="col">Harga jual</th><th scope="col">Stok tersedia</th><th scope="col" class="text-right">Tindakan</th></tr></x-slot:head>
     @forelse($products as $product)
@@ -45,7 +63,7 @@
         </div></td>
       </tr>
     @empty
-      <tr><td colspan="5"><x-ui.empty-state icon="inventory_2" title="Belum ada produk" description="Mulai buat katalog dengan menambahkan produk pertama." /></td></tr>
+      <tr><td colspan="5"><x-ui.empty-state icon="inventory_2" title="Produk tidak ditemukan" description="Coba ubah pencarian atau filter, atau tambahkan produk baru." /></td></tr>
     @endforelse
     <x-slot:footer>{{ $products->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}</x-slot:footer>
   </x-ui.table>

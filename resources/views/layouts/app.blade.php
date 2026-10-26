@@ -17,7 +17,7 @@
         } catch(e) { document.documentElement.dataset.fmTheme = 'light'; }
       })();
     </script>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/flowmerce-studio.css', 'resources/js/app.js'])
 </head>
-<body><a href="#main-content" class="sr-only focus:not-sr-only">Lewati ke konten utama</a><x-ui.app-shell>{{ $slot }}</x-ui.app-shell></body>
+<body><x-ui.app-shell>{{ $slot }}</x-ui.app-shell></body>
 </html>

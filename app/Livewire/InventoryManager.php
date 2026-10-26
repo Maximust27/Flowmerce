@@ -19,6 +19,15 @@ class InventoryManager extends Component
     public $old_image;
     public $isModalOpen = false;
 
+    // Presentation-only filters: do not mutate inventory or stock rules.
+    public string $search = '';
+    public string $stockFilter = 'all';
+    public string $categoryFilter = 'all';
+
+    public function updatedSearch(): void { $this->resetPage(); }
+    public function updatedStockFilter(): void { $this->resetPage(); }
+    public function updatedCategoryFilter(): void { $this->resetPage(); }
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'category' => 'nullable|string|max:255',
@@ -51,8 +60,10 @@ class InventoryManager extends Component
             $imagePath = $this->image->store('products', 'public');
         }
 
+        $wasEditing = (bool) $this->product_id;
+
         if ($this->product_id) {
-            $product = Product::findOrFail($this->product_id);
+            $product = Product::where('user_id', Auth::id())->findOrFail($this->product_id);
             $product->update([
                 'name' => $this->name,
                 'category' => $this->category,
@@ -77,7 +88,7 @@ class InventoryManager extends Component
 
         $this->closeModal();
         Cache::forget('dashboard_stats_' . Auth::id());
-        session()->flash('message', $this->product_id ? 'Produk berhasil diubah.' : 'Produk berhasil ditambahkan.');
+        session()->flash('message', $wasEditing ? 'Produk berhasil diubah.' : 'Produk berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -104,7 +115,29 @@ class InventoryManager extends Component
 
     public function render()
     {
-        $products = Product::where('user_id', Auth::id())->latest()->paginate(10);
-        return view('livewire.inventory-manager', compact('products'));
+        $userId = Auth::id();
+        $search = trim($this->search);
+
+        $query = Product::query()->where('user_id', $userId)
+            ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('category', 'like', '%' . $search . '%');
+            }))
+            ->when($this->categoryFilter !== 'all',
+                fn ($query) => $query->where('category', $this->categoryFilter))
+            ->when($this->stockFilter === 'out',
+                fn ($query) => $query->where('current_stock', '<=', 0))
+            ->when($this->stockFilter === 'low',
+                fn ($query) => $query->where('current_stock', '>', 0)
+                    ->whereColumn('current_stock', '<=', 'min_stock_alert'))
+            ->when($this->stockFilter === 'normal',
+                fn ($query) => $query->whereColumn('current_stock', '>', 'min_stock_alert'));
+
+        $products = $query->latest()->paginate(10);
+        $categories = Product::where('user_id', $userId)
+            ->whereNotNull('category')->where('category', '!=', '')
+            ->distinct()->orderBy('category')->pluck('category');
+
+        return view('livewire.inventory-manager', compact('products', 'categories'));
     }
 }

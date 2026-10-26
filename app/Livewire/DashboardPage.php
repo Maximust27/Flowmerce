@@ -99,11 +99,26 @@ class DashboardPage extends Component
             }
         }
 
-        // Mengembalikan ke nama view aslimu ('dashboard' atau 'livewire.dashboard')
+        // Data presentasi untuk dashboard Studio; seluruh perhitungan bisnis tetap sama.
+        $totalProducts = Product::where('user_id', $userId)->count();
+        $todayIncome = Transaction::where('user_id', $userId)
+            ->where('type', 'INCOME')
+            ->whereDate('created_at', Carbon::today())
+            ->sum('amount');
+        $stockAlerts = Product::where('user_id', $userId)
+            ->whereColumn('current_stock', '<=', 'min_stock_alert')
+            ->orderBy('current_stock')
+            ->take(4)
+            ->get(['id', 'name', 'current_stock', 'min_stock_alert']);
+
         return view('dashboard', [
             'recentTransactions' => $recentTransactions,
             'chartLabels' => $labels,
             'chartBars' => $bars,
+            'chartValues' => $rawTotals,
+            'totalProducts' => $totalProducts,
+            'todayIncome' => $todayIncome,
+            'stockAlerts' => $stockAlerts,
         ]);
     }
 }

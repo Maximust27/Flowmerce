@@ -1,25 +1,25 @@
 @php($menu = config('flowmerce-navigation.items'))
-<div class="fm-sidebar__content">
-  <a class="fm-brand" href="{{ route('dashboard') }}" wire:navigate aria-label="Flowmerce — Dashboard" title="Flowmerce">
-    <span class="fm-brand__mark"><span class="material-symbols-outlined" aria-hidden="true">hub</span></span>
-    <span class="fm-brand__wordmark"><span class="fm-brand__name">Flowmerce</span><span class="fm-brand__subtitle">{{ auth()->user()->business_name ?: 'Workspace' }}</span></span>
-  </a>
-  <button class="fm-icon-button fm-sidebar__mobile-close" type="button" aria-label="Tutup menu" @click="sidebarOpen = false"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
-  <p class="fm-menu-label">Workspace</p>
-  <nav class="fm-menu" aria-label="Navigasi utama">
+<div class="fm-rail__inner">
+  <div class="fm-rail__brand">
+    <x-ui.brand :href="route('dashboard')" :compact="true" wire:navigate />
+    <button type="button" class="fm-icon-button fm-rail__close" @click="sidebarOpen=false" aria-label="Tutup menu"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+  </div>
+  <p class="fm-rail__caption">MENU</p>
+  <nav class="fm-rail__nav" aria-label="Navigasi workspace">
     @foreach($menu as $item)
-      <a href="{{ route($item['route']) }}" wire:navigate @click="sidebarOpen = false"
-        class="fm-menu-link" title="{{ $item['label'] }}"
-        @if(request()->routeIs($item['match'])) aria-current="page" @endif>
+      <a href="{{ route($item['route']) }}" wire:navigate @click="sidebarOpen=false"
+         class="fm-rail__link"
+         @if(request()->routeIs($item['match'])) aria-current="page" @endif
+         title="{{ $item['label'] }}">
         <span class="material-symbols-outlined" aria-hidden="true">{{ $item['icon'] }}</span>
-        <span class="fm-menu-link__text">{{ $item['label'] }}</span>
+        <span class="fm-rail__link-label">{{ $item['label'] }}</span>
       </a>
     @endforeach
   </nav>
-  <div class="fm-sidebar__bottom">
-    <a class="fm-menu-link" href="{{ route('profile') }}" wire:navigate title="Pengaturan" @if(request()->routeIs('profile')) aria-current="page" @endif><span class="material-symbols-outlined" aria-hidden="true">settings</span><span class="fm-menu-link__text">Pengaturan</span></a>
+  <div class="fm-rail__footer">
+    <a href="{{ route('profile') }}" wire:navigate @click="sidebarOpen=false" class="fm-rail__link" title="Pengaturan" @if(request()->routeIs('profile')) aria-current="page" @endif><span class="material-symbols-outlined" aria-hidden="true">settings</span><span class="fm-rail__link-label">Pengaturan</span></a>
     <form action="{{ route('logout') }}" method="POST">@csrf
-      <button type="submit" class="fm-menu-link" title="Keluar"><span class="material-symbols-outlined" aria-hidden="true">logout</span><span class="fm-menu-link__text">Keluar</span></button>
+      <button class="fm-rail__link" type="submit" title="Keluar" aria-label="Keluar dari akun"><span class="material-symbols-outlined" aria-hidden="true">logout</span><span class="fm-rail__link-label">Keluar</span></button>
     </form>
   </div>
 </div>

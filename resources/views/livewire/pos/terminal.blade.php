@@ -1,8 +1,6 @@
 <div class="fm-pos" x-data="{ cartOpen: false }" @keydown.escape.window="cartOpen=false">
   <header class="fm-pos__header">
-    <a class="fm-pos__brand" href="{{ auth()->user()->role === 'admin' ? route('dashboard') : route('pos.index') }}">
-      <span class="fm-pos__brand-mark"><span class="material-symbols-outlined" aria-hidden="true">hub</span></span>Flowmerce <span class="fm-muted" style="font-size:12px;font-weight:600">/ POS</span>
-    </a>
+    <div class="fm-pos__brand"><x-ui.brand :href="auth()->user()->role === 'admin' ? route('dashboard') : route('pos.index')" /><span class="fm-muted" style="font-size:12px;font-weight:600">/ POS</span></div>
     <div class="fm-pos__search">
       <span class="material-symbols-outlined" aria-hidden="true">search</span>
       <input type="search" wire:model.live.debounce.300ms="search" aria-label="Cari produk" placeholder="Cari nama produk…">

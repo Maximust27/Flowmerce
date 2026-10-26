@@ -20,6 +20,18 @@
   <x-ui.section-header title="Riwayat Transaksi" description="Semua pemasukan dan pengeluaran tercatat di sini.">
     <x-slot:actions><x-ui.badge tone="accent">Catatan Keuangan</x-ui.badge></x-slot:actions>
   </x-ui.section-header>
+  <div class="fm-list-toolbar" role="search" aria-label="Cari dan filter transaksi">
+    <label class="fm-list-toolbar__search" for="fm-transaction-search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input id="fm-transaction-search" type="search" wire:model.live.debounce.350ms="search" placeholder="Cari kategori atau catatan..." autocomplete="off">
+    </label>
+    <div class="fm-list-toolbar__filters">
+      <label class="fm-list-toolbar__select"><span class="sr-only">Jenis transaksi</span>
+        <select wire:model.live="typeFilter"><option value="all">Semua transaksi</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select>
+        <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+      </label>
+    </div>
+  </div>
   <x-ui.table label="Riwayat transaksi keuangan">
     <x-slot:head><tr><th scope="col">Tanggal</th><th scope="col">Jenis transaksi</th><th scope="col">Kategori / Keterangan</th><th scope="col" class="text-right">Nominal</th></tr></x-slot:head>
     @forelse($transactions as $tx)
@@ -30,7 +42,7 @@
         <td class="fm-mono fm-nowrap text-right"><strong style="color:{{ $tx->type === 'INCOME' ? 'var(--fm-success)' : 'var(--fm-danger)' }}">{{ $tx->type === 'INCOME' ? '+' : '−' }}Rp {{ number_format($tx->amount, 0, ',', '.') }}</strong></td>
       </tr>
     @empty
-      <tr><td colspan="4"><x-ui.empty-state icon="receipt_long" title="Belum ada transaksi" description="Mulai catat pemasukan atau pengeluaran bisnis Anda." /></td></tr>
+      <tr><td colspan="4"><x-ui.empty-state icon="receipt_long" title="Tidak ada transaksi" description="Coba sesuaikan pencarian atau filter, atau catat transaksi baru." /></td></tr>
     @endforelse
     <x-slot:footer>{{ $transactions->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}</x-slot:footer>
   </x-ui.table>
