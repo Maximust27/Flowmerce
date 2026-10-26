@@ -39,14 +39,21 @@ new class extends Component
 }; ?>
 
 <section>
-  <x-ui.section-header title="Ubah Kata Sandi" description="Lindungi akun dengan kata sandi yang kuat dan unik." />
-  <form wire:submit="updatePassword" class="fm-form" style="margin-top:22px">
-    <x-ui.field field="current_password" label="Kata Sandi Saat Ini" type="password" wire:model="current_password" autocomplete="current-password" required />
-    <x-ui.field field="password" label="Kata Sandi Baru" type="password" wire:model="password" autocomplete="new-password" required />
-    <x-ui.field field="password_confirmation" label="Konfirmasi Kata Sandi" type="password" wire:model="password_confirmation" autocomplete="new-password" required />
-    <div class="fm-form__actions" style="justify-content:flex-start">
-      <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="updatePassword"><span class="material-symbols-outlined" aria-hidden="true">lock_reset</span>Perbarui Password</x-ui.button>
-      <x-action-message on="password-updated"><span class="fm-muted" style="font-size:12px">Password diperbarui</span></x-action-message>
+    <div class="fm-account__section-heading">
+        <div><span class="fm-overview__micro-label">ACCOUNT SECURITY</span><h2>Keamanan akun</h2><p>Perbarui kata sandi secara berkala untuk menjaga akun tetap aman.</p></div>
+        <span class="fm-account__section-icon material-symbols-outlined" aria-hidden="true">shield_lock</span>
     </div>
-  </form>
+    <form wire:submit="updatePassword" class="fm-form fm-account__form">
+        <x-ui.field field="current_password" label="Kata sandi saat ini" type="password" icon="lock_outline" reveal wire:model="current_password" autocomplete="current-password" required />
+        <div class="fm-form__grid">
+            <x-ui.field field="password" label="Kata sandi baru" type="password" icon="lock_reset" reveal wire:model="password" autocomplete="new-password" required />
+            <x-ui.field field="password_confirmation" label="Konfirmasi kata sandi" type="password" icon="lock_outline" reveal wire:model="password_confirmation" autocomplete="new-password" required />
+        </div>
+        <div class="fm-account__form-actions">
+            <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="updatePassword">
+                <span class="material-symbols-outlined" aria-hidden="true">lock_reset</span>Perbarui kata sandi
+            </x-ui.button>
+            <x-action-message on="password-updated"><span class="fm-account__saved">Kata sandi berhasil diperbarui</span></x-action-message>
+        </div>
+    </form>
 </section>

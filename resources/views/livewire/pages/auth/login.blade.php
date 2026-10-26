@@ -28,17 +28,37 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-  <p class="fm-section-eyebrow">Selamat datang</p><h1>Masuk ke Flowmerce</h1><p style="margin-top:10px">Kelola aktivitas bisnis Anda dari satu tempat.</p>
-  @if(session('status'))<x-ui.feedback style="margin-top:17px">{{ session('status') }}</x-ui.feedback>@endif
-  <form wire:submit="login" class="fm-form" style="margin-top:25px">
-    <x-ui.field field="form.email" label="Alamat Email" type="email" wire:model="form.email" autocomplete="username" placeholder="email@bisnis.com" required autofocus />
-    <x-ui.field field="form.password" label="Kata Sandi" type="password" wire:model="form.password" autocomplete="current-password" placeholder="Masukkan kata sandi" required />
-    <div class="flex items-center justify-between gap-3">
-      <label class="flex items-center gap-2 fm-muted" style="font-size:11px"><input type="checkbox" wire:model="form.remember" name="remember" style="accent-color:var(--fm-accent)">Ingat saya</label>
-      @if(Route::has('password.request'))<a class="fm-auth__link" href="{{ route('password.request') }}" wire:navigate>Lupa kata sandi?</a>@endif
-    </div>
-    <x-ui.button type="submit" class="fm-auth__submit" wire:loading.attr="disabled" wire:target="login">Masuk <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></x-ui.button>
-  </form>
-  <p style="margin-top:22px;text-align:center">Belum punya akun? <a href="{{ route('register') }}" wire:navigate class="fm-auth__link">Daftar Sekarang</a></p>
+<div class="fm-auth-flow">
+    <x-ui.auth-heading eyebrow="SELAMAT DATANG KEMBALI" title="Masuk ke workspace." description="Kembali kelola bisnis dengan semua informasi penting dalam satu tempat." />
+
+    @if(session('status'))
+        <x-ui.feedback class="fm-auth-flow__feedback">{{ session('status') }}</x-ui.feedback>
+    @endif
+
+    <form wire:submit="login" class="fm-auth-form">
+        <x-ui.field field="form.email" label="Alamat email" type="email" icon="alternate_email"
+            wire:model="form.email" autocomplete="username" placeholder="nama@email.com" required autofocus />
+
+        <x-ui.field field="form.password" label="Kata sandi" type="password" icon="lock_outline" reveal
+            wire:model="form.password" autocomplete="current-password" placeholder="Masukkan kata sandi" required />
+
+        <div class="fm-auth-form__options">
+            <label class="fm-auth-form__remember">
+                <input type="checkbox" wire:model="form.remember" name="remember">
+                <span>Ingat saya</span>
+            </label>
+            @if(Route::has('password.request'))
+                <a class="fm-auth-link" href="{{ route('password.request') }}" wire:navigate>Lupa kata sandi?</a>
+            @endif
+        </div>
+
+        <x-ui.button type="submit" class="fm-auth-form__submit" wire:loading.attr="disabled" wire:target="login">
+            <span wire:loading.remove wire:target="login">Masuk ke Flowmerce</span>
+            <span wire:loading wire:target="login">Memverifikasi akun...</span>
+            <span class="material-symbols-outlined" aria-hidden="true" wire:loading.remove wire:target="login">arrow_forward</span>
+        </x-ui.button>
+    </form>
+
+    <p class="fm-auth-flow__switch">Baru di Flowmerce? <a href="{{ route('register') }}" wire:navigate>Buat akun bisnis <span aria-hidden="true">↗</span></a></p>
+    <p class="fm-auth-flow__note"><span class="material-symbols-outlined" aria-hidden="true">verified_user</span> Akses untuk pemilik usaha dan kasir yang terdaftar.</p>
 </div>

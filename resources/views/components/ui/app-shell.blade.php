@@ -1,5 +1,7 @@
 @php
-  $menu = config('flowmerce-navigation.items');
+  $menu = auth()->user()->role === 'cashier'
+    ? collect(config('flowmerce-navigation.items'))->where('route', 'pos.index')->values()->all()
+    : config('flowmerce-navigation.items');
   $activeMenu = collect($menu)->first(fn($item) => request()->routeIs($item['match']));
   $activeTitle = request()->routeIs('profile') ? 'Pengaturan' : ($activeMenu['label'] ?? 'Workspace');
 @endphp
@@ -40,15 +42,21 @@
       @foreach(array_slice($menu,0,4) as $item)
         <a href="{{ route($item['route']) }}" wire:navigate @if(request()->routeIs($item['match'])) aria-current="page" @endif>{{ $item['label'] }}</a>
       @endforeach
-      <a href="{{ route('chat.index') }}" wire:navigate @if(request()->routeIs('chat.*')) aria-current="page" @endif>Asisten AI <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span></a>
+      @if(auth()->user()->role === 'admin')
+        <a href="{{ route('chat.index') }}" wire:navigate @if(request()->routeIs('chat.*')) aria-current="page" @endif>Asisten AI <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span></a>
+      @endif
     </nav>
     <main class="fm-content" id="main-content">{{ $slot }}</main>
   </div>
   <nav class="fm-mobile-nav" aria-label="Navigasi cepat mobile">
+    @if(auth()->user()->role === 'admin')
     <a class="fm-mobile-nav__link" href="{{ route('dashboard') }}" wire:navigate @if(request()->routeIs('dashboard')) aria-current="page" @endif><span class="material-symbols-outlined" aria-hidden="true">space_dashboard</span>Beranda</a>
     <a class="fm-mobile-nav__link" href="{{ route('inventaris.index') }}" wire:navigate @if(request()->routeIs('inventaris.*')) aria-current="page" @endif><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>Produk</a>
+    @endif
     <a class="fm-mobile-nav__link fm-mobile-nav__link--primary" href="{{ route('pos.index') }}"><span class="material-symbols-outlined" aria-hidden="true">point_of_sale</span>Kasir</a>
+    @if(auth()->user()->role === 'admin')
     <a class="fm-mobile-nav__link" href="{{ route('keuangan.index') }}" wire:navigate @if(request()->routeIs('keuangan.*')) aria-current="page" @endif><span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>Keuangan</a>
+    @endif
     <button type="button" class="fm-mobile-nav__link" @click="sidebarOpen=true"><span class="material-symbols-outlined" aria-hidden="true">menu</span>Menu</button>
   </nav>
   <x-ui.command-palette />

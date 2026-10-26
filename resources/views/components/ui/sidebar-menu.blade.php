@@ -1,7 +1,12 @@
-@php($menu = config('flowmerce-navigation.items'))
+@php
+    $menu = auth()->user()->role === 'cashier'
+        ? collect(config('flowmerce-navigation.items'))->where('route', 'pos.index')->values()->all()
+        : config('flowmerce-navigation.items');
+    $homeRoute = auth()->user()->role === 'cashier' ? 'pos.index' : 'dashboard';
+@endphp
 <div class="fm-rail__inner">
   <div class="fm-rail__brand">
-    <x-ui.brand :href="route('dashboard')" :compact="true" wire:navigate />
+    <x-ui.brand :href="route($homeRoute)" :compact="true" wire:navigate />
     <button type="button" class="fm-icon-button fm-rail__close" @click="sidebarOpen=false" aria-label="Tutup menu"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
   </div>
   <p class="fm-rail__caption">MENU</p>

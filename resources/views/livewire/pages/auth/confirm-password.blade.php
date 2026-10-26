@@ -33,6 +33,17 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div><p class="fm-section-eyebrow">Konfirmasi Keamanan</p><h1>Konfirmasi Kata Sandi</h1><p style="margin-top:11px">Untuk melanjutkan ke area sensitif, verifikasi kembali kata sandi akun Anda.</p>
-  <form wire:submit="confirmPassword" class="fm-form" style="margin-top:25px"><x-ui.field field="password" label="Kata Sandi" type="password" wire:model="password" autocomplete="current-password" required /><x-ui.button type="submit" class="fm-auth__submit" wire:loading.attr="disabled" wire:target="confirmPassword">Konfirmasi Identitas</x-ui.button></form>
+<div class="fm-auth-flow">
+    <div class="fm-auth-flow__symbol"><span class="material-symbols-outlined" aria-hidden="true">verified_user</span></div>
+    <x-ui.auth-heading eyebrow="VERIFIKASI KEAMANAN" title="Konfirmasi identitasmu." description="Untuk melanjutkan aktivitas sensitif, masukkan kembali kata sandi akun Flowmerce." />
+    <form wire:submit="confirmPassword" class="fm-auth-form">
+        <x-ui.field field="password" label="Kata sandi saat ini" type="password" icon="lock_outline" reveal
+            wire:model="password" autocomplete="current-password" placeholder="Kata sandi akun" required autofocus />
+        <x-ui.button type="submit" class="fm-auth-form__submit" wire:loading.attr="disabled" wire:target="confirmPassword">
+            <span wire:loading.remove wire:target="confirmPassword">Konfirmasi dan lanjutkan</span>
+            <span wire:loading wire:target="confirmPassword">Memverifikasi...</span>
+            <span class="material-symbols-outlined" aria-hidden="true" wire:loading.remove wire:target="confirmPassword">arrow_forward</span>
+        </x-ui.button>
+    </form>
+    <p class="fm-auth-flow__note"><span class="material-symbols-outlined" aria-hidden="true">lock</span> Konfirmasi ini diperlukan untuk menjaga keamanan akun.</p>
 </div>

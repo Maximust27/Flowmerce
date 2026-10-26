@@ -63,17 +63,31 @@ new class extends Component
 }; ?>
 
 <section>
-  <x-ui.section-header title="Informasi Profil" description="Perbarui identitas dan email akun Anda." />
-  <form wire:submit="updateProfileInformation" class="fm-form" style="margin-top:22px">
-    <x-ui.field field="name" label="Nama Lengkap" wire:model="name" autocomplete="name" required />
-    <x-ui.field field="email" label="Alamat Email" type="email" wire:model="email" autocomplete="username" required />
-    @if(auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !auth()->user()->hasVerifiedEmail())
-      <div class="fm-feedback" data-tone="danger">Email belum diverifikasi. <button type="button" class="fm-text-link" wire:click="sendVerification">Kirim ulang tautan verifikasi</button></div>
-      @if(session('status') === 'verification-link-sent')<x-ui.feedback>Link verifikasi baru sudah dikirim.</x-ui.feedback>@endif
-    @endif
-    <div class="fm-form__actions" style="justify-content:flex-start">
-      <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="updateProfileInformation"><span class="material-symbols-outlined" aria-hidden="true">save</span>Simpan Profil</x-ui.button>
-      <x-action-message on="profile-updated"><span class="fm-muted" style="font-size:12px">Tersimpan</span></x-action-message>
+    <div class="fm-account__section-heading">
+        <div><span class="fm-overview__micro-label">PERSONAL DETAILS</span><h2>Informasi pribadi</h2><p>Ubah nama dan alamat email yang digunakan untuk masuk.</p></div>
+        <span class="fm-account__section-icon material-symbols-outlined" aria-hidden="true">badge</span>
     </div>
-  </form>
+    <form wire:submit="updateProfileInformation" class="fm-form fm-account__form">
+        <div class="fm-form__grid">
+            <x-ui.field field="name" label="Nama lengkap" icon="person_outline" wire:model="name" autocomplete="name" required />
+            <x-ui.field field="email" label="Alamat email" type="email" icon="alternate_email" wire:model="email" autocomplete="username" required />
+        </div>
+        @if(auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !auth()->user()->hasVerifiedEmail())
+            <div class="fm-account__verify">
+                <span class="material-symbols-outlined" aria-hidden="true">mark_email_unread</span>
+                <div><strong>Email belum terverifikasi</strong><p>Periksa kotak masukmu atau minta tautan verifikasi baru.</p>
+                    <button type="button" wire:click="sendVerification" class="fm-auth-link">Kirim ulang verifikasi</button>
+                </div>
+            </div>
+            @if(session('status') === 'verification-link-sent')
+                <x-ui.feedback>Tautan verifikasi baru berhasil dikirim.</x-ui.feedback>
+            @endif
+        @endif
+        <div class="fm-account__form-actions">
+            <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="updateProfileInformation">
+                <span class="material-symbols-outlined" aria-hidden="true">check</span>Simpan perubahan
+            </x-ui.button>
+            <x-action-message on="profile-updated"><span class="fm-account__saved">Profil berhasil diperbarui</span></x-action-message>
+        </div>
+    </form>
 </section>
