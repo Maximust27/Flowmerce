@@ -1,0 +1,308 @@
+/*
+ * Flowmerce Studio | GSAP presentation contract
+ *
+ * Leave the app shell, page container, fixed sidebar, checkout summary and
+ * full-screen scrims untransformed. GSAP only moves safe leaf-level content.
+ * All page content is fully readable with JS disabled or reduced motion.
+ */
+:root {
+    --fm-motion-fast: 180ms;
+    --fm-motion-base: 360ms;
+    --fm-motion-long: 620ms;
+}
+
+html.fm-gsap-enabled .fm-app .fm-page,
+html.fm-gsap-enabled .fm-app .fm-dashboard,
+html.fm-gsap-enabled .fm-auth-panel,
+html.fm-gsap-enabled .fm-modal__panel,
+html.fm-gsap-enabled .fm-command__dialog,
+html.fm-gsap-enabled .fm-lineplot__curve {
+    animation: none !important;
+}
+
+/* GSAP controls lift/scale on these specific cards. Colors and shadows remain
+   CSS-native so pointer movements don't fight against a transition transform. */
+@media (hover: hover) and (pointer: fine) {
+    html.fm-gsap-enabled .fm-public-feature,
+    html.fm-gsap-enabled .fm-tables__card,
+    html.fm-gsap-enabled .fm-guest__product,
+    html.fm-gsap-enabled .fm-product,
+    html.fm-gsap-enabled .fm-studio-shortcuts__links > a {
+        transition-property: background-color, border-color, box-shadow, color !important;
+    }
+
+    html.fm-gsap-enabled .fm-public-feature:hover,
+    html.fm-gsap-enabled .fm-tables__card:hover,
+    html.fm-gsap-enabled .fm-guest__product:hover,
+    html.fm-gsap-enabled .fm-product:hover,
+    html.fm-gsap-enabled .fm-studio-shortcuts__links > a:hover {
+        transform: none;
+    }
+}
+
+/* An SVG curve is drawn with real chart data, not animated fake numbers. */
+html.fm-gsap-enabled .fm-lineplot__curve {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+}
+
+/* Small ambient details; never affect positioning, reading order or clicks. */
+.fm-guest__cart-row,
+.fm-chat__message,
+.fm-pos__online-order {
+    transform-origin: center center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.fm-gsap-enabled .fm-public-feature,
+    html.fm-gsap-enabled .fm-tables__card,
+    html.fm-gsap-enabled .fm-guest__product,
+    html.fm-gsap-enabled .fm-product,
+    html.fm-gsap-enabled .fm-studio-shortcuts__links > a {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+
+/* V2 — Single motion owner. Disabling legacy entrance animations at CSS load
+   prevents a CSS animation from flashing just before GSAP hydrates. */
+.fm-app .fm-page,
+.fm-app .fm-dashboard,
+.fm-auth .fm-auth-panel,
+.fm-app .fm-modal__panel,
+.fm-app .fm-command__dialog,
+.fm-public .fm-lineplot__curve,
+.fm-app .fm-lineplot__curve {
+    animation: none !important;
+}
+/* Never translate page containers: they can contain fixed dialogs. */
+.fm-app .fm-page,
+.fm-app .fm-dashboard {
+    transform: none !important;
+}
+/* Data updates never flash from a fully transparent state. */
+.fm-app [wire\:loading] {
+    transition: opacity 200ms ease-out;
+}
+
+/* Landing hero: two independently orbiting/hovering decorative bodies.
+   CSS is a readable static fallback when JS or motion is unavailable. */
+.fm-public-hero__visual {
+    perspective: 900px;
+    overflow: visible;
+}
+.fm-public-hero__halo {
+    position: absolute;
+    z-index: -1;
+    top: -15%;
+    left: -7%;
+    width: min(92%, 480px);
+    aspect-ratio: 1;
+    border: 1px dashed color-mix(in srgb, var(--fm-accent) 29%, transparent);
+    border-radius: 50%;
+    opacity: .52;
+    pointer-events: none;
+}
+.fm-public-hero__halo::after {
+    content: "";
+    position: absolute;
+    inset: 11%;
+    border: 1px solid color-mix(in srgb, var(--fm-accent) 16%, transparent);
+    border-radius: 50%;
+}
+.fm-public-hero__decor {
+    pointer-events: none;
+    will-change: auto;
+    box-shadow: 0 12px 35px color-mix(in srgb, var(--fm-accent) 22%, transparent);
+}
+.fm-public-hero__decor--top {
+    background: linear-gradient(145deg, #ffa88c, var(--fm-accent));
+}
+.fm-public-hero__decor--bottom {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fm-accent) 72%, white), var(--fm-accent));
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--fm-accent) 9%, transparent), 0 12px 30px color-mix(in srgb, var(--fm-accent) 17%, transparent);
+}
+
+/* An animated solar system: two concentric orbital paths, six satellites,
+   and a stationary logo at the center. GSAP rotates each path and applies
+   inverse rotation to satellites, so icons remain upright as they travel. */
+.fm-public-showcase__orbit.fm-orbit {
+    width: min(100%, 372px);
+    height: auto;
+    aspect-ratio: 1;
+    margin-inline: auto;
+    border: 0;
+    box-shadow: none;
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+}
+.fm-public-showcase__orbit.fm-orbit::after { content: none; }
+.fm-orbit__glow {
+    position: absolute;
+    z-index: -1;
+    inset: -16%;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, color-mix(in srgb, var(--fm-accent) 11%, transparent) 0 27%, transparent 68%);
+}
+.fm-orbit__track {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: auto;
+}
+.fm-orbit__track--outer {
+    inset: 12px;
+    border: 1px solid color-mix(in srgb, var(--fm-accent) 22%, var(--fm-border));
+    box-shadow: 0 0 0 20px color-mix(in srgb, var(--fm-accent) 2%, transparent);
+}
+.fm-orbit__track--inner {
+    inset: 82px;
+    border: 1px dashed color-mix(in srgb, var(--fm-accent) 30%, var(--fm-border));
+}
+.fm-orbit__satellite {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border: 1px solid var(--fm-border);
+    border-radius: 17px;
+    background: var(--fm-surface);
+    color: var(--fm-accent);
+    box-shadow: 0 13px 34px color-mix(in srgb, var(--fm-ink) 8%, transparent), 0 2px 5px color-mix(in srgb, var(--fm-ink) 4%, transparent);
+    translate: -50% -50%;
+}
+.fm-orbit__track--inner .fm-orbit__satellite {
+    width: 45px;
+    height: 45px;
+    border-radius: 14px;
+    background: var(--fm-accent-soft);
+    color: var(--fm-accent);
+}
+.fm-orbit__satellite > .material-symbols-outlined {
+    font-size: 24px;
+    line-height: 1;
+}
+.fm-orbit__track--inner .fm-orbit__satellite > .material-symbols-outlined {
+    font-size: 21px;
+}
+.fm-orbit__satellite--north { top: 0; left: 50%; }
+.fm-orbit__satellite--east { top: 50%; left: 100%; }
+.fm-orbit__satellite--south { top: 100%; left: 50%; }
+.fm-orbit__satellite--west { top: 50%; left: 0; }
+.fm-orbit__core.fm-public-showcase__orbit-center {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+.fm-orbit__core-ring {
+    position: absolute;
+    width: 118px;
+    height: 118px;
+    border-radius: 38px;
+    background: var(--fm-surface);
+    border: 1px solid color-mix(in srgb, var(--fm-accent) 15%, var(--fm-border));
+    box-shadow: 0 10px 40px color-mix(in srgb, var(--fm-accent) 10%, transparent),
+                0 0 0 14px color-mix(in srgb, var(--fm-accent) 4%, transparent);
+}
+.fm-orbit__core .fm-public-showcase__brand-image {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 78px;
+    height: 78px;
+    object-fit: contain;
+}
+.fm-orbit__core-caption {
+    position: absolute;
+    z-index: 2;
+    top: calc(50% + 47px);
+    left: 50%;
+    translate: -50% 0;
+    white-space: nowrap;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .10em;
+    color: var(--fm-muted);
+}
+
+/* Feature panels have their own life without stealing focus from the copy. */
+.fm-public-feature {
+    isolation: isolate;
+    backface-visibility: hidden;
+}
+.fm-public-feature::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle at 82% 13%, color-mix(in srgb, var(--fm-accent) 6%, transparent), transparent 54%);
+    transition: opacity 460ms ease;
+}
+.fm-public-feature:not(.fm-public-feature--featured):hover::after { opacity: 1; }
+.fm-public-feature__icon { transform-origin: 50% 50%; }
+
+/* No perpetual movement when it could make the interface distracting. */
+@media (prefers-reduced-motion: reduce) {
+    .fm-public-hero__decor, .fm-public-hero__halo,
+    .fm-orbit__track, .fm-orbit__satellite, .fm-orbit__core,
+    .fm-public-feature__icon {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+@media (max-width: 640px) {
+    .fm-public-showcase__orbit.fm-orbit { width: min(82vw, 318px); }
+    .fm-orbit__track--inner { inset: 24%; }
+    .fm-orbit__satellite { width: 46px; height: 46px; border-radius: 14px; }
+    .fm-orbit__satellite > .material-symbols-outlined { font-size: 21px; }
+    .fm-orbit__track--inner .fm-orbit__satellite { width: 40px; height: 40px; }
+    .fm-orbit__core-ring { width: 101px; height: 101px; border-radius: 32px; }
+    .fm-orbit__core .fm-public-showcase__brand-image { width: 67px; height: 67px; }
+    .fm-orbit__core-caption { top: calc(50% + 41px); font-size: 7px; }
+    .fm-public-hero__halo { left: 0; top: -13%; }
+}
+
+@media (max-width: 400px) {
+    .fm-orbit__track--inner { inset: 22%; }
+    .fm-orbit__core-ring { width: 86px; height: 86px; border-radius: 28px; }
+    .fm-orbit__core .fm-public-showcase__brand-image { width: 60px; height: 60px; }
+    .fm-orbit__core-caption { top: calc(50% + 36px); }
+}
+
+/* Motion refinement — one animation owner per element.
+   Legacy stat-card/graph CSS keyframes were fighting the JS choreography,
+   creating a second fade/slide with staggered delays after navigation. */
+.fm-app .fm-stat-card,
+.fm-app .fm-chart__bar,
+.fm-app .fm-lineplot__curve {
+    animation: none !important;
+    animation-delay: 0ms !important;
+}
+
+/* Preserve complete legibility of landing cards at every scroll position.
+   The JS animates their icons only, not the card text or the card opacity. */
+.fm-public-features > .fm-public-feature {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Keep easing consistent and comfortable for non-GSAP user interactions. */
+.fm-public-feature,
+.fm-tables__card {
+    transition-duration: 360ms;
+    transition-timing-function: cubic-bezier(.22, 1, .36, 1);
+}

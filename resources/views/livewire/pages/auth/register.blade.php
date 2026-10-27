@@ -41,67 +41,40 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <form wire:submit="register">
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" class="block mt-1 w-full" type="text" name="name" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+<div class="fm-auth-flow fm-auth-flow--register">
+    <x-ui.auth-heading eyebrow="MULAI DENGAN FLOWMERCE" title="Bangun workspace-mu." description="Daftarkan informasi dasar, lalu kelola produk, transaksi, dan laporan dari satu aplikasi." />
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+    <form wire:submit="register" class="fm-auth-form">
+        <fieldset class="fm-auth-form__section">
+            <legend class="fm-auth-form__section-head"><span>01</span> Data pemilik</legend>
+            <div class="fm-auth-form__grid">
+                <x-ui.field field="name" label="Nama lengkap" icon="person_outline" wire:model="name" autocomplete="name" placeholder="Nama pemilik usaha" required autofocus />
+                <x-ui.field field="email" label="Alamat email" type="email" icon="alternate_email" wire:model="email" autocomplete="username" placeholder="nama@email.com" required />
+            </div>
+        </fieldset>
 
-        <!-- Business Name -->
-        <div class="mt-4">
-            <x-input-label for="business_name" :value="__('Nama Bisnis')" />
-            <x-text-input wire:model="business_name" id="business_name" class="block mt-1 w-full" type="text" name="business_name" required placeholder="Cth: Warung Barokah" />
-            <x-input-error :messages="$errors->get('business_name')" class="mt-2" />
-        </div>
+        <fieldset class="fm-auth-form__section">
+            <legend class="fm-auth-form__section-head"><span>02</span> Tentang usahamu</legend>
+            <div class="fm-auth-form__grid">
+                <x-ui.field field="business_name" label="Nama usaha" icon="storefront" wire:model="business_name" placeholder="Contoh: Kedai Kopi Kita" required />
+                <x-ui.field field="business_category" label="Kategori usaha" icon="category" wire:model="business_category" placeholder="Contoh: Kuliner" required />
+            </div>
+        </fieldset>
 
-        <!-- Business Category -->
-        <div class="mt-4">
-            <x-input-label for="business_category" :value="__('Kategori Bisnis')" />
-            <x-text-input wire:model="business_category" id="business_category" class="block mt-1 w-full" type="text" name="business_category" required placeholder="Cth: Coffee Shop, Warung Makan" />
-            <x-input-error :messages="$errors->get('business_category')" class="mt-2" />
-        </div>
+        <fieldset class="fm-auth-form__section">
+            <legend class="fm-auth-form__section-head"><span>03</span> Keamanan akun</legend>
+            <div class="fm-auth-form__grid">
+                <x-ui.field field="password" label="Kata sandi" icon="lock_outline" type="password" wire:model="password" autocomplete="new-password" placeholder="Buat kata sandi" reveal required />
+                <x-ui.field field="password_confirmation" label="Konfirmasi kata sandi" icon="lock_reset" type="password" wire:model="password_confirmation" autocomplete="new-password" placeholder="Ulangi kata sandi" reveal required />
+            </div>
+            <p class="fm-auth-form__helper"><span class="material-symbols-outlined" aria-hidden="true">info</span>Akun pertama akan menjadi administrator usaha. Gunakan kata sandi yang unik dan aman.</p>
+        </fieldset>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}" wire:navigate>
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
+        <x-ui.button type="submit" class="fm-auth-form__submit" wire:loading.attr="disabled" wire:target="register">
+            <span wire:loading.remove wire:target="register">Buat workspace bisnis</span>
+            <span wire:loading wire:target="register">Membuat akun...</span>
+            <span class="material-symbols-outlined" aria-hidden="true" wire:loading.remove wire:target="register">arrow_forward</span>
+        </x-ui.button>
     </form>
+    <p class="fm-auth-flow__switch">Sudah memiliki akun? <a href="{{ route('login') }}" wire:navigate>Masuk ke Flowmerce <span aria-hidden="true">↗</span></a></p>
 </div>

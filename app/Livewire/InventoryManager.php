@@ -18,6 +18,16 @@ class InventoryManager extends Component
     public $image;
     public $old_image;
     public $isModalOpen = false;
+    public bool $is_available_online = true;
+
+    // Presentation-only filters: do not mutate inventory or stock rules.
+    public string $search = '';
+    public string $stockFilter = 'all';
+    public string $categoryFilter = 'all';
+
+    public function updatedSearch(): void { $this->resetPage(); }
+    public function updatedStockFilter(): void { $this->resetPage(); }
+    public function updatedCategoryFilter(): void { $this->resetPage(); }
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -27,6 +37,7 @@ class InventoryManager extends Component
         'current_stock' => 'required|integer|min:0',
         'min_stock_alert' => 'required|integer|min:0',
         'image' => 'nullable|image|max:2048',
+        'is_available_online' => 'boolean',
     ];
 
     public function openModal()
@@ -38,7 +49,7 @@ class InventoryManager extends Component
     public function closeModal()
     {
         $this->isModalOpen = false;
-        $this->reset(['product_id', 'name', 'category', 'buy_price', 'sell_price', 'current_stock', 'min_stock_alert', 'image', 'old_image']);
+        $this->reset(['product_id', 'name', 'category', 'buy_price', 'sell_price', 'current_stock', 'min_stock_alert', 'image', 'old_image', 'is_available_online']);
         $this->resetValidation();
     }
 
@@ -51,8 +62,10 @@ class InventoryManager extends Component
             $imagePath = $this->image->store('products', 'public');
         }
 
+        $wasEditing = (bool) $this->product_id;
+
         if ($this->product_id) {
-            $product = Product::findOrFail($this->product_id);
+            $product = Product::where('user_id', Auth::id())->findOrFail($this->product_id);
             $product->update([
                 'name' => $this->name,
                 'category' => $this->category,
@@ -61,6 +74,7 @@ class InventoryManager extends Component
                 'current_stock' => $this->current_stock,
                 'min_stock_alert' => $this->min_stock_alert,
                 'image' => $imagePath,
+                'is_available_online' => $this->is_available_online,
             ]);
         } else {
             Product::create([
@@ -77,7 +91,7 @@ class InventoryManager extends Component
 
         $this->closeModal();
         Cache::forget('dashboard_stats_' . Auth::id());
-        session()->flash('message', $this->product_id ? 'Produk berhasil diubah.' : 'Produk berhasil ditambahkan.');
+        session()->flash('message', $wasEditing ? 'Produk berhasil diubah.' : 'Produk berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -91,6 +105,7 @@ class InventoryManager extends Component
         $this->current_stock = $product->current_stock;
         $this->min_stock_alert = $product->min_stock_alert;
         $this->old_image = $product->image;
+        $this->is_available_online = (bool) $product->is_available_online;
         $this->isModalOpen = true;
     }
 
@@ -104,7 +119,29 @@ class InventoryManager extends Component
 
     public function render()
     {
-        $products = Product::where('user_id', Auth::id())->latest()->paginate(10);
-        return view('livewire.inventory-manager', compact('products'));
+        $userId = Auth::id();
+        $search = trim($this->search);
+
+        $query = Product::query()->where('user_id', $userId)
+            ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('category', 'like', '%' . $search . '%');
+            }))
+            ->when($this->categoryFilter !== 'all',
+                fn ($query) => $query->where('category', $this->categoryFilter))
+            ->when($this->stockFilter === 'out',
+                fn ($query) => $query->where('current_stock', '<=', 0))
+            ->when($this->stockFilter === 'low',
+                fn ($query) => $query->where('current_stock', '>', 0)
+                    ->whereColumn('current_stock', '<=', 'min_stock_alert'))
+            ->when($this->stockFilter === 'normal',
+                fn ($query) => $query->whereColumn('current_stock', '>', 'min_stock_alert'));
+
+        $products = $query->latest()->paginate(10);
+        $categories = Product::where('user_id', $userId)
+            ->whereNotNull('category')->where('category', '!=', '')
+            ->distinct()->orderBy('category')->pluck('category');
+
+        return view('livewire.inventory-manager', compact('products', 'categories'));
     }
 }

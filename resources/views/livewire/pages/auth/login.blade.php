@@ -28,48 +28,37 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<div class="fm-auth-flow">
+    <x-ui.auth-heading eyebrow="SELAMAT DATANG KEMBALI" title="Masuk ke workspace." description="Kembali kelola bisnis dengan semua informasi penting dalam satu tempat." />
 
-    <form wire:submit="login">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
-        </div>
+    @if(session('status'))
+        <x-ui.feedback class="fm-auth-flow__feedback">{{ session('status') }}</x-ui.feedback>
+    @endif
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+    <form wire:submit="login" class="fm-auth-form">
+        <x-ui.field field="form.email" label="Alamat email" type="email" icon="alternate_email"
+            wire:model="form.email" autocomplete="username" placeholder="nama@email.com" required autofocus />
 
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+        <x-ui.field field="form.password" label="Kata sandi" type="password" icon="lock_outline" reveal
+            wire:model="form.password" autocomplete="current-password" placeholder="Masukkan kata sandi" required />
 
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <div class="fm-auth-form__options">
+            <label class="fm-auth-form__remember">
+                <input type="checkbox" wire:model="form.remember" name="remember">
+                <span>Ingat saya</span>
             </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </a>
+            @if(Route::has('password.request'))
+                <a class="fm-auth-link" href="{{ route('password.request') }}" wire:navigate>Lupa kata sandi?</a>
             @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
         </div>
+
+        <x-ui.button type="submit" class="fm-auth-form__submit" wire:loading.attr="disabled" wire:target="login">
+            <span wire:loading.remove wire:target="login">Masuk ke Flowmerce</span>
+            <span wire:loading wire:target="login">Memverifikasi akun...</span>
+            <span class="material-symbols-outlined" aria-hidden="true" wire:loading.remove wire:target="login">arrow_forward</span>
+        </x-ui.button>
     </form>
+
+    <p class="fm-auth-flow__switch">Baru di Flowmerce? <a href="{{ route('register') }}" wire:navigate>Buat akun bisnis <span aria-hidden="true">↗</span></a></p>
+    <p class="fm-auth-flow__note"><span class="material-symbols-outlined" aria-hidden="true">verified_user</span> Akses untuk pemilik usaha dan kasir yang terdaftar.</p>
 </div>

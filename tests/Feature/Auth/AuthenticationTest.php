@@ -13,73 +13,67 @@ class AuthenticationTest extends TestCase
 
     public function test_login_screen_can_be_rendered(): void
     {
-        $response = $this->get('/login');
-
-        $response
-            ->assertOk()
-            ->assertSeeVolt('pages.auth.login');
+        $this->get('/login')->assertOk()->assertSeeVolt('pages.auth.login');
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'admin']);
 
-        $component = Volt::test('pages.auth.login')
+        Volt::test('pages.auth.login')
             ->set('form.email', $user->email)
-            ->set('form.password', 'password');
-
-        $component->call('login');
-
-        $component
+            ->set('form.password', 'password')
+            ->call('login')
             ->assertHasNoErrors()
             ->assertRedirect(route('dashboard', absolute: false));
 
         $this->assertAuthenticated();
     }
 
+    public function test_cashiers_are_redirected_to_pos_after_login(): void
+    {
+        $cashier = User::factory()->create(['role' => 'cashier', 'business_name' => 'Toko Kasir']);
+
+        Volt::test('pages.auth.login')
+            ->set('form.email', $cashier->email)
+            ->set('form.password', 'password')
+            ->call('login')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('pos.index', absolute: false));
+    }
+
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
         $user = User::factory()->create();
 
-        $component = Volt::test('pages.auth.login')
+        Volt::test('pages.auth.login')
             ->set('form.email', $user->email)
-            ->set('form.password', 'wrong-password');
-
-        $component->call('login');
-
-        $component
+            ->set('form.password', 'wrong-password')
+            ->call('login')
             ->assertHasErrors()
             ->assertNoRedirect();
 
         $this->assertGuest();
     }
 
-    public function test_navigation_menu_can_be_rendered(): void
+    public function test_authenticated_workspace_navigation_can_be_rendered(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'admin', 'business_name' => 'Toko Contoh']);
 
-        $this->actingAs($user);
-
-        $response = $this->get('/dashboard');
-
-        $response
+        $this->actingAs($user)
+            ->get(route('dashboard'))
             ->assertOk()
-            ->assertSeeVolt('layout.navigation');
+            ->assertSee('fm-topnav')
+            ->assertSee('Inventaris')
+            ->assertSee('Keuangan')
+            ->assertSee('Asisten AI');
     }
 
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $component = Volt::test('layout.navigation');
-
-        $component->call('logout');
-
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirect('/');
+        $this->actingAs($user)->post(route('logout'))->assertRedirect('/');
 
         $this->assertGuest();
     }

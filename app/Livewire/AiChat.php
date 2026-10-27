@@ -2,109 +2,88 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Illuminate\Support\Facades\Http;
+use App\Services\BusinessAdvisor;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Transaction;
-use App\Models\Product;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 
 class AiChat extends Component
 {
-    public $message = '';
-    public $chatHistory = [];
-    public $isTyping = false;
-    public $userId;
+    public string $message = '';
+    public array $chatHistory = [];
+    public bool $isTyping = false;
 
-    public function mount()
+    public function mount(): void
     {
-        $this->userId = Auth::id();
-        $this->chatHistory[] = [
-            'role' => 'assistant', 
-            'content' => 'Halo! Saya asisten bisnis AI Anda. Ada yang bisa saya bantu terkait laporan keuangan, analisis stok, atau strategi pemasaran hari ini?'
-        ];
+        $this->chatHistory = [[
+            'role' => 'assistant',
+            'content' => 'Selamat datang di konsultasi bisnis Flowmerce. Saya dapat membantu membaca pencatatan keuangan, memeriksa stok, dan menyusun langkah pengembangan usaha.',
+        ]];
     }
 
-    public function sendMessage()
+    public function sendMessage(BusinessAdvisor $advisor): void
     {
-        if(trim($this->message) === '') return;
+        $this->validate(['message' => ['required', 'string', 'max:1200']]);
 
-        $userMsg = $this->message;
-        
-        $this->chatHistory[] = [
-            'role' => 'user',
-            'content' => $userMsg
-        ];
-        
+        $question = trim($this->message);
+        if ($question === '') return;
+
+        $this->chatHistory[] = ['role' => 'user', 'content' => $question];
+        $this->chatHistory[] = ['role' => 'assistant', 'content' => ''];
+        // Keep the Livewire payload compact, particularly on mobile.
+        $this->chatHistory = array_slice($this->chatHistory, -24);
         $this->message = '';
         $this->isTyping = true;
-        
-        // Add an empty assistant message to append chunks to
-        $this->chatHistory[] = [
-            'role' => 'assistant',
-            'content' => '' // Will be filled by Echo
-        ];
-        
         $this->dispatch('ai-thinking');
-        
-        $this->getAiResponse($userMsg);
-    }
-    
-    public function getAiResponse($userMsg)
-    {
-        $businessInfo = Auth::user()->only(['name', 'business_name', 'business_category']);
-        
-        $revenue = Transaction::where('type', 'INCOME')->sum('amount');
-        $expenses = Transaction::where('type', 'EXPENSE')->sum('amount');
-        $lowStock = Product::whereColumn('current_stock', '<=', 'min_stock_alert')->pluck('name');
-        
-        $context = [
-            'business_profile' => $businessInfo,
-            'financials' => [
-                'revenue' => (float) $revenue,
-                'expenses' => (float) $expenses,
-                'profit' => (float) ($revenue - $expenses)
-            ],
-            'low_stock_alerts' => $lowStock->toArray()
-        ];
-        
-        $apiKey = config('services.gemini.api_key');
-        
-        if(empty($apiKey)) {
-            $this->chatHistory[count($this->chatHistory)-1]['content'] = "Maaf, GEMINI_API_KEY belum dikonfigurasi di .env system.";
-            $this->isTyping = false;
-            return;
-        }
 
-        $prompt = "Anda adalah konsultan bisnis AI UMKM. Gunakan data ini untuk menjawab:\n" . 
-                  "Owner: {$context['business_profile']['name']}\n" .
-                  "Bisnis: {$context['business_profile']['business_name']}\n" .
-                  "Kategori: {$context['business_profile']['business_category']}\n" .
-                  "Keuangan: Rev: " . number_format($context['financials']['revenue']) . ", Exp: " . number_format($context['financials']['expenses']) . ", Profit: " . number_format($context['financials']['profit']) . "\n" .
-                  "Stok Rendah: " . implode(', ', $context['low_stock_alerts']) . "\n\n" .
-                  "User: " . $userMsg;
+        $index = array_key_last($this->chatHistory);
 
         try {
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={$apiKey}", [
-                'contents' => [['parts' => [['text' => $prompt]]]]
-            ]);
-
-            if ($response->successful()) {
-                $text = $response->json('candidates.0.content.parts.0.text');
-                $this->chatHistory[count($this->chatHistory)-1]['content'] = $text ?: "Maaf, AI tidak memberikan jawaban.";
-            } elseif ($response->status() === 429) {
-                $this->chatHistory[count($this->chatHistory)-1]['content'] = "Limit tercapai (Free Tier). Silakan tunggu ~60 detik sebelum pesan berikutnya.";
-            } else {
-                \Log::error("Gemini API Error [" . $response->status() . "]: " . $response->body());
-                $this->chatHistory[count($this->chatHistory)-1]['content'] = "Maaf, ada masalah teknis (Error " . $response->status() . ").";
+            $apiKey = config('services.gemini.api_key');
+            if (!$apiKey) {
+                $this->chatHistory[$index]['content'] = 'Asisten bisnis belum tersedia. Hubungi pengelola aplikasi untuk mengaktifkan layanan konsultasi.';
+                return;
             }
 
-        } catch (\Exception $e) {
-            \Log::error("Gemini Request Error: " . $e->getMessage());
-            $this->chatHistory[count($this->chatHistory)-1]['content'] = "Koneksi ke server AI terputus. Silakan coba lagi.";
-        }
+            $context = $advisor->contextFor(Auth::user());
+            $response = Http::timeout(25)->acceptJson()
+                ->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key='.urlencode($apiKey), [
+                    'systemInstruction' => [
+                        'parts' => [['text' => $advisor->instructions()]],
+                    ],
+                    'contents' => [[
+                        'role' => 'user',
+                        'parts' => [[
+                            'text' => "Data bisnis terverifikasi dari database aplikasi (JSON):\n".
+                                json_encode($context, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT).
+                                "\n\nPertanyaan pemilik usaha: ".$question,
+                        ]],
+                    ]],
+                    'generationConfig' => [
+                        'temperature' => 0.35,
+                        'maxOutputTokens' => 650,
+                    ],
+                ]);
 
-        $this->isTyping = false;
-        $this->dispatch('message-received');
+            if ($response->successful()) {
+                $this->chatHistory[$index]['content'] = $advisor->plainText(
+                    $response->json('candidates.0.content.parts.0.text')
+                );
+            } elseif ($response->status() === 429) {
+                $this->chatHistory[$index]['content'] = 'Layanan konsultasi sedang sibuk. Coba kembali beberapa saat lagi.';
+            } else {
+                // Do not log the response body: it may contain user business data.
+                Log::warning('Business advisor provider returned a non-success response', ['status' => $response->status()]);
+                $this->chatHistory[$index]['content'] = 'Analisis belum dapat diproses saat ini. Silakan coba lagi.';
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('Business advisor is temporarily unavailable', ['exception' => get_class($exception)]);
+            $this->chatHistory[$index]['content'] = 'Koneksi ke layanan konsultasi sedang bermasalah. Silakan coba kembali.';
+        } finally {
+            $this->isTyping = false;
+            $this->dispatch('message-received');
+        }
     }
 
     public function render()

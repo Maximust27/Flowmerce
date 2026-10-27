@@ -36,26 +36,20 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form wire:submit="sendPasswordResetLink">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+<div class="fm-auth-flow">
+    <div class="fm-auth-flow__symbol"><span class="material-symbols-outlined" aria-hidden="true">mark_email_unread</span></div>
+    <x-ui.auth-heading eyebrow="PULIHKAN AKUN" title="Lupa kata sandi?" description="Masukkan email yang terhubung ke akun. Kami akan mengirim tautan untuk membuat kata sandi baru." />
+    @if(session('status'))
+        <x-ui.feedback class="fm-auth-flow__feedback">{{ session('status') }}</x-ui.feedback>
+    @endif
+    <form wire:submit="sendPasswordResetLink" class="fm-auth-form">
+        <x-ui.field field="email" label="Alamat email" type="email" icon="alternate_email" wire:model="email"
+            autocomplete="username" placeholder="nama@email.com" required autofocus />
+        <x-ui.button type="submit" class="fm-auth-form__submit" wire:loading.attr="disabled" wire:target="sendPasswordResetLink">
+            <span wire:loading.remove wire:target="sendPasswordResetLink">Kirim tautan pemulihan</span>
+            <span wire:loading wire:target="sendPasswordResetLink">Mengirim tautan...</span>
+            <span class="material-symbols-outlined" aria-hidden="true" wire:loading.remove wire:target="sendPasswordResetLink">arrow_forward</span>
+        </x-ui.button>
     </form>
+    <p class="fm-auth-flow__switch"><a href="{{ route('login') }}" wire:navigate><span aria-hidden="true">←</span> Kembali ke halaman masuk</a></p>
 </div>

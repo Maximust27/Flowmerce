@@ -63,53 +63,31 @@ new class extends Component
 }; ?>
 
 <section>
-    <header>
-        <h2 class="text-lg font-bold text-white">
-            {{ __('Informasi Profil') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-slate-400">
-            {{ __("Perbarui informasi profil akun dan alamat email Anda.") }}
-        </p>
-    </header>
-
-    <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+    <div class="fm-account__section-heading">
+        <div><span class="fm-overview__micro-label">PERSONAL DETAILS</span><h2>Informasi pribadi</h2><p>Ubah nama dan alamat email yang digunakan untuk masuk.</p></div>
+        <span class="fm-account__section-icon material-symbols-outlined" aria-hidden="true">badge</span>
+    </div>
+    <form wire:submit="updateProfileInformation" class="fm-form fm-account__form">
+        <div class="fm-form__grid">
+            <x-ui.field field="name" label="Nama lengkap" icon="person_outline" wire:model="name" autocomplete="name" required />
+            <x-ui.field field="email" label="Alamat email" type="email" icon="alternate_email" wire:model="email" autocomplete="username" required />
         </div>
-
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-            @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800">
-                        {{ __('Your email address is unverified.') }}
-
-                        <button wire:click.prevent="sendVerification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
+        @if(auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !auth()->user()->hasVerifiedEmail())
+            <div class="fm-account__verify">
+                <span class="material-symbols-outlined" aria-hidden="true">mark_email_unread</span>
+                <div><strong>Email belum terverifikasi</strong><p>Periksa kotak masukmu atau minta tautan verifikasi baru.</p>
+                    <button type="button" wire:click="sendVerification" class="fm-auth-link">Kirim ulang verifikasi</button>
                 </div>
+            </div>
+            @if(session('status') === 'verification-link-sent')
+                <x-ui.feedback>Tautan verifikasi baru berhasil dikirim.</x-ui.feedback>
             @endif
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            <x-action-message class="me-3" on="profile-updated">
-                {{ __('Saved.') }}
-            </x-action-message>
+        @endif
+        <div class="fm-account__form-actions">
+            <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="updateProfileInformation">
+                <span class="material-symbols-outlined" aria-hidden="true">check</span>Simpan perubahan
+            </x-ui.button>
+            <x-action-message on="profile-updated"><span class="fm-account__saved">Profil berhasil diperbarui</span></x-action-message>
         </div>
     </form>
 </section>

@@ -15,6 +15,12 @@ class TransactionManager extends Component
     public $type = 'INCOME', $amount, $category, $notes;
     public $isModalOpen = false;
 
+    public string $search = '';
+    public string $typeFilter = 'all';
+
+    public function updatedSearch(): void { $this->resetPage(); }
+    public function updatedTypeFilter(): void { $this->resetPage(); }
+
     protected $rules = [
         'type' => 'required|in:INCOME,EXPENSE',
         'amount' => 'required|numeric|min:1',
@@ -56,7 +62,17 @@ class TransactionManager extends Component
 
     public function render()
     {
-        $transactions = Transaction::where('user_id', Auth::id())->latest()->paginate(10);
+        $search = trim($this->search);
+
+        $transactions = Transaction::where('user_id', Auth::id())
+            ->when($this->typeFilter === 'income', fn ($query) => $query->where('type', 'INCOME'))
+            ->when($this->typeFilter === 'expense', fn ($query) => $query->where('type', 'EXPENSE'))
+            ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search) {
+                $query->where('category', 'like', '%' . $search . '%')
+                    ->orWhere('notes', 'like', '%' . $search . '%');
+            }))
+            ->latest()->paginate(10);
+
         return view('livewire.transaction-manager', compact('transactions'));
     }
 }

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Flowmerce</title>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#222b35"/>
+      <stop offset=".63" stop-color="#171c25"/>
+      <stop offset="1" stop-color="#10151d"/>
+    </linearGradient>
+    <linearGradient id="letter" x1="0" y1="0" x2=".95" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e8eaf0"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffa45e"/>
+      <stop offset=".55" stop-color="#ff7960"/>
+      <stop offset="1" stop-color="#ff5f55"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#tile)"/>
+  <path d="M33 101V58c0-18 11-28 29-28h38c8 0 13 4 13 11s-6 11-14 11H65c-8 0-11 4-11 12v37c0 8-5 13-11 13s-10-5-10-13z" fill="url(#letter)"/>
+  <path d="M57 79c5-16 16-23 33-23h19c-2 12-11 20-25 21H68c-5 0-8 1-11 4z" fill="url(#coral)"/>
+</svg>

@@ -23,56 +23,25 @@ new class extends Component
     }
 }; ?>
 
-<section class="space-y-6">
-    <header>
-        <h2 class="text-lg font-bold text-error">
-            {{ __('Hapus Akun') }}
-        </h2>
+<section>
+    <div class="fm-account__section-heading fm-account__section-heading--danger">
+        <div><span class="fm-overview__micro-label">DANGER ZONE</span><h2>Hapus akun</h2><p>Tindakan ini permanen. Pastikan data yang diperlukan sudah disimpan.</p></div>
+        <span class="fm-account__section-icon material-symbols-outlined" aria-hidden="true">delete_forever</span>
+    </div>
+    <x-ui.button variant="danger" x-data x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
+        <span class="material-symbols-outlined" aria-hidden="true">delete_outline</span>Hapus akun permanen
+    </x-ui.button>
 
-        <p class="mt-1 text-sm text-slate-400">
-            {{ __('Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Sebelum menghapus akun Anda, harap unduh data atau informasi apa pun yang ingin Anda pertahankan.') }}
-        </p>
-    </header>
-
-    <x-danger-button
-        x-data=""
-        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Hapus Akun') }}</x-danger-button>
-
-    <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
-        <form wire:submit="deleteUser" class="p-6 bg-surface-container-lowest">
-
-            <h2 class="text-lg font-bold text-white">
-                {{ __('Apakah Anda yakin ingin menghapus akun Anda?') }}
-            </h2>
-
-            <p class="mt-1 text-sm text-slate-400">
-                {{ __('Setelah akun Anda dihapus, semua sumber daya dan data akan dihapus secara permanen. Masukkan password Anda untuk mengonfirmasi.') }}
-            </p>
-
-            <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
-
-                <x-text-input
-                    wire:model="password"
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
-                />
-
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
-            </div>
-
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Batal') }}
-                </x-secondary-button>
-
-                <x-danger-button class="ms-3">
-                    {{ __('Hapus Akun') }}
-                </x-danger-button>
+    <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" maxWidth="md" focusable>
+        <form wire:submit="deleteUser" class="fm-account__delete-dialog">
+            <div class="fm-account__delete-icon"><span class="material-symbols-outlined" aria-hidden="true">warning_amber</span></div>
+            <h2 class="fm-modal__title">Hapus akun Flowmerce?</h2>
+            <p class="fm-account__delete-description">Akun dan data terkait akan dihapus secara permanen. Masukkan kata sandi untuk mengonfirmasi.</p>
+            <x-ui.field field="password" label="Kata sandi saat ini" type="password" icon="lock_outline" reveal
+                wire:model="password" autocomplete="current-password" placeholder="Kata sandi akun" required />
+            <div class="fm-account__delete-actions">
+                <x-ui.button variant="secondary" x-on:click="$dispatch('close')">Batal</x-ui.button>
+                <x-ui.button type="submit" variant="danger" wire:loading.attr="disabled" wire:target="deleteUser">Ya, hapus akun</x-ui.button>
             </div>
         </form>
     </x-modal>

@@ -1,106 +1,34 @@
-<div>
-    {{-- Header --}}
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-        <div>
-            <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">Gudang Digital</h1>
-            <p class="text-slate-400 max-w-lg">Kelola arus masuk dan keluar barang secara real-time dengan asisten cerdas Flowmerce.</p>
+<div class="fm-page">
+  <x-ui.page-header eyebrow="Operasional Stok" title="Gudang Digital" description="Lihat pergerakan barang dan riwayat masuk-keluar stok secara runtut.">
+    <x-slot:actions><x-ui.button href="{{ route('inventaris.index') }}"><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>Kelola Produk</x-ui.button></x-slot:actions>
+  </x-ui.page-header>
+  <section class="fm-kpi-grid" aria-label="Ringkasan stok gudang">
+    <x-ui.stat-card label="Total Stok" :value="number_format($totalStock, 0, ',', '.').' unit'" icon="warehouse" hint="Ketersediaan seluruh produk" />
+    <x-ui.stat-card label="Barang Masuk Hari Ini" :value="'+'.number_format($inToday, 0, ',', '.').' unit'" icon="move_to_inbox" tone="success" hint="Perubahan stok masuk hari ini" />
+    <x-ui.stat-card label="Barang Keluar Hari Ini" :value="'−'.number_format($outToday, 0, ',', '.').' unit'" icon="outbox" variant="accent" hint="Perubahan stok keluar hari ini" />
+  </section>
+  <x-ui.section-header title="Aktivitas Gudang" description="Riwayat penyesuaian stok otomatis maupun manual.">
+    <x-slot:actions>
+      <div class="fm-toolbar__group" role="group" aria-label="Filter pergerakan stok">
+        <button type="button" wire:click="setFilter('all')" class="fm-pill" aria-pressed="{{ $filter === 'all' ? 'true' : 'false' }}">Semua</button>
+        <button type="button" wire:click="setFilter('in')" class="fm-pill" aria-pressed="{{ $filter === 'in' ? 'true' : 'false' }}">Masuk</button>
+        <button type="button" wire:click="setFilter('out')" class="fm-pill" aria-pressed="{{ $filter === 'out' ? 'true' : 'false' }}">Keluar</button>
+        <x-ui.button variant="outline" wire:click="exportPdf"><span class="material-symbols-outlined" aria-hidden="true">download</span>Ekspor PDF</x-ui.button>
+      </div>
+    </x-slot:actions>
+  </x-ui.section-header>
+  <div class="fm-timeline">
+    @forelse($logs as $log)
+      <article class="fm-timeline__item" data-type="{{ $log->type === 'IN' ? 'in' : 'out' }}" wire:key="stock-log-{{ $log->id }}">
+        <span class="fm-timeline__dot"><span class="material-symbols-outlined" aria-hidden="true">{{ $log->type === 'IN' ? 'south_west' : 'north_east' }}</span></span>
+        <div class="fm-timeline__body">
+          <div><h3 class="fm-timeline__name">{{ $log->product->name ?? 'Produk sudah dihapus' }}</h3><p class="fm-timeline__meta">{{ $log->reason }} · Referensi #LOG-{{ $log->id }}</p><p class="fm-timeline__meta">{{ $log->created_at->format('d M Y, H:i') }}</p></div>
+          <div><p class="fm-timeline__number">{{ $log->type === 'IN' ? '+' : '−' }}{{ number_format($log->quantity, 0, ',', '.') }} unit</p><div style="margin-top:5px"><x-ui.badge :tone="$log->type === 'IN' ? 'success' : 'danger'">{{ $log->type === 'IN' ? 'Masuk' : 'Keluar' }}</x-ui.badge></div></div>
         </div>
-        <a href="{{ route('inventaris.index') }}" wire:navigate class="btn btn-primary">
-            <span class="material-symbols-outlined">add_circle</span>
-            Inventaris Produk
-        </a>
-    </div>
-
-    {{-- Overview Stats --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="glass-card inner-glow p-6 rounded-xl">
-            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-4">Total Stok Digital</p>
-            <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-jb font-bold text-white">{{ number_format($totalStock, 0, ',', '.') }}</span>
-                <span class="text-xs text-slate-400">Unit</span>
-            </div>
-        </div>
-        <div class="glass-card inner-glow p-6 rounded-xl border-l-4 border-primary">
-            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-4">Barang Masuk (Hari Ini)</p>
-            <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-jb font-bold text-primary">+{{ number_format($inToday, 0, ',', '.') }}</span>
-                <span class="text-xs text-slate-400">Unit</span>
-            </div>
-        </div>
-        <div class="glass-card inner-glow p-6 rounded-xl border-l-4 border-error">
-            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-4">Barang Keluar (Hari Ini)</p>
-            <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-jb font-bold text-error">-{{ number_format($outToday, 0, ',', '.') }}</span>
-                <span class="text-xs text-slate-400">Unit</span>
-            </div>
-        </div>
-        <div class="glass-card inner-glow p-6 rounded-xl bg-gradient-to-br from-violet-600/10 to-transparent">
-            <p class="text-[10px] text-violet-400 font-bold uppercase tracking-widest mb-4">Akurasi Opname</p>
-            <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-jb font-bold text-white">100%</span>
-                <span class="material-symbols-outlined text-violet-400 text-sm">verified</span>
-            </div>
-        </div>
-    </div>
-
-    {{-- Timeline --}}
-    <div class="grid grid-cols-1 gap-8">
-        <div class="space-y-6">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xl font-bold text-white">Timeline Arus Barang</h3>
-                <div class="flex gap-2">
-                    <button wire:click="setFilter('all')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'all' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Semua</button>
-                    <button wire:click="setFilter('in')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'in' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Masuk</button>
-                    <button wire:click="setFilter('out')" class="text-xs px-4 py-2 rounded-full {{ $filter === 'out' ? 'bg-primary text-white font-bold' : 'bg-surface-container-high text-slate-300' }}">Keluar</button>
-                    <button wire:click="exportPdf()" class="text-xs px-4 py-2 rounded-full border border-white/10 text-primary flex items-center gap-1 hover:bg-primary/10 transition-colors"><span class="material-symbols-outlined text-sm">file_download</span> Export PDF</button>
-                </div>
-            </div>
-
-            <div class="relative space-y-8 before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-[2px] before:bg-white/5">
-                {{-- Date Header --}}
-                <div class="relative z-10 flex items-center mb-6">
-                    <div class="w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-white/10 flex items-center justify-center text-slate-400">
-                        <span class="material-symbols-outlined text-sm">history</span>
-                    </div>
-                    <span class="ml-4 text-xs font-bold uppercase tracking-widest text-slate-500">Riwayat Terkini</span>
-                </div>
-
-                @forelse($logs as $log)
-                <div class="relative z-10 flex items-start gap-4 mb-4">
-                    <div class="w-10 h-10 shrink-0 rounded-full {{ $log->type == 'IN' ? 'bg-primary/20 text-primary border-primary/30' : 'bg-error/20 text-error border-error/30' }} flex items-center justify-center border">
-                        <span class="material-symbols-outlined">{{ $log->type == 'IN' ? 'north_east' : 'south_west' }}</span>
-                    </div>
-                    <div class="glass-card inner-glow flex-1 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-slate-400">
-                                <span class="material-symbols-outlined">inventory_2</span>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-white">{{ $log->product->name ?? 'Produk Dihapus' }}</h4>
-                                <p class="text-xs text-slate-500">{{ $log->reason }} • <span class="text-slate-400">Ref: #LOG-{{ $log->id }}</span></p>
-                            </div>
-                        </div>
-                        <div class="flex flex-row sm:flex-col items-center sm:items-end gap-1">
-                            <span class="text-xl font-jb font-bold {{ $log->type == 'IN' ? 'text-primary' : 'text-error' }}">
-                                {{ $log->type == 'IN' ? '+' : '-' }}{{ $log->quantity }}
-                            </span>
-                            <span class="text-[10px] font-jb text-slate-500 uppercase">{{ $log->created_at->format('d M y, H:i') }}</span>
-                        </div>
-                    </div>
-                </div>
-                @empty
-                <div class="pl-12 pt-4">
-                    <p class="text-sm text-slate-500">Belum ada aktivitas stok gudang.</p>
-                </div>
-                @endforelse
-                
-                <div class="pl-12 pt-4">
-                    {{ $logs->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="h-20 md:hidden"></div>
-
+      </article>
+    @empty
+      <x-ui.card padding="lg"><x-ui.empty-state icon="history" title="Belum ada pergerakan stok" description="Riwayat stok akan tercatat setelah ada aktivitas inventaris atau penjualan." /></x-ui.card>
+    @endforelse
+  </div>
+  <div class="fm-surface-panel">{{ $logs->links('vendor.pagination.custom', data: ['scrollTo' => false]) }}</div>
 </div>

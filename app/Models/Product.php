@@ -20,7 +20,10 @@ class Product extends Model
         'current_stock',
         'min_stock_alert',
         'image',
+        'is_available_online',
     ];
+
+    protected $casts = ['is_available_online' => 'boolean'];
 
     public function user(): BelongsTo
     {

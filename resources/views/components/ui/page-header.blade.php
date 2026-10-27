@@ -1,0 +1,2 @@
+@props(['eyebrow' => null, 'title', 'description' => null])
+<header class="fm-page-header"><div>@if($eyebrow)<p class="fm-page-header__eyebrow">{{ $eyebrow }}</p>@endif<h1 class="fm-page-header__title">{{ $title }}</h1>@if($description)<p class="fm-page-header__description">{{ $description }}</p>@endif</div>@if(isset($actions))<div class="fm-page-header__actions">{{ $actions }}</div>@endif</header>

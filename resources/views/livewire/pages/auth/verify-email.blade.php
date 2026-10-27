@@ -35,24 +35,25 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
+<div class="fm-auth-flow">
+    <div class="fm-auth-flow__symbol"><span class="material-symbols-outlined" aria-hidden="true">forward_to_inbox</span></div>
+    <x-ui.auth-heading eyebrow="VERIFIKASI EMAIL" title="Periksa kotak masukmu." description="Kami telah mengirim tautan verifikasi ke alamat email akun. Buka tautannya untuk memverifikasi email." />
+    <div class="fm-auth-flow__info">
+        <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+        <span>{{ auth()->user()->email }}</span>
     </div>
-
-    @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
+    @if(session('status') === 'verification-link-sent')
+        <x-ui.feedback class="fm-auth-flow__feedback">Tautan verifikasi baru berhasil dikirim. Periksa emailmu.</x-ui.feedback>
     @endif
-
-    <div class="mt-4 flex items-center justify-between">
-        <x-primary-button wire:click="sendVerification">
-            {{ __('Resend Verification Email') }}
-        </x-primary-button>
-
-        <button wire:click="logout" type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            {{ __('Log Out') }}
-        </button>
+    <div class="fm-auth-form">
+        <x-ui.button type="button" wire:click="sendVerification" class="fm-auth-form__submit" wire:loading.attr="disabled" wire:target="sendVerification">
+            <span wire:loading.remove wire:target="sendVerification">Kirim ulang verifikasi</span>
+            <span wire:loading wire:target="sendVerification">Mengirim tautan...</span>
+            <span class="material-symbols-outlined" aria-hidden="true" wire:loading.remove wire:target="sendVerification">arrow_forward</span>
+        </x-ui.button>
+        <x-ui.button type="button" variant="secondary" wire:click="logout" wire:loading.attr="disabled" wire:target="logout" class="fm-auth-form__secondary">
+            Keluar dari akun
+        </x-ui.button>
     </div>
+    <p class="fm-auth-flow__note"><span class="material-symbols-outlined" aria-hidden="true">info</span> Tidak menerima email? Periksa folder spam sebelum mengirim ulang.</p>
 </div>

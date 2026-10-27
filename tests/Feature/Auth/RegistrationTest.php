@@ -12,25 +12,28 @@ class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered(): void
     {
-        $response = $this->get('/register');
-
-        $response
-            ->assertOk()
-            ->assertSeeVolt('pages.auth.register');
+        $this->get('/register')->assertOk()->assertSeeVolt('pages.auth.register');
     }
 
-    public function test_new_users_can_register(): void
+    public function test_new_business_owners_can_register(): void
     {
-        $component = Volt::test('pages.auth.register')
+        Volt::test('pages.auth.register')
             ->set('name', 'Test User')
             ->set('email', 'test@example.com')
+            ->set('business_name', 'Toko Contoh')
+            ->set('business_category', 'Ritel')
             ->set('password', 'password')
-            ->set('password_confirmation', 'password');
-
-        $component->call('register');
-
-        $component->assertRedirect(route('dashboard', absolute: false));
+            ->set('password_confirmation', 'password')
+            ->call('register')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('dashboard', absolute: false));
 
         $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+            'business_name' => 'Toko Contoh',
+            'business_category' => 'Ritel',
+            'role' => 'admin',
+        ]);
     }
 }

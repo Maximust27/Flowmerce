@@ -39,41 +39,21 @@ new class extends Component
 }; ?>
 
 <section>
-    <header>
-        <h2 class="text-lg font-bold text-white">
-            {{ __('Perbarui Password') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-slate-400">
-            {{ __('Pastikan akun Anda menggunakan password yang panjang dan acak untuk tetap aman.') }}
-        </p>
-    </header>
-
-    <form wire:submit="updatePassword" class="mt-6 space-y-6">
-        <div>
-            <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-            <x-text-input wire:model="current_password" id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
-            <x-input-error :messages="$errors->get('current_password')" class="mt-2" />
+    <div class="fm-account__section-heading">
+        <div><span class="fm-overview__micro-label">ACCOUNT SECURITY</span><h2>Keamanan akun</h2><p>Perbarui kata sandi secara berkala untuk menjaga akun tetap aman.</p></div>
+        <span class="fm-account__section-icon material-symbols-outlined" aria-hidden="true">shield_lock</span>
+    </div>
+    <form wire:submit="updatePassword" class="fm-form fm-account__form">
+        <x-ui.field field="current_password" label="Kata sandi saat ini" type="password" icon="lock_outline" reveal wire:model="current_password" autocomplete="current-password" required />
+        <div class="fm-form__grid">
+            <x-ui.field field="password" label="Kata sandi baru" type="password" icon="lock_reset" reveal wire:model="password" autocomplete="new-password" required />
+            <x-ui.field field="password_confirmation" label="Konfirmasi kata sandi" type="password" icon="lock_outline" reveal wire:model="password_confirmation" autocomplete="new-password" required />
         </div>
-
-        <div>
-            <x-input-label for="update_password_password" :value="__('New Password')" />
-            <x-text-input wire:model="password" id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <div>
-            <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input wire:model="password_confirmation" id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            <x-action-message class="me-3" on="password-updated">
-                {{ __('Saved.') }}
-            </x-action-message>
+        <div class="fm-account__form-actions">
+            <x-ui.button type="submit" wire:loading.attr="disabled" wire:target="updatePassword">
+                <span class="material-symbols-outlined" aria-hidden="true">lock_reset</span>Perbarui kata sandi
+            </x-ui.button>
+            <x-action-message on="password-updated"><span class="fm-account__saved">Kata sandi berhasil diperbarui</span></x-action-message>
         </div>
     </form>
 </section>
