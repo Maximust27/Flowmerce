@@ -55,18 +55,27 @@ function reveal(nodes, options = {}) {
         delay = 0,
         start = null,
         trigger = elements[0],
+        subtle = false,
     } = options;
 
+    // Internal pages stay almost fully visible at all times. Moving from a
+    // completely transparent state after hydration caused the visible flash.
+    const initialOpacity = subtle ? 0.975 : 0;
+    const initialDistance = subtle ? Math.min(distance, 7) : distance;
+
     return gsap.fromTo(elements,
-        { autoAlpha: 0, y: distance },
+        { opacity: initialOpacity, y: initialDistance },
         {
-            autoAlpha: 1,
+            opacity: 1,
             y: 0,
             duration,
             delay,
             stagger,
             ease: 'power3.out',
-            clearProps: 'opacity,visibility,transform',
+            // Wait for the first scheduled render on subtle UI transitions;
+            // never hide existing text or controls during Livewire hydration.
+            immediateRender: !subtle,
+            clearProps: 'opacity,transform',
             overwrite: 'auto',
             ...(start ? {
                 scrollTrigger: {
@@ -80,14 +89,26 @@ function reveal(nodes, options = {}) {
     );
 }
 
+/** Same understated motion language for every authenticated module. */
+function softEntrance(selector, delay = 0, stagger = 0.042) {
+    return reveal(find(selector), {
+        subtle: true,
+        distance: 7,
+        duration: 0.42,
+        stagger,
+        delay,
+    });
+}
+
 function drawRevenueChart(path) {
     if (!path || !path.isConnected || animatedNodes.has(path)) return;
     animatedNodes.add(path);
     path.dataset.fmMotionLastCurve = path.getAttribute('d') || '';
 
-    gsap.fromTo(path, { strokeDashoffset: 100 }, {
+    gsap.fromTo(path, { strokeDashoffset: 16 }, {
         strokeDashoffset: 0,
-        duration: 1.05,
+        duration: 0.85,
+        immediateRender: false,
         delay: 0.16,
         ease: 'power2.inOut',
         clearProps: 'strokeDashoffset',
@@ -95,59 +116,143 @@ function drawRevenueChart(path) {
     });
 }
 
-function mountDashboard() {
-    reveal(find('.fm-dashboard .fm-page-header'), { distance: 13, duration: 0.56 });
-
-    reveal(find('.fm-overview-grid > *'), {
-        distance: 19, delay: 0.08, stagger: 0.105, duration: 0.62,
-    });
-
-    reveal(find('.fm-overview__metrics > .fm-stat-card'), {
-        distance: 13, stagger: 0.07, delay: 0.19, duration: 0.54,
-    });
-
-    reveal(find('.fm-insights-grid > .fm-card'), {
-        distance: 17, stagger: 0.11, delay: 0.3, duration: 0.65,
-    });
-
-    reveal(find('.fm-studio-shortcuts'), {
-        distance: 12, duration: 0.55, delay: 0.42,
-    });
-
+function mountWorkspace() {
+    // Dashboard, Inventaris, Gudang, Keuangan, Pegawai and Meja use the same
+    // light-touch choreography. No nested container + child opacity tweening.
+    softEntrance('.fm-page > .fm-page-header, .fm-dashboard > .fm-page-header', 0);
+    softEntrance(
+        '.fm-page > .fm-kpi-grid > .fm-stat-card, ' +
+        '.fm-page > .fm-kpi-grid > .fm-card, ' +
+        '.fm-dashboard > .fm-overview-grid > .fm-card, ' +
+        '.fm-dashboard > .fm-overview-grid > .fm-overview__metrics',
+        0.035
+    );
+    softEntrance(
+        '.fm-page > .fm-section-header, .fm-page > .fm-list-toolbar, ' +
+        '.fm-page > .fm-table-card, .fm-page > .fm-timeline, ' +
+        '.fm-page > .fm-card, .fm-page > .fm-account__identity, ' +
+        '.fm-page > .fm-account__layout, .fm-page > .fm-tables__notice, ' +
+        '.fm-page > .fm-surface-panel, .fm-dashboard > .fm-insights-grid > .fm-card, ' +
+        '.fm-dashboard > .fm-studio-shortcuts',
+        0.085
+    );
+    // Cards are animated individually only where the parent has not been
+    // animated, avoiding a nested "fade twice" that used to look like blinking.
+    softEntrance('.fm-tables__grid > .fm-tables__card', 0.12, 0.035);
     find('.fm-lineplot__curve').forEach(drawRevenueChart);
 }
 
-function mountWorkspace() {
-    if (sceneRoot.querySelector('.fm-dashboard')) {
-        mountDashboard();
-        return;
-    }
+/**
+ * Ambient animations run only while their section is visible. Browser-tab
+ * backgrounding and reduced-motion settings pause every perpetual timeline.
+ */
+function watchAmbient(section, loops) {
+    if (!section || !loops.length) return;
 
-    reveal(find('.fm-page .fm-page-header'), { distance: 12, duration: 0.52 });
-    reveal(find('.fm-page > .fm-kpi-grid > .fm-stat-card, .fm-page > .fm-kpi-grid > .fm-card'), {
-        distance: 16, delay: 0.075, stagger: 0.07,
+    let inView = false;
+    const sync = () => {
+        const active = inView && !document.hidden && !reducedMotion.matches;
+        loops.forEach(loop => active ? loop.play() : loop.pause());
+    };
+
+    const watcher = ScrollTrigger.create({
+        trigger: section,
+        start: 'top bottom',
+        end: 'bottom top',
+        onToggle: self => {
+            inView = self.isActive;
+            sync();
+        },
     });
-    reveal(find('.fm-page > .fm-card, .fm-page > .fm-account__identity, .fm-page > .fm-list-toolbar, .fm-page > .fm-tables__notice'), {
-        distance: 12, delay: 0.12, stagger: 0.07,
-    });
-    reveal(find('.fm-tables__grid > .fm-tables__card'), {
-        distance: 15, delay: 0.14, stagger: 0.055, duration: 0.5,
-    });
-    reveal(find('.fm-account__primary > .fm-card, .fm-account__secondary > .fm-card'), {
-        distance: 15, delay: 0.12, stagger: 0.075,
-    });
-    reveal(find('.fm-page > .fm-section-header, .fm-page > .fm-data-table, .fm-page > .fm-table-card'), {
-        distance: 10, delay: 0.15, stagger: 0.055,
-    });
+
+    inView = watcher.isActive;
+    document.addEventListener('visibilitychange', sync);
+    sceneCleanups.push(() => document.removeEventListener('visibilitychange', sync));
+    sync();
+}
+
+function floatHeroDecor() {
+    const hero = sceneRoot.querySelector('[data-fm-hero-ambient]');
+    if (!hero) return;
+
+    const square = hero.querySelector('[data-fm-float="square"]');
+    const circle = hero.querySelector('[data-fm-float="circle"]');
+    const halo = hero.querySelector('.fm-public-hero__halo');
+    const loops = [];
+
+    if (square) loops.push(gsap.to(square, {
+        y: -14, x: 7, rotation: 24, scale: 1.04,
+        duration: 3.9, ease: 'sine.inOut', repeat: -1, yoyo: true, paused: true,
+    }));
+
+    if (circle) loops.push(gsap.to(circle, {
+        y: 15, x: -9, scale: 1.12,
+        duration: 4.8, ease: 'sine.inOut', repeat: -1, yoyo: true, paused: true,
+    }));
+
+    if (halo) loops.push(gsap.to(halo, {
+        rotation: 360, duration: 78,
+        ease: 'none', repeat: -1, paused: true,
+    }));
+
+    watchAmbient(hero, loops);
+}
+
+/** Rotate the orbital path and counter-rotate the icons by the same amount. */
+function orbitTimeline(track, duration, direction) {
+    const satellites = track.querySelectorAll('[data-fm-orbit-satellite]');
+    const degrees = direction === 'clockwise' ? 360 : -360;
+
+    return gsap.timeline({ paused: true, repeat: -1 })
+        .to(track, {
+            rotation: degrees,
+            duration,
+            ease: 'none',
+            transformOrigin: '50% 50%',
+        }, 0)
+        .to(satellites, {
+            rotation: -degrees,
+            duration,
+            ease: 'none',
+            transformOrigin: '50% 50%',
+        }, 0);
+}
+
+function animateFeatureOrbit() {
+    const orbit = sceneRoot.querySelector('[data-fm-orbit]');
+    if (!orbit) return;
+
+    const outer = orbit.querySelector('[data-fm-orbit-track="outer"]');
+    const inner = orbit.querySelector('[data-fm-orbit-track="inner"]');
+    const ring = orbit.querySelector('.fm-orbit__core-ring');
+    const loops = [];
+
+    if (outer) loops.push(orbitTimeline(outer, 32, 'clockwise'));
+    if (inner) loops.push(orbitTimeline(inner, 43, 'counterclockwise'));
+
+    if (ring) loops.push(gsap.to(ring, {
+        scale: 1.055,
+        duration: 3.6,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+        paused: true,
+    }));
+
+    watchAmbient(orbit, loops);
 }
 
 function mountPublic() {
+    // Landing is more expressive than the operational dashboard, but content
+    // remains readable even before JS mounts.
     reveal(find('.fm-public-hero__copy > *'), {
-        distance: 21, duration: 0.68, stagger: 0.11,
+        subtle: true, distance: 12, duration: 0.72, stagger: 0.095,
     });
     reveal(find('.fm-public-hero__visual > .fm-product-preview'), {
-        distance: 25, duration: 0.9, delay: 0.22,
+        subtle: true, distance: 13, duration: 0.85, delay: 0.14,
     });
+
+    floatHeroDecor();
 
     const scrollGroups = [
         ['.fm-public-strip__inner > *', '.fm-public-strip'],
@@ -163,13 +268,35 @@ function mountPublic() {
         if (!trigger) continue;
 
         reveal(find(selector), {
-            start: 'top 86%',
+            start: 'top 87%',
             trigger,
-            distance: 20,
-            duration: 0.66,
-            stagger: 0.09,
+            distance: 19,
+            duration: 0.69,
+            stagger: 0.085,
         });
     }
+
+    // Feature chart bars grow once when their illustrated card is visible.
+    const illustration = sceneRoot.querySelector('.fm-public-feature__illustration');
+    if (illustration) {
+        gsap.fromTo(illustration.querySelectorAll('span'), {
+            scaleY: 0.36, opacity: 0.55,
+            transformOrigin: 'bottom center',
+        }, {
+            scaleY: 1, opacity: 1,
+            duration: 0.82,
+            stagger: 0.1,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+            scrollTrigger: {
+                trigger: illustration,
+                start: 'top 92%',
+                once: true,
+            },
+        });
+    }
+
+    animateFeatureOrbit();
 }
 
 function mountAuth() {
@@ -256,7 +383,9 @@ function animateNewNode(element) {
 
     if (element.matches?.(classes.join(',')) && !animatedNodes.has(element)) {
         animatedNodes.add(element);
-        sceneContext.add(() => reveal([element], { distance: 9, duration: 0.35 }));
+        sceneContext.add(() => reveal([element], {
+            distance: 7, duration: 0.36, subtle: true,
+        }));
     }
 
     const curve = element.matches?.('.fm-lineplot__curve')
@@ -294,6 +423,11 @@ function initHoverEffects() {
                 ease: 'power2.out',
                 overwrite: 'auto',
             });
+            const icon = card.querySelector('.fm-public-feature__icon');
+            if (icon) gsap.to(icon, {
+                y: -3, rotation: -5, duration: 0.3,
+                ease: 'power2.out', overwrite: 'auto',
+            });
         });
     };
     const leave = event => {
@@ -307,6 +441,12 @@ function initHoverEffects() {
                 duration: 0.27,
                 ease: 'power2.out',
                 overwrite: 'auto',
+                clearProps: 'transform',
+            });
+            const icon = card.querySelector('.fm-public-feature__icon');
+            if (icon) gsap.to(icon, {
+                y: 0, rotation: 0, duration: 0.33,
+                ease: 'power2.out', overwrite: 'auto',
                 clearProps: 'transform',
             });
         });
@@ -378,9 +518,10 @@ function registerLivewireHooks() {
         if (el.dataset.fmMotionLastCurve === nextPath) return;
         el.dataset.fmMotionLastCurve = nextPath;
         sceneContext.add(() => {
-            gsap.fromTo(el, { strokeDashoffset: 100 }, {
+            gsap.fromTo(el, { strokeDashoffset: 16 }, {
                 strokeDashoffset: 0,
-                duration: 0.85,
+                duration: 0.72,
+                immediateRender: false,
                 ease: 'power2.inOut',
                 overwrite: 'auto',
                 clearProps: 'strokeDashoffset',

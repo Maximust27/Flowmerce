@@ -46,6 +46,59 @@ class MotionExperienceTest extends TestCase
             ->assertSee('data-fm-motion-root="auth"', false);
     }
 
+    public function test_landing_orbit_contains_six_features_and_two_floating_shapes(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk()
+            ->assertSee('data-fm-orbit', false)
+            ->assertSee('data-fm-orbit-track="outer"', false)
+            ->assertSee('data-fm-orbit-track="inner"', false)
+            ->assertSee('data-fm-float="square"', false)
+            ->assertSee('data-fm-float="circle"', false)
+            ->assertSee('fm-public-showcase__brand-image');
+
+        $this->assertSame(6, substr_count($response->getContent(), 'data-fm-orbit-satellite'));
+
+        $motion = file_get_contents(resource_path('js/flowmerce-motion.js'));
+        $this->assertStringContainsString('function orbitTimeline(', $motion);
+        $this->assertStringContainsString('function floatHeroDecor(', $motion);
+        $this->assertStringContainsString('function watchAmbient(', $motion);
+        $this->assertStringContainsString('visibilitychange', $motion);
+        $this->assertStringContainsString("orbitTimeline(outer, 32, 'clockwise')", $motion);
+    }
+
+    public function test_internal_modules_share_subtle_transitions_without_css_flash(): void
+    {
+        $owner = User::factory()->create([
+            'role' => 'admin',
+            'business_name' => 'Studio Tanpa Kedip',
+        ]);
+
+        foreach ([
+            'dashboard',
+            'inventaris.index',
+            'gudang.index',
+            'keuangan.index',
+            'pegawai.index',
+            'meja.index',
+        ] as $route) {
+            $this->actingAs($owner)
+                ->get(route($route))
+                ->assertOk()
+                ->assertSee('data-fm-motion-root="app"', false);
+        }
+
+        $motion = file_get_contents(resource_path('js/flowmerce-motion.js'));
+        $styles = file_get_contents(resource_path('css/flowmerce-motion.css'));
+        $this->assertStringContainsString('function softEntrance(', $motion);
+        $this->assertStringContainsString('subtle: true', $motion);
+        $this->assertStringContainsString('immediateRender: !subtle', $motion);
+        $this->assertStringContainsString('.fm-app .fm-page', $styles);
+        $this->assertStringContainsString('animation: none !important', $styles);
+        $this->assertStringContainsString('transform: none !important', $styles);
+    }
+
     public function test_dashboard_pos_and_guest_menu_use_isolated_motion_roots(): void
     {
         $owner = User::factory()->create([

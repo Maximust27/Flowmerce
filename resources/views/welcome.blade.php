@@ -45,10 +45,11 @@
                         Tanpa perlu berpindah-pindah aplikasi untuk pekerjaan utama usaha.
                     </div>
                 </div>
-                <div class="fm-public-hero__visual">
-                    <span class="fm-public-hero__decor fm-public-hero__decor--top" aria-hidden="true"></span>
+                <div class="fm-public-hero__visual" data-fm-hero-ambient>
+                    <span class="fm-public-hero__halo" aria-hidden="true"></span>
+                    <span class="fm-public-hero__decor fm-public-hero__decor--top" aria-hidden="true" data-fm-float="square"></span>
                     <x-ui.workspace-preview variant="hero" />
-                    <span class="fm-public-hero__decor fm-public-hero__decor--bottom" aria-hidden="true"></span>
+                    <span class="fm-public-hero__decor fm-public-hero__decor--bottom" aria-hidden="true" data-fm-float="circle"></span>
                 </div>
             </section>
 
@@ -117,12 +118,38 @@
                         <span><span class="material-symbols-outlined" aria-hidden="true">check_circle</span> Komponen yang konsisten</span>
                     </div>
                 </div>
-                <div class="fm-public-showcase__orbit" aria-hidden="true">
-                    <div class="fm-public-showcase__orbit-center"><img class="fm-public-showcase__brand-image" src="{{ asset('images/branding/flowmerce-icon.webp') }}" width="80" height="80" alt=""></div>
-                    <span class="material-symbols-outlined fm-public-showcase__orbit-icon fm-public-showcase__orbit-icon--one">inventory_2</span>
-                    <span class="material-symbols-outlined fm-public-showcase__orbit-icon fm-public-showcase__orbit-icon--two">point_of_sale</span>
-                    <span class="material-symbols-outlined fm-public-showcase__orbit-icon fm-public-showcase__orbit-icon--three">account_balance_wallet</span>
-                    <span class="material-symbols-outlined fm-public-showcase__orbit-icon fm-public-showcase__orbit-icon--four">auto_awesome</span>
+                <div class="fm-public-showcase__orbit fm-orbit" data-fm-orbit
+                     role="img" aria-label="Flowmerce sebagai pusat orbit enam fitur: Inventaris, Kasir POS, Keuangan, Pegawai, Gudang, dan Asisten AI.">
+                    <span class="fm-orbit__glow" aria-hidden="true"></span>
+
+                    <div class="fm-orbit__track fm-orbit__track--outer" data-fm-orbit-track="outer" aria-hidden="true">
+                        <span class="fm-orbit__satellite fm-orbit__satellite--north" data-fm-orbit-satellite data-label="Inventaris">
+                            <span class="material-symbols-outlined">inventory_2</span>
+                        </span>
+                        <span class="fm-orbit__satellite fm-orbit__satellite--east" data-fm-orbit-satellite data-label="Kasir POS">
+                            <span class="material-symbols-outlined">point_of_sale</span>
+                        </span>
+                        <span class="fm-orbit__satellite fm-orbit__satellite--south" data-fm-orbit-satellite data-label="Keuangan">
+                            <span class="material-symbols-outlined">account_balance_wallet</span>
+                        </span>
+                        <span class="fm-orbit__satellite fm-orbit__satellite--west" data-fm-orbit-satellite data-label="Pegawai">
+                            <span class="material-symbols-outlined">groups</span>
+                        </span>
+                    </div>
+                    <div class="fm-orbit__track fm-orbit__track--inner" data-fm-orbit-track="inner" aria-hidden="true">
+                        <span class="fm-orbit__satellite fm-orbit__satellite--north" data-fm-orbit-satellite data-label="Gudang">
+                            <span class="material-symbols-outlined">warehouse</span>
+                        </span>
+                        <span class="fm-orbit__satellite fm-orbit__satellite--south" data-fm-orbit-satellite data-label="Asisten AI">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                        </span>
+                    </div>
+
+                    <div class="fm-public-showcase__orbit-center fm-orbit__core" aria-hidden="true">
+                        <span class="fm-orbit__core-ring"></span>
+                        <img class="fm-public-showcase__brand-image" src="{{ asset('images/branding/flowmerce-icon.webp') }}" width="80" height="80" alt="">
+                        <span class="fm-orbit__core-caption">ONE WORKSPACE</span>
+                    </div>
                 </div>
             </section>
 
