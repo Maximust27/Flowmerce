@@ -11,6 +11,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="{{ $description }}">
     <meta name="theme-color" content="#f7f8f8">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/branding/flowmerce-mark.svg') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('images/branding/flowmerce-favicon.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/branding/flowmerce-favicon.png') }}">
     <title>{{ $title ? $title.' · Flowmerce' : 'Flowmerce · Workspace UMKM' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

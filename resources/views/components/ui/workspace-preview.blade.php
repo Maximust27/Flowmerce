@@ -7,7 +7,7 @@
     </div>
     <div class="fm-product-preview__body">
         <div class="fm-product-preview__rail" aria-hidden="true">
-            <span class="fm-product-preview__rail-logo">f.</span>
+            <span class="fm-product-preview__rail-logo fm-product-preview__rail-logo--image"><img src="{{ asset('images/branding/flowmerce-icon.webp') }}" width="25" height="25" alt=""></span>
             <span class="material-symbols-outlined is-active">space_dashboard</span>
             <span class="material-symbols-outlined">inventory_2</span>
             <span class="material-symbols-outlined">account_balance_wallet</span>

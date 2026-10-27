@@ -210,3 +210,84 @@
  .fm-pos__online-order {flex-wrap:wrap}
  .fm-pos__online-total {margin-left:auto}
 }
+
+/*
+ * QR checkout layout fix: the old flex:1 + CSS grid cart stretched against a
+ * viewport-height sidebar. When QRIS appeared, other flex children shrank and
+ * the last cart row visually collided with the totals. Use one scroll context
+ * and non-shrinking sections to retain natural document order.
+ */
+.fm-guest__checkout {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+}
+.fm-guest__checkout-head {
+    flex: 0 0 auto;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--fm-surface);
+}
+.fm-guest__cart-items {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 10px;
+    align-content: normal;
+    min-height: 0;
+    padding: 17px 23px;
+    overflow: visible;
+}
+.fm-guest__cart-items > *,
+.fm-guest__totals,
+.fm-guest__payment,
+.fm-guest__order-button,
+.fm-guest__checkout-note {
+    flex-shrink: 0;
+}
+.fm-guest__cart-row {
+    flex: 0 0 auto;
+    min-height: 63px;
+}
+.fm-guest__totals { border-top: 1px solid var(--fm-border); }
+.fm-guest__payment { align-content: start; min-width: 0; }
+.fm-guest__qris { position: static; min-width: 0; width: 100%; margin: 3px 0 5px; }
+.fm-guest__qris img { display: block; max-width: 100%; height: auto; }
+.fm-guest__order-button { flex: 0 0 auto; }
+.fm-guest__checkout-note { flex: 0 0 auto; }
+.fm-guest__product-image { position: relative; }
+.fm-guest__image-placeholder {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--fm-muted);
+    background: var(--fm-surface-raised);
+    font-size: 46px;
+}
+.fm-guest__product-image > img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+@media (max-width: 950px) {
+    .fm-guest__checkout {
+        height: 100dvh;
+        max-height: 100dvh;
+        scroll-behavior: auto;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fm-guest__checkout { scroll-behavior: auto; }
+}

@@ -37,10 +37,9 @@
                             data-product-id="{{ $product->id }}" data-category-name="{{ $product->category ?: 'Lainnya' }}"
                             data-product-name="{{ $product->name }}">
                             <div class="fm-guest__product-image">
+                                <span class="fm-guest__image-placeholder material-symbols-outlined" aria-hidden="true">restaurant</span>
                                 @if($product->image)
                                     <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" loading="lazy">
-                                @else
-                                    <span class="material-symbols-outlined" aria-hidden="true">restaurant</span>
                                 @endif
                             </div>
                             <div class="fm-guest__product-body">

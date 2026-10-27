@@ -118,7 +118,7 @@
                     </div>
                 </div>
                 <div class="fm-public-showcase__orbit" aria-hidden="true">
-                    <div class="fm-public-showcase__orbit-center"><span class="fm-mark"><span class="fm-mark__upright"></span><span class="fm-mark__top"></span><span class="fm-mark__mid"></span></span></div>
+                    <div class="fm-public-showcase__orbit-center"><img class="fm-public-showcase__brand-image" src="{{ asset('images/branding/flowmerce-icon.webp') }}" width="80" height="80" alt=""></div>
                     <span class="material-symbols-outlined fm-public-showcase__orbit-icon fm-public-showcase__orbit-icon--one">inventory_2</span>
                     <span class="material-symbols-outlined fm-public-showcase__orbit-icon fm-public-showcase__orbit-icon--two">point_of_sale</span>
                     <span class="material-symbols-outlined fm-public-showcase__orbit-icon fm-public-showcase__orbit-icon--three">account_balance_wallet</span>

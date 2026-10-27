@@ -25,6 +25,16 @@ function initGuestMenu(root) {
     const confirmation = root.querySelector('[data-confirmation]');
     const qrisPreview = root.querySelector('[data-qris-preview]');
 
+    // Missing local uploads should never display the browser's broken-image
+    // icon or alt text on top of the product card. A designed fallback remains.
+    root.querySelectorAll('.fm-guest__product-image img').forEach(image => {
+        const showFallback = () => {
+            image.hidden = true;
+        };
+        image.addEventListener('error', showFallback, { once: true });
+        if (image.complete && image.naturalWidth === 0) showFallback();
+    });
+
     const icon = (name, label) => {
         const button = document.createElement('button');
         button.type = 'button';

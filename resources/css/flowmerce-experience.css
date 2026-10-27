@@ -366,3 +366,44 @@
   .fm-public-feature:hover { transform:none; }
   .fm-product-preview[data-variant="auth"],.fm-product-preview[data-variant="hero"] { transform:none; }
 }
+
+/* Unified, image-backed Flowmerce mark in all shells and theme variants. */
+.fm-wordmark .fm-mark.fm-mark--image {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    box-shadow: none;
+    border: 0;
+    overflow: visible;
+    flex-shrink: 0;
+    line-height: 0;
+}
+.fm-wordmark .fm-mark--image picture,
+.fm-wordmark .fm-mark--image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+.fm-public-showcase__brand-image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    display: block;
+}
+.fm-product-preview__rail-logo.fm-product-preview__rail-logo--image {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    background: transparent;
+}
+.fm-product-preview__rail-logo--image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
