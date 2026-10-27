@@ -1,7 +1,7 @@
 <x-ui.html-document :title="'Menu '.$table->table_number.' · '.($owner->business_name ?: 'Flowmerce')" body-class="fm-guest"
     description="Lihat menu dan pesan langsung dari meja melalui Flowmerce.">
     @vite('resources/js/guest-menu.js')
-    <main class="fm-guest__app" data-fm-guest
+    <main class="fm-guest__app" data-fm-motion-root="guest" data-fm-guest
           data-order-url="{{ route('guest.order.store', ['tableCode' => $tableCode]) }}"
           data-table-number="{{ $table->table_number }}"
           data-qris="{{ $owner->gopay_qr_image ? Storage::url($owner->gopay_qr_image) : '' }}">

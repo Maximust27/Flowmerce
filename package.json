@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test:motion": "node --check resources/js/flowmerce-motion.js && node --check resources/js/guest-menu.js && node --check resources/js/flowmerce-theme.js"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.11",
@@ -16,5 +17,8 @@
         "pusher-js": "^8.5.0",
         "tailwindcss": "^4.2.2",
         "vite": "^8.0.0"
+    },
+    "dependencies": {
+        "gsap": "^3.15.0"
     }
 }

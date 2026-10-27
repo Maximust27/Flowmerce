@@ -3,7 +3,7 @@
         ? collect(config('flowmerce-navigation.items'))->where('route', 'pos.index')->values()->all()
         : config('flowmerce-navigation.items');
 @endphp
-<div class="fm-command" x-show="commandOpen" x-cloak @keydown.escape.window="commandOpen=false">
+<div class="fm-command" x-show="commandOpen" x-transition.opacity.duration.180ms x-cloak @keydown.escape.window="commandOpen=false">
   <div class="fm-command__scrim" @click="commandOpen=false" aria-hidden="true"></div>
   <section class="fm-command__dialog" role="dialog" aria-modal="true" aria-label="Navigasi cepat">
     <div class="fm-command__search">

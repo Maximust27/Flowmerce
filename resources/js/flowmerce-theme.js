@@ -64,7 +64,10 @@ export function registerFlowmerceShell() {
                 this.sidebarOpen = false;
                 this.commandQuery = '';
                 this.commandOpen = true;
-                this.$nextTick(() => this.$refs.commandSearch?.focus());
+                this.$nextTick(() => {
+                    this.$refs.commandSearch?.focus();
+                    document.dispatchEvent(new CustomEvent('flowmerce:command-open'));
+                });
             },
 
             toggleTheme() { switchTheme(); },

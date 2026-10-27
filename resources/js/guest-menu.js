@@ -63,6 +63,7 @@ function initGuestMenu(root) {
 
             const row = document.createElement('div');
             row.className = 'fm-guest__cart-row';
+            row.dataset.cartProductId = id;
             const details = document.createElement('div');
             details.className = 'fm-guest__cart-row-details';
             const name = document.createElement('strong');
@@ -113,6 +114,10 @@ function initGuestMenu(root) {
         cart.set(id, {...product, qty: qty + 1});
         setError('');
         renderCart();
+        root.dispatchEvent(new CustomEvent('flowmerce:cart-added', {
+            bubbles: true,
+            detail: { productId: id },
+        }));
     }
 
     let busy = false;
@@ -130,6 +135,11 @@ function initGuestMenu(root) {
                 if (item.qty <= 0) cart.delete(id);
             } else if (item.qty < item.stock) item.qty += 1;
             renderCart();
+            if (amount.dataset.qty === 'plus') {
+                root.dispatchEvent(new CustomEvent('flowmerce:cart-added', {
+                    bubbles: true, detail: { productId: id },
+                }));
+            }
         }
         if (event.target.closest('[data-cart-toggle]')) {
             panel.classList.add('is-open');
@@ -171,7 +181,11 @@ function initGuestMenu(root) {
 
     root.querySelectorAll('input[name="fm-guest-payment"]').forEach(radio => {
         radio.addEventListener('change', () => {
-            if (qrisPreview) qrisPreview.hidden = root.querySelector('input[name="fm-guest-payment"]:checked').value !== 'QRIS';
+            if (qrisPreview) {
+                const showingQris = root.querySelector('input[name="fm-guest-payment"]:checked').value === 'QRIS';
+                qrisPreview.hidden = !showingQris;
+                if (showingQris) root.dispatchEvent(new CustomEvent('flowmerce:qris-revealed', { bubbles: true }));
+            }
         });
     });
 
@@ -208,6 +222,7 @@ function initGuestMenu(root) {
             root.querySelector('[data-order-code]').textContent = result.order_code;
             root.querySelector('[data-order-total]').textContent = currency(result.total);
             confirmation.hidden = false;
+            root.dispatchEvent(new CustomEvent('flowmerce:order-confirmed', { bubbles: true }));
             panel.classList.remove('is-open');
             backdrop.hidden = true;
         } catch (error) {

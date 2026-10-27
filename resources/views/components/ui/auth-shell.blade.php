@@ -9,7 +9,7 @@
         default => 'AKUN',
     };
 @endphp
-<div class="fm-auth-layout" x-data="flowmerceShell()">
+<div class="fm-auth-layout" data-fm-motion-root="auth" x-data="flowmerceShell()">
     <aside class="fm-auth-aside" aria-label="Tentang Flowmerce">
         <div class="fm-auth-aside__top">
             <x-ui.brand :href="url('/')" class="fm-auth-aside__brand" />

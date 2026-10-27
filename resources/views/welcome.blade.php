@@ -1,6 +1,6 @@
 <x-ui.html-document title="Workspace modern untuk UMKM" body-class="fm-welcome"
     description="Flowmerce Studio menghubungkan inventaris, kasir, gudang, keuangan, dan tim dalam satu workspace untuk UMKM.">
-    <div class="fm-public" x-data="flowmerceShell()">
+    <div class="fm-public" data-fm-motion-root="public" x-data="flowmerceShell()">
         <header class="fm-public__header">
             <nav class="fm-public__nav" aria-label="Navigasi halaman utama">
                 <x-ui.brand :href="url('/')" class="fm-public__brand" />

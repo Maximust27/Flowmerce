@@ -34,7 +34,7 @@
             document.documentElement.style.colorScheme = theme;
         })();
     </script>
-    @vite(['resources/css/app.css', 'resources/css/flowmerce-studio.css', 'resources/css/flowmerce-experience.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/flowmerce-studio.css', 'resources/css/flowmerce-experience.css', 'resources/css/flowmerce-motion.css', 'resources/js/app.js'])
 </head>
 <body class="{{ $bodyClass }}">
     {{ $slot }}

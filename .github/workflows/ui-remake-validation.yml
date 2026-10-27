@@ -53,6 +53,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm install --ignore-scripts --no-audit --no-fund
 
+      - name: Check GSAP motion JavaScript
+        run: npm run test:motion
+
       - name: Build frontend bundle
         run: npm run build
 

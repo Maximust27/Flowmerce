@@ -5,7 +5,7 @@
   $activeMenu = collect($menu)->first(fn($item) => request()->routeIs($item['match']));
   $activeTitle = request()->routeIs('profile') ? 'Pengaturan' : ($activeMenu['label'] ?? 'Workspace');
 @endphp
-<div class="fm-app fm-shell" x-data="flowmerceShell()"
+<div class="fm-app fm-shell" data-fm-motion-root="app" x-data="flowmerceShell()"
      @keydown.window.ctrl.k.prevent="openCommand()"
      @keydown.window.meta.k.prevent="openCommand()"
      @keydown.escape.window="sidebarOpen=false;commandOpen=false">

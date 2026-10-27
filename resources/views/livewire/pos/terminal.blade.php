@@ -1,4 +1,4 @@
-<div class="fm-pos" x-data="{ cartOpen: false }" @keydown.escape.window="cartOpen=false">
+<div class="fm-pos" data-fm-motion-root="pos" x-data="{ cartOpen: false }" @keydown.escape.window="cartOpen=false">
   <header class="fm-pos__header">
     <div class="fm-pos__brand"><x-ui.brand :href="auth()->user()->role === 'admin' ? route('dashboard') : route('pos.index')" /><span class="fm-muted" style="font-size:12px;font-weight:600">/ POS</span></div>
     <div class="fm-pos__search">

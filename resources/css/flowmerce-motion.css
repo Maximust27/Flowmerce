@@ -1,0 +1,65 @@
+/*
+ * Flowmerce Studio | GSAP presentation contract
+ *
+ * Leave the app shell, page container, fixed sidebar, checkout summary and
+ * full-screen scrims untransformed. GSAP only moves safe leaf-level content.
+ * All page content is fully readable with JS disabled or reduced motion.
+ */
+:root {
+    --fm-motion-fast: 180ms;
+    --fm-motion-base: 360ms;
+    --fm-motion-long: 620ms;
+}
+
+html.fm-gsap-enabled .fm-app .fm-page,
+html.fm-gsap-enabled .fm-app .fm-dashboard,
+html.fm-gsap-enabled .fm-auth-panel,
+html.fm-gsap-enabled .fm-modal__panel,
+html.fm-gsap-enabled .fm-command__dialog,
+html.fm-gsap-enabled .fm-lineplot__curve {
+    animation: none !important;
+}
+
+/* GSAP controls lift/scale on these specific cards. Colors and shadows remain
+   CSS-native so pointer movements don't fight against a transition transform. */
+@media (hover: hover) and (pointer: fine) {
+    html.fm-gsap-enabled .fm-public-feature,
+    html.fm-gsap-enabled .fm-tables__card,
+    html.fm-gsap-enabled .fm-guest__product,
+    html.fm-gsap-enabled .fm-product,
+    html.fm-gsap-enabled .fm-studio-shortcuts__links > a {
+        transition-property: background-color, border-color, box-shadow, color !important;
+    }
+
+    html.fm-gsap-enabled .fm-public-feature:hover,
+    html.fm-gsap-enabled .fm-tables__card:hover,
+    html.fm-gsap-enabled .fm-guest__product:hover,
+    html.fm-gsap-enabled .fm-product:hover,
+    html.fm-gsap-enabled .fm-studio-shortcuts__links > a:hover {
+        transform: none;
+    }
+}
+
+/* An SVG curve is drawn with real chart data, not animated fake numbers. */
+html.fm-gsap-enabled .fm-lineplot__curve {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+}
+
+/* Small ambient details; never affect positioning, reading order or clicks. */
+.fm-guest__cart-row,
+.fm-chat__message,
+.fm-pos__online-order {
+    transform-origin: center center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.fm-gsap-enabled .fm-public-feature,
+    html.fm-gsap-enabled .fm-tables__card,
+    html.fm-gsap-enabled .fm-guest__product,
+    html.fm-gsap-enabled .fm-product,
+    html.fm-gsap-enabled .fm-studio-shortcuts__links > a {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+    }
+}
