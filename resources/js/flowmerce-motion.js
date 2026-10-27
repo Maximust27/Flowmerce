@@ -89,15 +89,45 @@ function reveal(nodes, options = {}) {
     );
 }
 
-/** Same understated motion language for every authenticated module. */
-function softEntrance(selector, delay = 0, stagger = 0.042) {
-    return reveal(find(selector), {
-        subtle: true,
-        distance: 7,
-        duration: 0.42,
-        stagger,
-        delay,
-    });
+/**
+ * Motion must never hide or re-hide business data. Older fromTo(0.975 opacity)
+ * was rendered late (immediateRender:false), which made content twitch when
+ * the scheduled tween started. Only animate the compositor's translateY.
+ * Position is applied up-front, then removed once settled.
+ */
+function softEntrance(selector, delay = 0, stagger = 0.065, options = {}) {
+    const nodes = Array.isArray(selector) ? selector : find(selector);
+    const elements = eligible(nodes).filter(node => !animatedNodes.has(node));
+    if (!elements.length) return null;
+    elements.forEach(node => animatedNodes.add(node));
+
+    const {
+        distance = 8,
+        duration = 0.66,
+        start = null,
+        trigger = elements[0],
+    } = options;
+
+    return gsap.fromTo(elements,
+        { y: distance },
+        {
+            y: 0,
+            duration,
+            stagger,
+            delay,
+            immediateRender: true,
+            ease: 'power2.out',
+            overwrite: 'auto',
+            clearProps: 'transform',
+            ...(start ? {
+                scrollTrigger: {
+                    trigger,
+                    start,
+                    once: true,
+                },
+            } : {}),
+        }
+    );
 }
 
 function drawRevenueChart(path) {
@@ -105,41 +135,51 @@ function drawRevenueChart(path) {
     animatedNodes.add(path);
     path.dataset.fmMotionLastCurve = path.getAttribute('d') || '';
 
-    gsap.fromTo(path, { strokeDashoffset: 16 }, {
+    // Keep the real chart visible; finish only the last tiny segment.
+    gsap.fromTo(path, { strokeDashoffset: 5 }, {
         strokeDashoffset: 0,
-        duration: 0.85,
-        immediateRender: false,
-        delay: 0.16,
-        ease: 'power2.inOut',
+        duration: 0.78,
+        delay: 0,
+        immediateRender: true,
+        ease: 'power2.out',
         clearProps: 'strokeDashoffset',
         overwrite: 'auto',
     });
 }
 
 function mountWorkspace() {
-    // Dashboard, Inventaris, Gudang, Keuangan, Pegawai and Meja use the same
-    // light-touch choreography. No nested container + child opacity tweening.
-    softEntrance('.fm-page > .fm-page-header, .fm-dashboard > .fm-page-header', 0);
+    // A single choreography for operational UI: no opacity changes and no
+    // animation of tables, stock logs, form fields or entire page containers.
+    softEntrance('.fm-page > .fm-page-header, .fm-dashboard > .fm-page-header', 0, 0, {
+        distance: 7, duration: 0.58,
+    });
+
+    if (sceneRoot.querySelector('.fm-dashboard')) {
+        // Restore the dashboard's calm bento sequencing without the old flash.
+        softEntrance(
+            '.fm-dashboard > .fm-overview-grid > .fm-card, ' +
+            '.fm-dashboard > .fm-overview-grid > .fm-overview__metrics',
+            0.045, 0.082, { distance: 10, duration: 0.72 }
+        );
+        softEntrance(
+            '.fm-dashboard > .fm-insights-grid > .fm-card',
+            0.125, 0.075, { distance: 8, duration: 0.66 }
+        );
+        softEntrance(
+            '.fm-dashboard > .fm-studio-shortcuts',
+            0.2, 0, { distance: 6, duration: 0.64 }
+        );
+        find('.fm-lineplot__curve').forEach(drawRevenueChart);
+        return;
+    }
+
+    // Inventory, warehouse, finance, employee and table management all share
+    // an identical, understated card reveal. Lists remain completely stable.
     softEntrance(
         '.fm-page > .fm-kpi-grid > .fm-stat-card, ' +
-        '.fm-page > .fm-kpi-grid > .fm-card, ' +
-        '.fm-dashboard > .fm-overview-grid > .fm-card, ' +
-        '.fm-dashboard > .fm-overview-grid > .fm-overview__metrics',
-        0.035
+        '.fm-page > .fm-kpi-grid > .fm-card',
+        0.045, 0.065, { distance: 7, duration: 0.65 }
     );
-    softEntrance(
-        '.fm-page > .fm-section-header, .fm-page > .fm-list-toolbar, ' +
-        '.fm-page > .fm-table-card, .fm-page > .fm-timeline, ' +
-        '.fm-page > .fm-card, .fm-page > .fm-account__identity, ' +
-        '.fm-page > .fm-account__layout, .fm-page > .fm-tables__notice, ' +
-        '.fm-page > .fm-surface-panel, .fm-dashboard > .fm-insights-grid > .fm-card, ' +
-        '.fm-dashboard > .fm-studio-shortcuts',
-        0.085
-    );
-    // Cards are animated individually only where the parent has not been
-    // animated, avoiding a nested "fade twice" that used to look like blinking.
-    softEntrance('.fm-tables__grid > .fm-tables__card', 0.12, 0.035);
-    find('.fm-lineplot__curve').forEach(drawRevenueChart);
 }
 
 /**
@@ -243,8 +283,8 @@ function animateFeatureOrbit() {
 }
 
 function mountPublic() {
-    // Landing is more expressive than the operational dashboard, but content
-    // remains readable even before JS mounts.
+    // Keep the already-approved floating square, circle and feature orbit.
+    // On the welcome page, a scrolling card never fades out or vanishes.
     reveal(find('.fm-public-hero__copy > *'), {
         subtle: true, distance: 12, duration: 0.72, stagger: 0.095,
     });
@@ -254,12 +294,11 @@ function mountPublic() {
 
     floatHeroDecor();
 
+    // Headlines get a gentle 8px lift once; their opacity stays 100%.
+    // Never animate the card container or the orbit itself on scroll.
     const scrollGroups = [
-        ['.fm-public-strip__inner > *', '.fm-public-strip'],
         ['.fm-public-section__head > *', '.fm-public-section'],
-        ['.fm-public-features > .fm-public-feature', '.fm-public-features'],
         ['.fm-public-showcase__content > *', '.fm-public-showcase'],
-        ['.fm-public-showcase__orbit', '.fm-public-showcase'],
         ['.fm-public-cta > *', '.fm-public-cta'],
     ];
 
@@ -267,30 +306,44 @@ function mountPublic() {
         const trigger = sceneRoot.querySelector(triggerSelector);
         if (!trigger) continue;
 
-        reveal(find(selector), {
-            start: 'top 87%',
+        softEntrance(selector, 0, 0.065, {
+            start: 'top 89%',
             trigger,
-            distance: 19,
-            duration: 0.69,
-            stagger: 0.085,
+            distance: 8,
+            duration: 0.74,
         });
     }
 
-    // Feature chart bars grow once when their illustrated card is visible.
+    // "Stok yang lebih terkendali" and its neighboring feature cards remain
+    // fully rendered throughout the scroll. Only decorative ICONS move.
+    const featureGrid = sceneRoot.querySelector('.fm-public-features');
+    if (featureGrid) {
+        softEntrance('.fm-public-features > .fm-public-feature .fm-public-feature__icon',
+            0, 0.07, {
+                start: 'top 88%',
+                trigger: featureGrid,
+                distance: 7,
+                duration: 0.75,
+            }
+        );
+    }
+
+    // The feature-card illustration grows gently from an almost full height;
+    // never fade the bars or the card's content from zero.
     const illustration = sceneRoot.querySelector('.fm-public-feature__illustration');
     if (illustration) {
         gsap.fromTo(illustration.querySelectorAll('span'), {
-            scaleY: 0.36, opacity: 0.55,
+            scaleY: 0.93,
             transformOrigin: 'bottom center',
         }, {
-            scaleY: 1, opacity: 1,
-            duration: 0.82,
-            stagger: 0.1,
-            ease: 'power3.out',
-            clearProps: 'transform,opacity',
+            scaleY: 1,
+            duration: 0.84,
+            stagger: 0.09,
+            ease: 'power2.out',
+            clearProps: 'transform',
             scrollTrigger: {
-                trigger: illustration,
-                start: 'top 92%',
+                trigger: featureGrid ?? illustration,
+                start: 'top 88%',
                 once: true,
             },
         });
@@ -313,32 +366,27 @@ function mountAuth() {
 }
 
 function mountPos() {
-    reveal(find('.fm-pos__intro, .fm-pos__tabs'), { distance: 14, stagger: 0.09 });
-    reveal(find('.fm-pos__grid > .fm-product').slice(0, 18), {
-        distance: 14, stagger: 0.035, delay: 0.12, duration: 0.49,
+    // POS feedback stays responsive; catalog and totals never fade to zero.
+    softEntrance('.fm-pos__intro, .fm-pos__tabs', 0, 0.06, {
+        distance: 7, duration: 0.6,
     });
-    reveal(find('.fm-pos__online-heading, .fm-pos__lookup, .fm-pos__online-order'), {
-        distance: 13, stagger: 0.065,
+    softEntrance(find('.fm-pos__grid > .fm-product').slice(0, 14), 0.04, 0.037, {
+        distance: 6, duration: 0.6,
     });
-    // Only fade the fixed/scrolling summary. Transforming it clips its drawer.
-    gsap.fromTo(find('.fm-pos__summary'), { opacity: 0 }, {
-        opacity: 1, duration: 0.56, ease: 'power2.out',
-        clearProps: 'opacity',
-    });
+    softEntrance(find('.fm-pos__online-heading, .fm-pos__lookup, .fm-pos__online-order').slice(0, 14),
+        0.06, 0.055, { distance: 6, duration: 0.62 }
+    );
+    // The fixed payment summary must never move or flash.
 }
 
 function mountGuest() {
-    reveal(find('.fm-guest__intro > *, .fm-guest__search, .fm-guest__categories'), {
-        distance: 14, stagger: 0.07,
-    });
-    reveal(find('.fm-guest__products > .fm-guest__product').slice(0, 18), {
-        distance: 16, duration: 0.51, delay: 0.09, stagger: 0.036,
-    });
-    // Keep the checkout in normal document flow; animate only header opacity.
-    gsap.fromTo(find('.fm-guest__checkout-head'), { opacity: 0 }, {
-        opacity: 1, duration: 0.42, delay: 0.16,
-        ease: 'power2.out', clearProps: 'opacity',
-    });
+    softEntrance('.fm-guest__intro > *, .fm-guest__search, .fm-guest__categories',
+        0, 0.052, { distance: 7, duration: 0.62 }
+    );
+    softEntrance(find('.fm-guest__products > .fm-guest__product').slice(0, 14),
+        0.035, 0.033, { distance: 6, duration: 0.61 }
+    );
+    // Customer checkout stays fully visible and in normal scroll flow.
 }
 
 function animateDialog(dialog) {
@@ -373,18 +421,13 @@ function animateNewNode(element) {
 
     candidateDialogs.forEach(animateDialog);
 
-    const classes = [
-        '.fm-chat__message',
-        '.fm-pos__basket-row',
-        '.fm-activity-row',
-        '.fm-tables__card',
-        '.fm-pos__online-order',
-    ];
-
-    if (element.matches?.(classes.join(',')) && !animatedNodes.has(element)) {
-        animatedNodes.add(element);
-        sceneContext.add(() => reveal([element], {
-            distance: 7, duration: 0.36, subtle: true,
+    // Only animate direct conversational / basket feedback. Business lists
+    // (inventory, finance, warehouse logs and employee/table rows) update
+    // without visual re-entry, so Livewire filters cannot flash the whole list.
+    const feedbackClasses = '.fm-chat__message, .fm-pos__basket-row';
+    if (element.matches?.(feedbackClasses) && !animatedNodes.has(element)) {
+        sceneContext.add(() => softEntrance([element], 0, 0, {
+            distance: 4, duration: 0.46,
         }));
     }
 
@@ -417,16 +460,16 @@ function initHoverEffects() {
 
         sceneContext.add(() => {
             gsap.to(card, {
-                y: -4,
-                scale: 1.006,
-                duration: 0.24,
-                ease: 'power2.out',
+                y: -2,
+                scale: 1,
+                duration: 0.38,
+                ease: 'sine.out',
                 overwrite: 'auto',
             });
             const icon = card.querySelector('.fm-public-feature__icon');
             if (icon) gsap.to(icon, {
-                y: -3, rotation: -5, duration: 0.3,
-                ease: 'power2.out', overwrite: 'auto',
+                y: -2, rotation: -3, duration: 0.38,
+                ease: 'sine.out', overwrite: 'auto',
             });
         });
     };
@@ -438,15 +481,15 @@ function initHoverEffects() {
             gsap.to(card, {
                 y: 0,
                 scale: 1,
-                duration: 0.27,
-                ease: 'power2.out',
+                duration: 0.42,
+                ease: 'sine.out',
                 overwrite: 'auto',
                 clearProps: 'transform',
             });
             const icon = card.querySelector('.fm-public-feature__icon');
             if (icon) gsap.to(icon, {
-                y: 0, rotation: 0, duration: 0.33,
-                ease: 'power2.out', overwrite: 'auto',
+                y: 0, rotation: 0, duration: 0.42,
+                ease: 'sine.out', overwrite: 'auto',
                 clearProps: 'transform',
             });
         });
@@ -517,16 +560,10 @@ function registerLivewireHooks() {
         const nextPath = el.getAttribute('d') || '';
         if (el.dataset.fmMotionLastCurve === nextPath) return;
         el.dataset.fmMotionLastCurve = nextPath;
-        sceneContext.add(() => {
-            gsap.fromTo(el, { strokeDashoffset: 16 }, {
-                strokeDashoffset: 0,
-                duration: 0.72,
-                immediateRender: false,
-                ease: 'power2.inOut',
-                overwrite: 'auto',
-                clearProps: 'strokeDashoffset',
-            });
-        });
+        // The Livewire morph already updated the chart. Replaying a
+        // stroke-dash animation made the line visually snap backwards.
+        gsap.killTweensOf(el);
+        el.style.removeProperty('stroke-dashoffset');
     });
 }
 
@@ -572,7 +609,7 @@ document.addEventListener('flowmerce:cart-added', event => {
     const badge = sceneRoot.querySelector('[data-cart-count]');
 
     sceneContext.add(() => {
-        if (row) reveal([row], { distance: 8, duration: 0.36 });
+        if (row) softEntrance([row], 0, 0, { distance: 4, duration: 0.42 });
         if (badge) {
             gsap.fromTo(badge, { scale: 1.28 }, {
                 scale: 1, duration: 0.3, ease: 'back.out(2.3)',
@@ -589,8 +626,8 @@ document.addEventListener('flowmerce:qris-revealed', event => {
     if (!preview || preview.hidden) return;
 
     sceneContext.add(() => {
-        reveal(Array.from(preview.children), {
-            distance: 9, stagger: 0.07, duration: 0.44,
+        softEntrance(Array.from(preview.children), 0, 0.055, {
+            distance: 5, duration: 0.48,
         });
     });
 });

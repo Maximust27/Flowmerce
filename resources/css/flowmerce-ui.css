@@ -202,7 +202,7 @@ html[data-fm-theme="dark"] .fm-theme-toggle__moon { display: none; }
     margin: 0 auto;
     padding: clamp(24px, 3vw, 44px) clamp(18px, 3vw, 44px) 92px;
 }
-.fm-dashboard { display: grid; gap: 25px; animation: fm-enter 440ms var(--fm-ease) both; }
+.fm-dashboard { display: grid; gap: 25px; }
 .fm-page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
 .fm-page-header__eyebrow { color: var(--fm-accent); font-size: 11px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
 .fm-page-header__title { margin-top: 5px; color: var(--fm-ink); font-size: clamp(25px, 2.4vw, 34px); letter-spacing: -.05em; line-height: 1.2; font-weight: 800; }
@@ -248,9 +248,7 @@ html[data-fm-theme="dark"] .fm-theme-toggle__moon { display: none; }
     box-shadow: none;
 }
 .fm-kpi-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
-.fm-stat-card { display: flex; min-height: 167px; flex-direction: column; gap: 17px; padding: 22px; animation: fm-enter 430ms var(--fm-ease) both; }
-.fm-stat-card:nth-child(2) { animation-delay: 65ms; }
-.fm-stat-card:nth-child(3) { animation-delay: 130ms; }
+.fm-stat-card { display: flex; min-height: 167px; flex-direction: column; gap: 17px; padding: 22px; }
 .fm-stat-card:hover { transform: translateY(-3px); box-shadow: var(--fm-shadow-hover); }
 .fm-stat-card__top { display: flex; justify-content: space-between; align-items: flex-start; }
 .fm-stat-card__icon {
@@ -412,7 +410,7 @@ html[data-fm-theme="dark"] .fm-theme-toggle__moon { display: none; }
 .fm-dashboard { gap:21px; }
 .fm-kpi-grid--four { grid-template-columns:repeat(4,minmax(0,1fr)); }
 .fm-kpi-grid--two { grid-template-columns:repeat(2,minmax(0,1fr)); }
-.fm-page { display:grid; gap:23px; animation:fm-enter 400ms var(--fm-ease) both; }
+.fm-page { display:grid; gap:23px; }
 .fm-page-intro { color:var(--fm-muted); font-size:12px; margin:0; }
 .fm-page-tools, .fm-section-header__actions { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
 .fm-section-header { display:flex; justify-content:space-between; align-items:center; gap:16px; }

@@ -282,3 +282,27 @@ html.fm-gsap-enabled .fm-lineplot__curve {
     .fm-orbit__core .fm-public-showcase__brand-image { width: 60px; height: 60px; }
     .fm-orbit__core-caption { top: calc(50% + 36px); }
 }
+
+/* Motion refinement — one animation owner per element.
+   Legacy stat-card/graph CSS keyframes were fighting the JS choreography,
+   creating a second fade/slide with staggered delays after navigation. */
+.fm-app .fm-stat-card,
+.fm-app .fm-chart__bar,
+.fm-app .fm-lineplot__curve {
+    animation: none !important;
+    animation-delay: 0ms !important;
+}
+
+/* Preserve complete legibility of landing cards at every scroll position.
+   The JS animates their icons only, not the card text or the card opacity. */
+.fm-public-features > .fm-public-feature {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Keep easing consistent and comfortable for non-GSAP user interactions. */
+.fm-public-feature,
+.fm-tables__card {
+    transition-duration: 360ms;
+    transition-timing-function: cubic-bezier(.22, 1, .36, 1);
+}

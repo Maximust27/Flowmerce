@@ -99,6 +99,54 @@ class MotionExperienceTest extends TestCase
         $this->assertStringContainsString('transform: none !important', $styles);
     }
 
+    public function test_welcome_scroll_keeps_feature_cards_visible_instead_of_blinking(): void
+    {
+        $motion = file_get_contents(resource_path('js/flowmerce-motion.js'));
+        $css = file_get_contents(resource_path('css/flowmerce-motion.css'));
+        $publicStart = strpos($motion, 'function mountPublic() {');
+        $authStart = strpos($motion, 'function mountAuth() {', $publicStart);
+        $publicMotion = substr($motion, $publicStart, $authStart - $publicStart);
+
+        $this->assertStringContainsString('function animateFeatureOrbit()', $motion);
+        $this->assertStringContainsString('function floatHeroDecor()', $motion);
+        $this->assertStringContainsString('softEntrance(\'.fm-public-features > .fm-public-feature .fm-public-feature__icon\'', $publicMotion);
+        $this->assertStringNotContainsString("reveal(find('.fm-public-features > .fm-public-feature')", $publicMotion);
+        $this->assertStringNotContainsString("['.fm-public-features > .fm-public-feature',", $publicMotion);
+        $this->assertStringContainsString('.fm-public-features > .fm-public-feature', $css);
+        $this->assertStringContainsString('opacity: 1;', $css);
+    }
+
+    public function test_business_pages_have_no_duplicated_css_or_zero_opacity_entrances(): void
+    {
+        $motion = file_get_contents(resource_path('js/flowmerce-motion.js'));
+        $styles = file_get_contents(resource_path('css/flowmerce-ui.css'));
+        $motionCss = file_get_contents(resource_path('css/flowmerce-motion.css'));
+
+        $softStart = strpos($motion, 'function softEntrance(');
+        $chartStart = strpos($motion, 'function drawRevenueChart(', $softStart);
+        $softCode = substr($motion, $softStart, $chartStart - $softStart);
+        $this->assertStringContainsString('immediateRender: true', $softCode);
+        $this->assertStringNotContainsString('opacity:', $softCode);
+        $this->assertStringNotContainsString('autoAlpha:', $softCode);
+
+        $this->assertStringNotContainsString('animation: fm-enter 430ms', $styles);
+        $this->assertStringNotContainsString('animation: fm-enter 440ms', $styles);
+        $this->assertStringNotContainsString('animation:fm-enter 400ms', $styles);
+        $this->assertStringNotContainsString('.fm-stat-card:nth-child(2) { animation-delay', $styles);
+
+        $this->assertStringContainsString('.fm-app .fm-stat-card', $motionCss);
+        $this->assertStringContainsString('animation: none !important', $motionCss);
+
+        $workspaceStart = strpos($motion, 'function mountWorkspace() {');
+        $workspaceEnd = strpos($motion, 'function watchAmbient(', $workspaceStart);
+        $workspaceCode = substr($motion, $workspaceStart, $workspaceEnd - $workspaceStart);
+        $this->assertStringContainsString('softEntrance(', $workspaceCode);
+        $this->assertStringNotContainsString('reveal(', $workspaceCode);
+        $this->assertStringNotContainsString('.fm-activity-row', $workspaceCode);
+
+        $this->assertStringContainsString('The Livewire morph already updated the chart', $motion);
+    }
+
     public function test_dashboard_pos_and_guest_menu_use_isolated_motion_roots(): void
     {
         $owner = User::factory()->create([
